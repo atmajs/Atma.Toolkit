@@ -1,0 +1,28 @@
+{
+  "name": "inlcude-js",
+  "description": "IncludeJS Resource Builder Tool",
+  "preferGlobal": "true",
+  "author": {
+    "name": "tenbits",
+    "email": "source.kit@gmail.com"
+  },
+  "version": "0.3.3",
+  "main": "./include.js",
+  "bin": {
+    "includejs": "./includejs.js"
+  },
+  "dependencies": {
+    "jsdom": ">= 0.2.15",
+    "fs.extra": ">= 1.2.0",
+    "commander": "~1.0.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mishoo/UglifyJS.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 0.8.6"
+  },
+  "_id": "inlcude-js@0.3.3"
+}
