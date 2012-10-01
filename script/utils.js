@@ -32,6 +32,7 @@ function() {
         output += str.substring(lastIndex);
         return output;
     }
+    
 
 
     Object.defaults = function(obj, def) {

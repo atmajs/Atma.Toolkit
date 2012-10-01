@@ -12,7 +12,7 @@
 </p>
 <p>
 <div>Example:</div>
-<code>cd ../project <br/>
-includejs index.html -minify</code>
+<code>cd ../project </code><br/>
+<code>includejs index.html -minify</code>
 
 </p>

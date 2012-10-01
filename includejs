@@ -35,16 +35,26 @@ if (!app.service('io','file/exists', config)){
    throw new Error("File doesnt exists: " + config.file);
 }
 
-var dir = process.argv[1],
-	index = dir.lastIndexOf('\\'),
-	dir = dir.substring(0, index + 1);
+if (/\.config$/.test(config.file)){
+   var data = app.service('io','file/readSync',config);
+   config = JSON.parse(data);
+   
+   if (!app.service('io','file/exists', config)){
+	  throw new Error("'file' is not defined in config or doesnt exists: " + config.file);
+   }
+
+}
+
+
+var includeJSDir = process.argv[1],
+	index = includeJSDir.lastIndexOf('\\');
 
 include.cfg({
    framework: '/script/{name}.js',
    formatter: '/lib/formatter/{name}.js',
    handler: '/lib/handler/{name}.js',
    parser:  '/lib/parser/{name}.js',
-   path: dir
+   path: includeJSDir.substring(0, index + 1)
 }).js({
    framework: '/net/uri',
    '': '/lib/builder.js'
