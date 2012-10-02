@@ -1,6 +1,6 @@
 <h4>IncludeJS Build Tool For node.js</h4>
 
-<p>@see <a href='https://github.com/tenbits/IncludeJS'>IncludeJS Project</a>
+<p>@see <a href='https://github.com/tenbits/CompoJS/#includeBuilder'>IncludeJS Project</a>
 
 <p>
 <div>Install:</div>
@@ -14,5 +14,6 @@
 <div>Example:</div>
 <code>cd ../project </code><br/>
 <code>includejs index.html -minify</code>
+
 
 </p>
