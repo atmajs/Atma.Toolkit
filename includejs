@@ -1,73 +1,117 @@
 #!/usr/bin/env node
 
-global.window = global;
+void
+
+function(w) {
+
+   require('./script/class.js');
+   require('./script/include.js');
 
 
-require('./script/class.js');
-require('./script/include.js');
+   w.app = require('./node/app.js').app;
+   w.XMLHttpRequest = require('./node/xmlhttprequest.local.js').XMLHttpRequest;
+   w.document = require('./node/document.parser.js').document;
 
 
-window.app = require('./node/app.js').app;
-window.XMLHttpRequest = require('./node/xmlhttprequest.local.js').XMLHttpRequest;
-window.document = require('./node/document.parser.js').document;
+   var program = require('./node/help.js').program;
 
-
-var program = require('commander');
-
-
-program
-   .usage('[file] [options]')
-   .description('IncludeJS Application Builder')
-   .version('0.3.3')
-   .option('-m, --minify', 'Minify Javascript and CSS output')
-   //-.option('-o, --output', 'script and style output directory, (!Relative to Application path)')
-   //-.option('-t, --type', 'Solution Type (js | html)')
+   /** IncludeJS.Builder Routes */
+   var includeJSDir = process.argv[1].replace(/\\/g,'/'),
+	   index = includeJSDir.lastIndexOf('/');
+   includeJSDir = includeJSDir.substring(0, index + 1);
    
-   .parse(process.argv);
-
-var config = {
-   file: program.args[0],
-   minify: program.minify
-}
-
-
-if (!app.service('io','file/exists', config)){
-   throw new Error("File doesnt exists: " + config.file);
-}
-
-if (/\.config$/.test(config.file)){
-   var data = app.service('io','file/readSync',config);
-   config = JSON.parse(data);
+   includeJSDir = 'file:///' + includeJSDir;
    
-   if (!app.service('io','file/exists', config)){
-	  throw new Error("'file' is not defined in config or doesnt exists: " + config.file);
+   
+
+   include.cfg({
+	  framework: '/script/{name}.js',
+	  formatter: '/lib/formatter/{name}.js',
+	  handler: '/lib/handler/{name}.js',
+	  parser: '/lib/parser/{name}.js',
+	  action: '/lib/action/{name}.js',
+	  path: includeJSDir
+   });
+
+   switch (program.args[0]) {
+
+   case '':
+   case null:
+	  console.error("Invalid Arguments Count");
+	  return;
+
+   case 'template':
+	  var id = program.args[1];
+	  include.js('/lib/action/template.js').done(function(response) {
+		 response.js[0].process(includeJSDir, id);
+	  });
+	  return;
+   default:
+	  break;
    }
 
-}
+   /** BUILDER */
+   void
+
+   function() {
+
+	  var config = {
+		 file: program.args[0],
+		 minify: program.minify
+	  }
 
 
-var includeJSDir = process.argv[1],
-	index = includeJSDir.lastIndexOf('\\');
+	  if (!app.service('io', 'file/exists', config)) {
+		 throw new Error("File doesnt exists: " + config.file);
+	  }
 
-include.cfg({
-   framework: '/script/{name}.js',
-   formatter: '/lib/formatter/{name}.js',
-   handler: '/lib/handler/{name}.js',
-   parser:  '/lib/parser/{name}.js',
-   path: includeJSDir.substring(0, index + 1)
-}).js({
-   framework: '/net/uri',
-   '': '/lib/builder.js'
-   
-}).done(function() {
-   
-   var uri = new net.URI(config.file); 
-   
-   if (uri.isRelative()){
-      uri = (new net.URI(process.cwd())).combine(config.file);
-   }
-   
-   Builder.process(uri, config);
+	  if (/\.config$/.test(config.file)) {
+		 config = JSON.parse(app.service('io', 'file/readSync', config));
 
-   //console.log('Main Completed', process.argv, process.version);
-});
+		 if (!app.service('io', 'file/exists', config)) {
+			throw new Error("'file' is not defined in config or doesnt exists: " + config.file);
+		 }
+
+	  }
+
+
+
+	  include.js({
+		 framework: ['utils', 'arr', 'net/uri'],
+		 formatter: ['cssmin', 'uglify'],
+		 parser: ['js', 'css', 'html','loader'],
+		 action: ['build', 'import'],
+		 handler: ['css', 'io'],
+		 '': ['/lib/helpers.js', '/lib/htmlDocument.js', '/lib/sys.js']
+
+	  }).wait().js('/lib/project/solution.js').done(function() {
+
+		 var uri = new net.URI(config.file);
+		 if (uri.isRelative()) {
+			uri = (new net.URI(process.cwd())).combine(config.file);
+		 }
+
+
+		 var type = config.type;
+		 switch (uri.extension) {
+		 case 'js':
+			type = 'js';
+			break;
+		 case 'html':
+		 case 'htm':
+			type = 'html';
+			break;
+		 default:
+			if (!type) throw new Error('Unknown Solution Type');
+		 }
+
+
+		 w.solution = new w.Solution(type, uri, config);
+		 w.solution.process();
+
+
+
+	  });
+
+   }();
+}(global.window || (global.window = global));

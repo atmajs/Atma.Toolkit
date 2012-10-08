@@ -17,14 +17,12 @@ function(w, d) {
 					return index == -1 ? '' : url.substring(index + 1, -index);
 				},
 				/** @obsolete */
-				resolveCurrent: function() {
+				resolveCurrent: function(collection) {
+					if (collection.location != null) return collection.location;
 					var scripts = d.querySelectorAll('script');
 					return scripts[scripts.length - 1].getAttribute('src');
 				},
 				resolveUrl: function(url, parent) {
-					if (cfg.path && url[0] == '/'){
-						url = cfg.path + url.substring(1);
-					}
 					if (url[0] == '/') {
 						if (isWeb == false || cfg.lockedToFolder == true) return url.substring(1);
 						return url;
@@ -138,23 +136,21 @@ function(w, d) {
 				if (/complete|interactive/g.test(d.readyState) == false) return;
 
 				if (timer) console.log('DOMContentLoader', d.readyState, Date.now() - timer, 'ms');
+				events.domReady = true;
 				events.ready = helper.doNothing;
 
 				if (events.invokeOnReady != null) {
 					events.invokeOnReady();
 					delete events.invokeOnReady;
 				}
-				
-				
+
 				helper.invokeEach(readycollection);
-				
 				if (d.readyState == 'complete') {
 					events.load = helper.doNothing;
 					helper.invokeEach(loadcollection);
 					loadcollection = null;
 				}
 			};
-			
 			return {
 				ready: function(callback) {
 					readycollection.unshift(callback);
@@ -179,14 +175,15 @@ function(w, d) {
 			return this.on(4, this.resolve.bind(this, callback));
 		},
 		resolve: function(callback) {
-			var r = callback(this.response);
-			if (r != null) this.obj = r;
+			if (this.state < 4) return;
+			callback(this.buildResponse());			
 		}
 	});
 
 
 	var StateObservable = Class({
 		Construct: function() {
+			this.state = 0;
 			this.callbacks = [];
 		},
 		on: function(state, callback) {
@@ -199,7 +196,7 @@ function(w, d) {
 		readystatechanged: function(state) {
 			this.state = state;
 			for (var i = 0, x, length = this.callbacks.length; x = this.callbacks[i], i < length; i++) {
-				if (x.state > this.state || x.callback == null) continue;				
+				if (x.state > state || x.callback == null) continue;
 				x.callback(this);
 				x.callback = null;
 			}
@@ -245,7 +242,7 @@ function(w, d) {
 		},
 		promise: function(namespace) {
 			var arr = namespace.split('.'),
-				obj = w;
+				obj = window;
 			while (arr.length) {
 				var key = arr.shift();
 				obj = obj[key] || (obj[key] = {});
@@ -258,23 +255,25 @@ function(w, d) {
 					var id = _bin[key][i].id,
 						url = _bin[key][i].url,
 						namespace = _bin[key][i].namespace,
-						resource = new Resource;
+						resource = new Resource();
 
 					resource.state = 4;
-					resource.namespace = namespace;
-					
+
 					if (url) {
 						if (url[0] == '/') url = url.substring(1);
 						resource.location = helper.uri.getDir(url);
 					}
-					
+					if (namespace) {
+						resource.namespace = namespace;
+					}
+
 					switch (key) {
 					case 'load':
 					case 'lazy':
 						resource.state = 0;
 						void
 
-						function(_r, _id) {							
+						function(_r, _id) {
 							events.invokeOnReady = function() {
 								var container = d.querySelector('script[data-appuri="' + _id + '"]');
 								if (container == null) {
@@ -303,13 +302,16 @@ function(w, d) {
 		Extends: [IncludeDeferred, StateObservable],
 		Construct: function(type, url, namespace, xpath, parent, id) {
 
-			if (type == null) return this;
-			
+			if (type == null) {
+				return this;
+			}
+
 			this.namespace = namespace;
 			this.type = type;
 			this.xpath = xpath;
+
+
 			this.url = url;
-			
 			if (url != null) {
 				this.url = helper.uri.resolveUrl(url, parent);
 			}
@@ -335,7 +337,7 @@ function(w, d) {
 
 			this.location = helper.uri.getDir(url);
 
-			//-console.log('includejs. Load Resource:', id, url);
+			console.log('includejs. Load Resource:', id, url);
 
 
 			;
@@ -383,22 +385,20 @@ function(w, d) {
 		},
 		include: function(type, pckg) {
 			this.state = 0;
-			if (this.includes == null) this.includes = [];
-			
+
 			helper.eachIncludeItem(type, pckg, function(namespace, url, xpath) {
 
 				var resource = new Resource(type, url, namespace, xpath, this);
 
-				
 				this.includes.push(resource);
 
-				resource.index = this.calcIndex(type, namespace);
+				resource.index = this.index(type, namespace);
 				resource.on(4, this.resourceLoaded.bind(this));
 			}.bind(this));
 
 			return this;
 		},
-		calcIndex: function(type, namespace) {
+		index: function(type, namespace) {
 			if (this.response == null) this.response = {};
 			switch (type) {
 			case 'js':
@@ -410,51 +410,53 @@ function(w, d) {
 			return -1;
 		},
 		wait: function() {
-			if (this.waits == null) this.waits = [];			
 			if (this._include == null) this._include = this.include;
-			
-			var data;
-			
-			this.waits.push((data = []));			
-			this.include = function(type, pckg) {				
+
+			var _this = this,
+				_include = this._include,
+				data = [];
+			this.include = function(type, pckg) {
 				data.push({
 					type: type,
 					pckg: pckg
 				});
 				return this;
-			}			
-			return this;			
+			}
+			return this.on(4, function() {
+				_this.include = _include;
+				for (var i = 0; i < data.length; i++) _this.include(data[i].type, data[i].pckg);
+			});
 		},
 		resourceLoaded: function(resource) {
-			if (resource.obj != null && resource.obj instanceof Include === false){
-				switch(resource.type){
-					case 'js':
-					case 'load':
-					case 'ajax':
-						var obj = (this.response[resource.type] || (this.response[resource.type] = []));
+			for (var i = 0; i < this.includes.length; i++) if (this.includes[i].state != 4) return;
+			this.state = 4;
+
+			this.readystatechanged(this.state);
+
+			var r = this.resolve();
+			if (r != null) {
+				this.obj = r;
+			}
+
+		},
+		buildResponse: function() {
+			for (var i = 0, x, length = this.includes.length; x = this.includes[i], i < length; i++) {
+				switch (x.type) {
+				case 'js':
+				case 'load':
+				case 'ajax':
+					var obj = (this.response[x.type] || (this.response[x.type] = []));
+					if (!obj) continue;
 					
-						if (resource.namespace != null) {
-							obj = helper.ensureArray(obj, resource.namespace);						
-						}
-						obj[resource.index] = resource.obj;
+					if (x.namespace != null) {
+						obj = helper.ensureArray(obj, x.namespace);						
+					}
+					obj[x.index] = x.obj;
 					break;
 				}
-			}
-			
-			for (var i = 0; i < this.includes.length; i++) if (this.includes[i].state != 4) return;
-			
-			
-			if (this.waits && this.waits.length){
-				var data = this.waits.shift();
-				this.include = this._include;
-				for (var i = 0; i < data.length; i++) this.include(data[i].type, data[i].pckg);
-				return;
-			}
-			
-			this.readystatechanged((this.state = 4));			
-			
+			};
+			return this.response;
 		},
-		
 		onload: function(url, response) {
 			if (!response) {
 				console.warn('Resource cannt be loaded', this.url);
@@ -466,24 +468,31 @@ function(w, d) {
 			case 'load':
 			case 'ajax':
 				this.obj = response;
-				break;
+			case 'css':
+				this.readystatechanged(4);
+				return;
 			case 'lazy':
-				LazyModule.create(this.xpath, response);				
-				break;
-			case 'js':
-				try {
-					__includeEval(response, this);
-				} catch (error) {
-					error.url = this.url;
-					helper.reportError(error);
-				}	
-				break;
+				LazyModule.create(this.xpath, response);
+				this.readystatechanged(4);
+				return;
 			};
-			
+
+
+
+			try {
+				this.obj = __includeEval(response, include);
+			} catch (error) {
+				error.url = this.url;
+				helper.reportError(error);
+			} finally {
+
+				response = null;
+			}
+
 			//console.log('resource', this.url, this.rescollection);
 			if (this.includes == null || this.includes.length == 0) {
 				this.readystatechanged(4);
-			}			
+			}
 		}
 
 	});

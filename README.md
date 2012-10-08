@@ -1,13 +1,13 @@
 <h4>IncludeJS Build Tool For node.js</h4>
 
-<p>@see <a href='https://github.com/tenbits/CompoJS/#includeBuilder'>IncludeJS Project</a>
+<p>@see <a href='http://tenbits.github.com/CompoJS/#includeBuilder'>IncludeJS Project</a>
 
 <p>
 <div>Install:</div>
 <code>$ npm install includejs -g</code>
 </p>
 <p>
-<div>Help:</div>
+<div>Complete Usage Help:</div>
 <code>$ includejs -help</code>
 </p>
 <p>

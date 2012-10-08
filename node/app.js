@@ -62,9 +62,36 @@ var services = {
         },
         'file/readSync': function(data) {
             return fs.readFileSync(data.file, 'utf-8');
+        },
+        'file/allSync': function(data){            
+            return walk(data.dir);
         }
     }
 }
+
+var walk = function(dir, root) {
+    var results = [],
+        files = fs.readdirSync(dir);
+        
+    if (root == null) root = '';
+    
+    function combine(_1, _2){
+        if (!_1) return _2;
+        if (!_2) return _1;
+        if (_2[0] == '/') _2 = _2.substring(1);
+        if (_1[_1.length - 1] == '/') return _1 + _2;
+        return _1 + '/' + _2;
+    }
+    
+    for(var i = 0, x, length = files.length; x = files[i], i<length; i++){
+        if (fs.statSync(combine(dir,x)).isDirectory()){            
+            results = results.concat(walk(combine(dir,x), combine(root,x)));
+            continue;
+        }
+        results.push(combine(root,x));
+    }
+    return results;  
+};
 
 exports.app = {
     service: function(name, method, data) {

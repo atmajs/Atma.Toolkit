@@ -1,12 +1,12 @@
 {
-  "name": "inlcude-js",
+  "name": "includejs",
   "description": "IncludeJS Resource Builder Tool",
   "preferGlobal": "true",
   "author": {
     "name": "tenbits",
     "email": "source.kit@gmail.com"
   },
-  "version": "0.3.3",
+  "version": "0.3.4",
   "main": "./include.js",
   "bin": {
     "includejs": "./includejs"
@@ -23,6 +23,5 @@
   "license": "MIT",
   "engines": {
     "node": ">= 0.8.6"
-  },
-  "_id": "inlcude-js@0.3.3"
+  }
 }
