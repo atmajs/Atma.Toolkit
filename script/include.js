@@ -147,6 +147,7 @@ function(w, d) {
 				
 				
 				helper.invokeEach(readycollection);
+				readycollection = null;
 				
 				if (d.readyState == 'complete') {
 					events.load = helper.doNothing;
@@ -168,11 +169,15 @@ function(w, d) {
 
 	var IncludeDeferred = Class({
 		ready: function(callback) {
-			return this.on(4, events.ready.bind(events, this.resolve.bind(this,callback)));
+			return this.on(4, function(){
+				events.ready(callback);
+			});
 		},
 		/** assest loaded and window is loaded */
 		loaded: function(callback) {
-			return this.on(4, events.load.bind(events, this.resolve.bind(this,callback)));
+			return this.on(4, function(){
+				events.load(callback);
+			});
 		},
 		/** assest loaded */
 		done: function(callback) {
