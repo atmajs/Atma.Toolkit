@@ -6,6 +6,8 @@ function(w) {
 
    require('./script/class.js');
    require('./script/include.js');
+   require('./script/net/uri.js');
+   require('./lib/handler/io.js');
 
 
    w.app = require('./node/app.js').app;
@@ -15,14 +17,6 @@ function(w) {
 
    var program = require('./node/help.js').program;
 
-   /** IncludeJS.Builder Routes */
-   var includeJSDir = process.argv[1].replace(/\\/g,'/'),
-	   index = includeJSDir.lastIndexOf('/');
-   includeJSDir = includeJSDir.substring(0, index + 1);
-   
-   includeJSDir = 'file:///' + includeJSDir;
-   
-   
 
    include.cfg({
 	  framework: '/script/{name}.js',
@@ -30,7 +24,7 @@ function(w) {
 	  handler: '/lib/handler/{name}.js',
 	  parser: '/lib/parser/{name}.js',
 	  action: '/lib/action/{name}.js',
-	  path: includeJSDir
+	  path: io.env.applicationDir.toString()
    });
 
    switch (program.args[0]) {
@@ -43,7 +37,7 @@ function(w) {
    case 'template':
 	  var id = program.args[1];
 	  include.js('/lib/action/template.js').done(function(response) {
-		 response.js[0].process(includeJSDir, id);
+		 response.js[0].process(id);
 	  });
 	  return;
    default:
@@ -54,24 +48,23 @@ function(w) {
    void
 
    function() {
-
+	  var file = new io.File(program.args[0]);
 	  var config = {
 		 file: program.args[0],
 		 minify: program.minify
 	  }
 
-
-	  if (!app.service('io', 'file/exists', config)) {
-		 throw new Error("File doesnt exists: " + config.file);
+	  if (file.exists() == false) {
+		 return console.error("File doesnt exists: ", config.file);
 	  }
 
-	  if (/\.config$/.test(config.file)) {
-		 config = JSON.parse(app.service('io', 'file/readSync', config));
+	  if (file.uri.extension == 'config') {
+		 config = JSON.parse(file.read());
+		 file.uri = new net.URI(config.file);
 
-		 if (!app.service('io', 'file/exists', config)) {
-			throw new Error("'file' is not defined in config or doesnt exists: " + config.file);
+		 if (file.exists() == false) {
+			return console.error("'file' is not defined in config or doesnt exists: ", config.file);
 		 }
-
 	  }
 
 
@@ -79,7 +72,7 @@ function(w) {
 	  include.js({
 		 framework: ['utils', 'arr', 'net/uri'],
 		 formatter: ['cssmin', 'uglify'],
-		 parser: ['js', 'css', 'html','loader'],
+		 parser: ['js', 'css', 'html', 'loader'],
 		 action: ['build', 'import'],
 		 handler: ['css', 'io'],
 		 '': ['/lib/helpers.js', '/lib/htmlDocument.js', '/lib/sys.js']
@@ -91,27 +84,18 @@ function(w) {
 			uri = (new net.URI(process.cwd())).combine(config.file);
 		 }
 
-
-		 var type = config.type;
-		 switch (uri.extension) {
-		 case 'js':
-			type = 'js';
-			break;
-		 case 'html':
-		 case 'htm':
-			type = 'html';
-			break;
-		 default:
-			if (!type) throw new Error('Unknown Solution Type');
-		 }
-
-
+		 var type = {
+			htm: 'html',
+			html: 'html',
+			js: 'js'
+		 }[uri.extension] || config.type
+		 if (!type) return console.error('Unknown Solution Type');
+		 
 		 w.solution = new w.Solution(type, uri, config);
 		 w.solution.process();
-
-
-
+		 return null;
 	  });
 
+	  return null;
    }();
 }(global.window || (global.window = global));

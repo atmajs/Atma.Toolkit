@@ -1,18 +1,19 @@
 /**
- *  Dev Machine Depended Routes, Change only Route Config
+ *  Dev Machine Depended Routes. Usually, this loader must not be included in commits.
+ *	{This File is also used in [include.builder]/[projects.template]/starter/include.loder.js}
  *
- *  ** This and other Starter Templates, are from npm globals folder. You can adapt them for your needs **
+ *  ** This and other Starter Templates, are from npm globals folder. You can adapt them to your needs **
  *  
  *  This Script loads ClassJS and IncludeJS and the script that is in tags attribute main
  *      <script href='include.loader.js' main='script/main.js' />
+ *
  */
 (function() {
 
-    var routes = {
-        lib: 'file:///c:/Development/libjs/{name}/lib/{name}.js',
-        framework: 'file:///c:/Development/libjs/framework/lib/{name}.js'
-    };
-
+	/** Here are project- and dev- dependent routes, see {npm/includejs/globals.json} */
+    var routes = %ROUTES%;
+	
+	/** Dont touch nothing below */
 
     var Loader = (function(R) {
         var load, main, ondone;
@@ -25,6 +26,7 @@
 				scripts = scripts = document && document.getElementsByTagName('script') || null;
 				
 			load = function(url, callback) {
+                if (url[0] == '/')  url = url.substring(1);
                 var script = document.createElement('script');
                 script.type = 'application/javascript';
                 script.src = url;

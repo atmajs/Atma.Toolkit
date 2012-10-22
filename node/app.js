@@ -19,18 +19,15 @@ var fs = require('fs'),
 
 var services = {
     io: {
-        'file/save': function(data) {
-            console.log('saving', data.path);
-
+        'file/save': function(data) {            
             var folder = urlhelper.getDir(data.path);
             if (folder && fs.existsSync(folder) == false) {
                 try {
                     fs.mkdirSync(folder);
                 } catch (e) {};
             }
-
-
-            fs.writeFile(data.path, data.content);
+            
+            fs.writeFileSync(data.path, data.content);
         },
         'file/copy': function(data, callback) {
             console.assert(data.from, 'file/copy - invalid copyFrom');

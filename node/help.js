@@ -10,7 +10,7 @@ function write(message, indent) {
 
 program.usage('[command] [options]') //
 .description('IncludeJS Application Builder') //
-.version('0.3.4') //
+.version('0.3.5') //
 .option('-m, --minify', 'Minify Javascript and CSS output');
 
 

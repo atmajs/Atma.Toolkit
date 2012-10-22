@@ -32,7 +32,6 @@ function() {
         output += str.substring(lastIndex);
         return output;
     }
-    
 
 
     Object.defaults = function(obj, def) {
@@ -55,6 +54,44 @@ function() {
         return target;
     }
 
+    Object.getProperty = function(o, chain) {
+        if (typeof o !== 'object' || chain == null) return o;
+        if (typeof chain === 'string') chain = chain.split('.');
+        if (chain.length === 1) return o[chain[0]];
+        return Object.getProperty(o[chain.shift()], chain);
+    }
+
+    Object.observe = function(obj, property, callback) {
+        if (obj.__observers == null) obj.__observers = {};
+        if (obj.__observers[property]) {
+            obj.__observers[property].push(callback);
+            return;
+        };
+        (obj.__observers[property] || (obj.__observers[property] = [])).push(callback);
+
+        var chain = property.split('.'),
+            parent = obj,
+            key = property;
+
+        if (chain.length > 1) {
+            key = chain.pop();
+            parent = Object.getProperty(obj, chain);
+        }
+
+        var value = parent[key];
+        Object.defineProperty(parent, key, {
+            get: function() {
+                return value;
+            },
+            set: function(x) {
+                value = x;
+                for (var i = 0, fn, length = obj.__observers[property].length; fn = obj.__observers[property][i], i < length; i++) {
+                    fn(x);
+                }
+            }
+        })
+    }
+
     Date.format = function(date, format) {
         if (!format) format = "MM/dd/yyyy";
 
@@ -73,4 +110,6 @@ function() {
         if (format.indexOf("ss") > -1) format = format.replace("ss", pad(date.getSeconds()));
         return format;
     }
+
+
 }();

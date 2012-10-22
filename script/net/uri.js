@@ -140,7 +140,7 @@
             if (this.protocol === 'file') str += '/';
             
             return str + helper.combinePathes(this.host, this.path, this.file) + (this.search || '');
-        },
+        },        
         /**
          * @return Current URI Path{String} that is relative to @arg1 URI
          */
@@ -153,7 +153,6 @@
                 if (p[0] === '/') p = p.substring(1);
                 return helper.combinePathes(p, this.file) + (this.search || '');
             }
-
             /** sub folder */
             var current = this.path.split('/');
             var relative = uri.path.split('/');
@@ -181,8 +180,6 @@
                 }
                 return helper.combinePathes(sub, forward, this.file);
             }
-
-
             return this.toString();
         },
 
