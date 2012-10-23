@@ -7,6 +7,8 @@ function(w) {
    require('./script/class.js');
    require('./script/include.js');
    require('./script/net/uri.js');
+   require('./script/utils.js');
+   require('./script/arr.js');
    require('./lib/handler/io.js');
 
 
@@ -70,7 +72,6 @@ function(w) {
 
 
 	  include.js({
-		 framework: ['utils', 'arr', 'net/uri'],
 		 formatter: ['cssmin', 'uglify'],
 		 parser: ['js', 'css', 'html', 'loader'],
 		 action: ['build', 'import'],
