@@ -4,99 +4,59 @@ void
 
 function(w) {
 
-   require('./script/class.js');
-   require('./script/include.js');
-   require('./script/net/uri.js');
-   require('./script/utils.js');
-   require('./script/arr.js');
-   require('./lib/handler/io.js');
+    require('./script/class.js');
+    require('./script/include.js');
+    require('./script/net/uri.js');
+    require('./script/utils.js');
+    require('./script/arr.js');
+    require('./lib/sys.js');
+    require('./lib/helpers.js');
+    require('./lib/handler/io.js');        
+    
+   
+    w.app = require('./node/app.js').app;
+    w.XMLHttpRequest = require('./node/xmlhttprequest.local.js').XMLHttpRequest;
+    w.document = require('./node/document.parser.js').document;
+    w.program = require('./node/help.js').program;
 
-
-   w.app = require('./node/app.js').app;
-   w.XMLHttpRequest = require('./node/xmlhttprequest.local.js').XMLHttpRequest;
-   w.document = require('./node/document.parser.js').document;
-
-
-   var program = require('./node/help.js').program;
-
-
-   include.cfg({
-	  framework: '/script/{name}.js',
-	  formatter: '/lib/formatter/{name}.js',
-	  handler: '/lib/handler/{name}.js',
-	  parser: '/lib/parser/{name}.js',
-	  action: '/lib/action/{name}.js',
-	  path: io.env.applicationDir.toString()
-   });
-
-   switch (program.args[0]) {
-
-   case '':
-   case null:
-	  console.error("Invalid Arguments Count");
-	  return;
-
-   case 'template':
-	  var id = program.args[1];
-	  include.js('/lib/action/template.js').done(function(response) {
-		 response.js[0].process(id);
-	  });
-	  return;
-   default:
-	  break;
-   }
-
-   /** BUILDER */
-   void
-
-   function() {
-	  var file = new io.File(program.args[0]);
-	  var config = {
-		 file: program.args[0],
-		 minify: program.minify
-	  }
-
-	  if (file.exists() == false) {
-		 return console.error("File doesnt exists: ", config.file);
-	  }
-
-	  if (file.uri.extension == 'config') {
-		 config = JSON.parse(file.read());
-		 file.uri = new net.URI(config.file);
-
-		 if (file.exists() == false) {
-			return console.error("'file' is not defined in config or doesnt exists: ", config.file);
-		 }
-	  }
-
-
-
-	  include.js({
-		 formatter: ['cssmin', 'uglify'],
-		 parser: ['js', 'css', 'html', 'loader'],
-		 action: ['build', 'import'],
-		 handler: ['css', 'io'],
-		 '': ['/lib/helpers.js', '/lib/htmlDocument.js', '/lib/sys.js']
-
-	  }).wait().js('/lib/project/solution.js').done(function() {
-
-		 var uri = new net.URI(config.file);
-		 if (uri.isRelative()) {
-			uri = (new net.URI(process.cwd())).combine(config.file);
-		 }
-
-		 var type = {
-			htm: 'html',
-			html: 'html',
-			js: 'js'
-		 }[uri.extension] || config.type
-		 if (!type) return console.error('Unknown Solution Type');
-		 
-		 w.solution = new w.Solution(type, uri, config);
-		 w.solution.process();
-		 return null;
-	  });
-
-	  return null;
-   }();
+    
+    include.cfg({
+        framework: '/script/{name}.js',
+        formatter: '/lib/formatter/{name}.js',
+        handler: '/lib/handler/{name}.js',
+        parser: '/lib/parser/{name}.js',
+        action: '/lib/action/{name}.js',
+        path: io.env.applicationDir.toString() + '/'
+    });
+    
+    switch (program.args[0]) {
+    case '':
+    case null:
+        return console.error("Invalid Arguments Count");        
+    case 'template':
+        include.js('/lib/action/template.js');
+        break;
+    case 'reference':
+        include.js('/lib/action/reference.js');
+        break;
+    default:        
+        include.js('/lib/project/solutionWorker.js').done(function() {
+            w.config && w.config.state == 4 && typeof SolutionWorker === 'function' && new SolutionWorker().process(w.config);
+        });
+        break;
+    }
+    return 1;
 }(global.window || (global.window = global));
+
+
+
+
+
+
+
+
+
+
+
+
+

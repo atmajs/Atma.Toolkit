@@ -192,10 +192,9 @@
             return helper.combinePathes(this.host, this.path, '/');
         },
         toDir: function(){
-            var str = this.toString(),
-                index = str.lastIndexOf('/');
-                
-            return str.substring(0, index + 1);
+            var str = this.toString();
+            
+            return this.file ? str.substring(0, str.lastIndexOf('/') + 1) : str;
         },
         isRelative: function() {
             return !this.host;

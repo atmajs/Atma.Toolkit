@@ -22,9 +22,9 @@ var services = {
         'file/save': function(data) {            
             var folder = urlhelper.getDir(data.path);
             if (folder && fs.existsSync(folder) == false) {
-                try {
-                    fs.mkdirSync(folder);
-                } catch (e) {};
+                //try {
+                    fsextra.mkdirpSync(folder);
+                //} catch (e) {};
             }
             
             fs.writeFileSync(data.path, data.content);
@@ -40,7 +40,7 @@ var services = {
                 callback && callback(404);
             }
             var folder = urlhelper.getDir(data.to);
-            if (fs.existsSync(folder) == false) fs.mkdirSync(folder);
+            if (fs.existsSync(folder) == false) fsextra.mkdirpSync(folder);
 
             fs.copy(data.from, data.to, callback);
         },
@@ -49,8 +49,8 @@ var services = {
                 console.error('file/copy - 404 Error', data.from);
 
             }
-            var folder = urlhelper.getDir(data.to);
-            if (fs.existsSync(folder) == false) fs.mkdirSync(folder);
+            var folder = urlhelper.getDir(data.to);            
+            if (fs.existsSync(folder) == false) fsextra.mkdirpSync(folder);
             
             copyFileSync(data.from, data.to);
         },
@@ -62,6 +62,9 @@ var services = {
         },
         'file/allSync': function(data){            
             return walk(data.dir);
+        },
+        'folder/ensure': function(data){
+            if (fs.existsSync(data.folder) == false) fsextra.mkdirpSync(data.folder);
         }
     }
 }

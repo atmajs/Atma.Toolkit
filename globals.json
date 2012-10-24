@@ -1,10 +1,9 @@
 {
-	"projects":[
-		{
-			"name": "libjs",
+	"projects":{
+		"libjs" : {
 			"path": "file:///c:/Development/libjs/"
 		}
-	],
+	},
 	"defaultRoutes":{
 		"lib": "{libjs}/{name}/lib/{name}.js",
         "framework": "{libjs}/framework/lib/{name}.js",
