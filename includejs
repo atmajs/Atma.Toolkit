@@ -4,6 +4,7 @@ void
 
 function(w) {
 
+    
     require('./script/class.js');
     require('./script/include.js');
     require('./script/net/uri.js');
@@ -38,6 +39,9 @@ function(w) {
         break;
     case 'reference':
         include.js('/lib/action/reference.js');
+        break;
+    case 'globals':
+        require("openurl").open(io.env.applicationDir.combine('globals.txt').toString());
         break;
     default:        
         include.js('/lib/project/solutionWorker.js').done(function() {
