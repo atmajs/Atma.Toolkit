@@ -43,6 +43,9 @@ function(w) {
     case 'globals':
         require("openurl").open(io.env.applicationDir.combine('globals.txt').toString());
         break;
+    case 'git-clone':
+        include.js('/lib/action/gitclone.js');
+        break;
     default:        
         include.js('/lib/project/solutionWorker.js').done(function() {
             w.config && w.config.state == 4 && typeof SolutionWorker === 'function' && new SolutionWorker().process(w.config);
