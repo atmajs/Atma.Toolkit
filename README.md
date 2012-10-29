@@ -1,6 +1,6 @@
 <h4>IncludeJS Build Tool For node.js</h4>
 
-<p>@see <a href='http://tenbits.github.com/CompoJS/#includeBuilder'>IncludeJS Project</a>
+<p>@see <a href='http://libjs.it/#includeBuilder'>IncludeJS Project</a>
 
 <p>
 <div>Install:</div>
