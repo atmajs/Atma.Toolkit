@@ -1,1 +1,1 @@
-include.cfg(%ROUTES%);
+include.routes(%ROUTES%);

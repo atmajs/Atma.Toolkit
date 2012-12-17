@@ -6,7 +6,7 @@
     "name": "tenbits",
     "email": "source.kit@gmail.com"
   },
-  "version": "0.3.7",
+  "version": "0.4.1",
   "main": "./include.js",
   "bin": {
     "includejs": "./includejs"
@@ -14,7 +14,9 @@
   "dependencies": {
     "jsdom": ">= 0.2.15",
     "fs.extra": ">= 1.2.0",
-    "commander": "~1.0.4"
+    "commander": "~1.0.4",
+    "uglify-js": "~2.2.2",
+    "clean-css": "~0.9.0"
   },
   "repository": {
     "type": "git",

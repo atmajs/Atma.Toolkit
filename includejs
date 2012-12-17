@@ -1,69 +1,55 @@
 #!/usr/bin/env node
 
-void
+!function(w) {
 
-function(w) {
+	require('./node/app.help.js');    
+	require('./src/libjs/class.js');
+	require('./src/libjs/include.node.js');
 
-    
-    require('./script/class.js');
-    require('./script/include.js');
-    require('./script/net/uri.js');
-    require('./script/utils.js');
-    require('./script/arr.js');
-    require('./lib/sys.js');
-    require('./lib/helpers.js');
-    require('./lib/handler/io.js');        
-    
-   
-    w.app = require('./node/app.js').app;
-    w.XMLHttpRequest = require('./node/xmlhttprequest.local.js').XMLHttpRequest;
-    w.document = require('./node/document.parser.js').document;
-    w.program = require('./node/help.js').program;
+    var program = require('commander');
 
-    
-    include.cfg({
-        framework: '/script/{name}.js',
-        formatter: '/lib/formatter/{name}.js',
-        handler: '/lib/handler/{name}.js',
-        parser: '/lib/parser/{name}.js',
-        action: '/lib/action/{name}.js',
-        path: io.env.applicationDir.toString() + '/'
-    });
-    
-    switch (program.args[0]) {
-    case '':
-    case null:
-        return console.error("Invalid Arguments Count");        
-    case 'template':
-        include.js('/lib/action/template.js');
-        break;
-    case 'reference':
-        include.js('/lib/action/reference.js');
-        break;
-    case 'globals':
-        require("openurl").open(io.env.applicationDir.combine('globals.txt').toString());
-        break;
-    case 'git-clone':
-        include.js('/lib/action/gitclone.js');
-        break;
-    default:        
-        include.js('/lib/project/solutionWorker.js').done(function() {
-            w.config && w.config.state == 4 && typeof SolutionWorker === 'function' && new SolutionWorker().process(w.config);
-        });
-        break;
-    }
-    return 1;
+
+	include.cfg({
+		path: 'file:///' + process.cwd() + '/',
+        lockedToFolder: true
+	}).routes({
+		framework: '/src/libjs/{0}.js',
+		handler: '/src/handler/{0}.js',
+		parser: '/src/parser/{0}.js',
+		action: '/src/action/{0}.js',
+		script: '/src/{0}.js',
+        helper: '/src/helper/{0}.js'
+	}).js({
+		framework: ['net/uri', 'utils', 'arr'],
+		script: [ //
+		'sys', //
+		'helpers', //
+		'handler/io', //
+		],
+
+	}).done(function() {
+		switch (program.args[0]) {
+		case '':
+		case null:
+			return console.error("Invalid Arguments Count");
+		case 'template':
+			include.js('/src/action/template.js');
+			break;
+		case 'reference':
+			include.js('/src/action/reference.js');
+			break;
+		case 'globals':
+			require('openurl').open(io.env.applicationDir.combine('globals.txt').toString());
+			break;
+		case 'git-clone':
+			include.js('/src/action/gitclone.js');
+			break;
+		default:
+			include.js('/src/project/solutionWorker.js');
+			break;
+		}
+		return 1;
+	});
+
+
 }(global.window || (global.window = global));
-
-
-
-
-
-
-
-
-
-
-
-
-

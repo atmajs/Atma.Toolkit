@@ -5,8 +5,8 @@
 		}
 	},
 	"defaultRoutes":{
-		"lib": 			"{libjs}/{name}/lib/{name}.js",
-        "framework": 	"{libjs}/framework/lib/{name}.js",
-		"compo": 		"{libjs}/compos/{name}/lib/{name}.js"
+		"lib": 			"{libjs}/{0}/lib/{1}.js",
+        "framework": 	"{libjs}/framework/lib/{0}.js",
+		"compo": 		"{libjs}/compos/{0}/lib/{1}.js"
 	}
 }
