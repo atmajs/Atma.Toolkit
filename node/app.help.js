@@ -36,10 +36,14 @@ program.on('--help', function() {
     write('"action" - ',3);
     write('"build" - @default - combine resources',4);
     write('"import" - copy outer resources to projects directory',4);
+	write('"reference" - switch back from "import" to resource referencing',4);
     
     write('"minify" - {Boolean} - available only with action == "build"',3);
     write('"outputMain" - output name of a built html',3);
     write('"outputSources" - directory of built resources',3);
+	
+	write('"uglify" - {Object} - UglifyJS settings. Example, {global_defs:{DEBUG:false}}',3);
+	
     
     
     write('');
