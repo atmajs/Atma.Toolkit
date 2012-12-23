@@ -10,38 +10,33 @@ include.js({
 
 
 	
-	global.io.fileFactory.registerHandler([/\.css$/], Class({
+	global.io.File.getFactory().registerHandler([/\.css$/], Class({
 		Base: io.File,
 		read: function() {
-			this.source = io.File.prototype.read.call(this);
-			this.images = CssParser.extractImages(global.solution.uri, this.uri, this.source);
-			return this.source;
+            if (this.images && this.content){
+                return this.content;
+            }
+			this.content = io.File.prototype.read.call(this);
+            this.images = CssParser.extractImages(global.solution.uri, this.uri, this.content);
+            
+			return this.content;
 		},
 		copyTo: function(uri) {
             
             this.copyImagesTo(uri);
             
 			
-			new io.File(uri).write(this.source);
+			new io.File(uri).write(this.content);
             
 			return this;
 		},
         copyImagesTo: function(uri){
-            if (this.source == null){
+            if (this.content == null){
                 this.read();
             }
             copyImages(this, uri);
             return this;
-        },
-		write: function(content) {
-
-			if (global.solution.config.minify) {
-                var cleanCSS = require('clean-css');
-				content = cleanCSS.process(content);
-			}
-            
-			io.File.prototype.write.call(this, content);
-		}
+        }
 	}));
 
 
@@ -68,7 +63,7 @@ include.js({
 			}
 
 			if (x.replaceWith) {
-				cssFile.source = CssParser.replace(cssFile.source, x.href, x.replaceWith);
+				cssFile.content = CssParser.replace(cssFile.content, x.href, x.replaceWith);
 			}
 		}
 	}

@@ -3,11 +3,10 @@
   "description": "IncludeJS Resource Builder Tool",
   "preferGlobal": "true",
   "author": {
-    "name": "tenbits",
+    "name": "Alexander Kit",
     "email": "source.kit@gmail.com"
   },
-  "version": "0.4.1",
-  "main": "./include.js",
+  "version": "0.4.4",
   "bin": {
     "includejs": "./includejs"
   },
@@ -16,12 +15,15 @@
     "fs.extra": ">= 1.2.0",
     "commander": "~1.0.4",
     "uglify-js": "~2.2.2",
-    "clean-css": "~0.9.0"
+    "clean-css": "~0.9.0",
+    "jshint": "~0.9.1",
+    "socket.io": "~0.9.13"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/tenbits/IncludeJS.Builder.git"
   },
+  "preferGlobal": true,
   "license": "MIT",
   "engines": {
     "node": ">= 0.8.6"

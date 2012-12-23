@@ -12,8 +12,8 @@ include.js({
 	include.exports = Class({
 		Construct: function(solutionUri, outputDirectoryUri, resource) {
 			
-            resource.source = new io.File(resource.uri).copyImagesTo(outputDirectoryUri).source;
+            resource.content = new io.File(resource.uri).copyImagesTo(outputDirectoryUri).content;
 		}
-	})
+	});
 
 });

@@ -1,3 +1,6 @@
+
+
+
 var program = require('commander');
 
 
@@ -11,7 +14,8 @@ function write(message, indent) {
 program.usage('[command] [options]') //
 .description('IncludeJS Application Builder') //
 .version('0.3.5') //
-.option('-m, --minify', 'Minify Javascript and CSS output');
+.option('-m, --minify', 'Minify Javascript and CSS output')//
+.option ('-action XXX', 'Sets or Overrides config action property');
 
 
 program.on('--help', function() {
@@ -31,7 +35,7 @@ program.on('--help', function() {
     
     write('"file" - *.html input',3);
     
-    write('"vars" - {Object} - Variables used when parsing includes',3);
+    //write('"vars" - {Object} - Variables used when parsing includes',3);
     
     write('"action" - ',3);
     write('"build" - @default - combine resources',4);
@@ -43,6 +47,10 @@ program.on('--help', function() {
     write('"outputSources" - directory of built resources',3);
 	
 	write('"uglify" - {Object} - UglifyJS settings. Example, {global_defs:{DEBUG:false}}',3);
+    write('"jshint" - {Object} - Hint settings',3);
+    write('"options" - {Object} - JSHINT options',4);
+    write('"global" - {Object} - JSHINT global variables',4);
+    write('"ignore" - {Object} - Filenames hash to ignore',4);
 	
     
     

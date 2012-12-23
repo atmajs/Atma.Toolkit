@@ -5,10 +5,10 @@ include.js({
     include.exports = {
         action: function(type) {
             switch (type) {
-            case 'import':
+            case 'project-import':
                 importResources() && rewriteRoutes('reference','import');
                 break;
-            case 'reference':
+            case 'project-reference':
                 referenceResources() && rewriteRoutes('import','reference');
                 break;
             default:
@@ -28,7 +28,7 @@ include.js({
             routes.write(source);
         }
 
-        new io.File(global.solution.resource.uri).write(global.solution.resource.source);
+        new io.File(global.solution.resource.uri).write(global.solution.resource.content);
     }
     
     var referenceResources = (function(){
@@ -37,18 +37,30 @@ include.js({
             var globals = JSON.parse(new io.File(io.env.applicationDir.combine('globals.txt')).read()),
                 referenceDir = io.env.applicationDir.combine('.reference/');
             
-            var routes = new io.File(io.env.currentDir.combine('include.routes.js'));
+            var routes = new io.File(io.env.currentDir.combine('include.routes.js')),
+                includeRoutes;
             if (routes.exists() == false){
                 console.error('"%s" does not exists', file.uri.toString());
                 return 0;
             }
+
+
             
             var include = {
-                cfg: function(cfg){
-                    routes = cfg;
+                routes: function(cfg){
+                    includeRoutes = cfg;
                 }
-            }            
-            eval(routes.read());
+            }          
+            try{  
+                eval(routes.read());
+            }catch(e){};
+
+            if (!includeRoutes){
+                console.error('Routes couldnt be parsed');
+                return 0;
+            }
+
+            routes = includeRoutes;
             
             
             for(var key in routes){

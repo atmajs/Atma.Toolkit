@@ -3,7 +3,7 @@ function() {
 
     var fs = require('fs');
 
-    io.fileFactory.registerHandler(/include\.routes\.js$/g, Class({
+    io.File.factory.registerHandler(/include\.routes\.js$/g, Class({
         Base: io.File,
         copyTo: function(uri){
             var source = this.read(),

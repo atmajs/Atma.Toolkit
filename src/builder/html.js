@@ -4,7 +4,7 @@ include.js({
 
 	include.exports = {
 		build: function(solution, builtOutput) {
-			var doc = new resp.Document(solution.resource.source);
+			var doc = new resp.Document(solution.resource.content);
 
 			doc.removeAll('script', 'src').removeAll('link', 'rel', 'stylesheet');
 

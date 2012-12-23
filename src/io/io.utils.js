@@ -1,5 +1,5 @@
-!
-function(g) {
+
+(function(g) {
 
 	var fs = require('fs'),
 		fsextra = require('fs.extra'),
@@ -84,8 +84,8 @@ function(g) {
 			exists: function(file) {
 				return fs.existsSync(file);
 			},
-			readSync: function(file) {
-				return fs.readFileSync(file, 'utf-8');
+			readSync: function(file, asBuffer) {                
+                return fs.readFileSync(file, asBuffer ? null : 'utf-8');
 			}
 		},
 		dir: {
@@ -100,4 +100,4 @@ function(g) {
 		}
 	}
 
-}(global);
+}(global));

@@ -43,7 +43,7 @@ include.js({
         w.include.promise('parser').html = {
             rewriteUrls: function(resource, line1, line2) {
                 var json = {},
-                    doc = new resp.Document(resource.source),
+                    doc = new resp.Document(resource.content),
                     arr = doc.getElementsByTagName('script');
                 
                 for (var i = 0, x, length = arr.length; x = arr[i], i < length; i++) {
@@ -53,7 +53,7 @@ include.js({
                     }
                 }
                 
-                resource.source = "<!DOCTYPE html>" + sys.newLine + doc.documentElement.innerHTML;
+                resource.content = "<!DOCTYPE html>" + sys.newLine + doc.documentElement.innerHTML;
             },
             extractIncludes: function(htmlSource, directory) {
                 var doc = new resp.Document(htmlSource),

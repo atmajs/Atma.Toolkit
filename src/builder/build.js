@@ -23,7 +23,7 @@ include.js({
 						output.js.push(s);
 					}
 
-					output.js.push(x.source);
+					output.js.push(x.content);
 
 					if (i > includeIndex) {
 						output.js.push("includeLib.ScriptStack.afterScriptRun(include)");
@@ -48,7 +48,9 @@ include.js({
 
 				output.js.splice(includeIndex + 1, 0, info);
 
-				if (solution.type == 'js') output.push(resource.source);
+				if (solution.type == 'js') {
+                    output.push(resource.content);
+                }
 				output.js = output.js.join(Sys.newLine + ';');
 			},
 			css: function(solution, stack, output) {
@@ -56,7 +58,7 @@ include.js({
 				for (var i = 0, x, length = stack.length; x = stack[i], i < length; i++) {
 					new resp.CssHandler(solution.uri, solution.uris.outputDirectory, x);
 				}
-				output.css = R.arr.select(stack, 'source').join(Sys.newLine);
+				output.css = R.arr.select(stack, 'content').join(Sys.newLine);
                 console.log('Build css... [end]');
 			},
 			lazy: function(solution, stack, output) {
@@ -68,14 +70,15 @@ include.js({
 			ofType: function(type, solution, stack, output) {
 				var stream = [];
 				for (var i = 0, x, length = stack.length; x = stack[i], i < length; i++) {
-					stream.push(String.format("<script type='include/#{type}' id='includejs-#{id}' data-appuri='#{appuri}'> #{source} </script>", {
+					stream.push(String.format("<script type='include/#{type}' id='includejs-#{id}' data-appuri='#{appuri}'> #{content} </script>", {
 						type: type,
 						appuri: x.namespace || x.appuri,
-						source: x.source,
-						id: x.id
+						content: x.content,
+						id: x.id.replace(/\W/g,'')
 					}));
 				}
 				output[type] = stream.join(Sys.newLine);
+				
 			}
 		};
 

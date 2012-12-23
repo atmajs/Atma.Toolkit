@@ -41,14 +41,16 @@
                 return;
             }
             
-            this.source = file.read();
+            this.content = file.read();
             
             switch (this.type) {
             case 'html':
             case 'js':
-                if (this.type == 'js' && this.url.indexOf('include.js') > -1) break;
+                if (this.type == 'js' && this.url.indexOf('include.js') > -1) {
+                    break;
+                }
 
-                var includes = global.parser[this.type].extractIncludes(this.source, solution.directory, solution.variables);
+                var includes = global.parser[this.type].extractIncludes(this.content, solution.directory, solution.variables);
 
                 this.includes = ruqq.arr.map(includes, function(x){
                     return new Resource(x, this);

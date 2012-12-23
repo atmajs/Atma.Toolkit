@@ -2,15 +2,21 @@
 
 !function(w) {
 
+
+    
+    
 	require('./node/app.help.js');    
 	require('./src/libjs/class.js');
 	require('./src/libjs/include.node.js');
 
     var program = require('commander');
 
-
-	include.cfg({
-		path: 'file:///' + process.cwd() + '/',
+    
+    global.socketio = require('socket.io');
+     
+    
+    include.cfg({
+		path: 'file:///' + __dirname + '/',
         lockedToFolder: true
 	}).routes({
 		framework: '/src/libjs/{0}.js',
@@ -18,17 +24,26 @@
 		parser: '/src/parser/{0}.js',
 		action: '/src/action/{0}.js',
 		script: '/src/{0}.js',
-        helper: '/src/helper/{0}.js'
+        helper: '/src/helper/{0}.js',
+        base: '/src/base/{0}.js'
 	}).js({
 		framework: ['net/uri', 'utils', 'arr'],
+        parser: ['config'],
 		script: [ //
 		'sys', //
 		'helpers', //
-		'handler/io', //
+		'io/package', //
 		],
 
 	}).done(function() {
-		switch (program.args[0]) {
+        
+		
+		if (!(global.config && global.config.state == 4)){
+			console.error('Invalid Config', global.config)
+			return 0;
+		}
+		
+        switch (global.config.action) {
 		case '':
 		case null:
 			return console.error("Invalid Arguments Count");
@@ -44,8 +59,11 @@
 		case 'git-clone':
 			include.js('/src/action/gitclone.js');
 			break;
-		default:
-			include.js('/src/project/solutionWorker.js');
+        case 'server':
+            include.js('/src/server/server.js');            
+            break;
+		default:			
+			include.js('/src/project/solutionWorker.js');            
 			break;
 		}
 		return 1;

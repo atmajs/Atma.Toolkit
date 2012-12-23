@@ -1,7 +1,6 @@
 include.js({
-    parser: ['js', 'css', 'html', 'config'],
-    handler: ['files/javascript', 'files/style'],
-    script: ['project/solution']
+    parser: ['js', 'css', 'html'],
+    script: ['io/files/style', 'project/solution']
 }).done(function() {
     var config = global.config;
     
@@ -14,9 +13,10 @@ include.js({
     
     new Solution(config.type, config.uri, config, {
         resolve: function(solution){
+            console.log('Resources Loaded');
             switch (solution.config.action) {
-            case 'import':
-            case 'reference':
+            case 'project-import':
+            case 'project-reference':
                 include.js({
                     action: 'resourceRoutes::resourceRoutes'    
                 }).done(function(resp){

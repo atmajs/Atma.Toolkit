@@ -1,4 +1,4 @@
-
+var Routes = global.includeLib.Routes();
 
 include.exports = Class({
 	Construct: function() {
@@ -6,7 +6,7 @@ include.exports = Class({
 		ruqq.arr.each(['js', 'css', 'load', 'lazy'], function(x) {
 			this[x] = function(pckg) {
 
-				global.includeLib.Routes.each(x, pckg, function(namespace, route) {
+				Routes.each(x, pckg, function(namespace, route) {
 					this.includes.push({
 						type: x,
 						url: route.path,
@@ -18,6 +18,16 @@ include.exports = Class({
 			}
 		}.bind(this));
 	},
-	cfg: global.include.cfg,
-	routes: global.include.routes
+	cfg: function() {
+		return this;
+	},
+	routes: function(arg){
+		if (arg == null){
+			return Routes.getRoutes();
+		}
+		for (var key in arg) {
+			Routes.register(key, arg[key]);
+		}
+		return this;
+	}
 });

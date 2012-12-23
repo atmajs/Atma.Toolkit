@@ -40,6 +40,10 @@ include.js('resource.js::Resource').done(function(resp) {
 
             Object.extend(this.config, config);
             
+            if (this.config.outputSources[this.config.outputSources.length - 1] != '/') {
+                this.config.outputSources += '/';
+            }
+            
             var info = {
                 name: this.uri.file.replace('.' + this.uri.extension, ''),
                 action: this.config.action,
