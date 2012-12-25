@@ -2,7 +2,7 @@
 !(function(global){
 
 	var routes = { 
-		'/': 'index'
+		//'/': 'index'
 	};
 	var Routes = Class({
 		Construct: function(){

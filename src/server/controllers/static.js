@@ -18,13 +18,19 @@ include.js({
 	include.exports = new new Class({
 		Base: resp.Emitter,
 		request: function(request, response) {
-			var path = url.parse(request.url).pathname,
-				fullPath = pathUtil.join(folder, path);
-
-			fullPath = net.URI.combine(folder, path);
-
-			var file = new File(fullPath);
-
+			//var path = url.parse(request.url).pathname,
+			//	fullPath = pathUtil.join(folder, path);
+			//             
+            
+            var uri = new net.URI(request.url);
+            
+            if (!uri.file){
+                uri = uri.combine('index.html');
+            }
+            
+            var fullPath = net.URI.combine(folder, uri.toLocalFile()),
+                file = new File(fullPath);
+            
 			if (file.exists()) {
 				var mimeType = MimeTypes[file.uri.extension] || 'text/plain',
 					content = file.read('binary');
