@@ -1,7 +1,7 @@
 {
   "name": "includejs",
   "description": "IncludeJS Resource Builder Tool",
-  "preferGlobal": "true",
+  "preferGlobal": true,
   "author": {
     "name": "Alexander Kit",
     "email": "source.kit@gmail.com"
@@ -23,7 +23,6 @@
     "type": "git",
     "url": "git://github.com/tenbits/IncludeJS.Builder.git"
   },
-  "preferGlobal": true,
   "license": "MIT",
   "engines": {
     "node": ">= 0.8.6"
