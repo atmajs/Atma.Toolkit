@@ -26,11 +26,17 @@
 	io.File.registerHookHandler({
 		register: function(regexp, name, handler) {
 			_hooks.push(new Hook(regexp, name, handler));
+            return this;
 		},
 		trigger: function(funcName, file) {
 			_hooks.forEach(function(x) {
 				x.run(funcName, file);
 			});
-		}
+            return this;
+		},
+        clear: function(){
+            _hooks = [];
+            return this;
+        }
 	});
 }());
