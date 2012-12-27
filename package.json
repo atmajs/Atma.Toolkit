@@ -1,6 +1,6 @@
 {
   "name": "includejs",
-  "description": "IncludeJS Resource Builder Tool",
+  "description": "IncludeJS Resource Builder Tool - CLI only",
   "preferGlobal": true,
   "author": {
     "name": "Alexander Kit",

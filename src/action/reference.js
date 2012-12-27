@@ -1,13 +1,26 @@
-include.js({
-    helper: 'referenceHelper::refHelper'
-}).done(function(resp) {
-    
-    var program = require('commander');;
+(function() {
 
-    if (!program.args[1]) {
-        return console.error('Path not defined.');
-    }
-    
-    resp.refHelper.create(io.env.currentDir, program.args[2], program.args[1]);
-    return null;
-});
+	include.exports = {
+		process: function(config, idfr) {
+
+			include.js({
+				helper: 'referenceHelper::refHelper'
+			}).done(function(resp) {
+				var args = require('commander').args,
+					path = config.path || args[1],
+					name = config.name || args[2];
+
+				if (!path || new io.Directory(path).exists() == false) {
+
+					console.error('Symbolic link points to undefined path', path);
+					idfr.resolve && idfr.resolve(1);
+					return;
+				}
+
+
+				resp.refHelper.create(io.env.currentDir, name, path);
+				idfr.resolve && idfr.resolve();
+			});
+		}
+	}
+}());

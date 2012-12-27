@@ -1,5 +1,4 @@
-void
-function() {
+(function() {
     var exec = require('child_process').exec;
 
 
@@ -42,7 +41,9 @@ function() {
 
     var RoutesJob = Class({
         Construct: function(libjsDir) {
-            if (libjsDir[libjsDir.length - 1] != '/') libjsDir = libjsDir + '/';
+            if (libjsDir[libjsDir.length - 1] != '/') {
+                libjsDir = libjsDir + '/';
+            }
             
             var file = new io.File(new net.URI(io.env.applicationDir).combine('globals.txt'));
             var globals = {
@@ -62,17 +63,19 @@ function() {
     })
 
     var Git = {
-        clone: function(list) {
+        clone: function(idfr) {
             var dir = new io.Directory(io.env.currentDir);
             
             dir.uri = dir.uri.combine('libjs/');
             if (dir.exists()) {
                 console.error('LibJS Directory Already Exists');
+                
+                idfr.resolve(1);
                 return;
             }
             dir.ensure();
             
-            list = [{
+            var list = [{
                 path: 'git://github.com/tenbits/ClassJS.git',
                 name: 'class'
             }, {
@@ -95,12 +98,17 @@ function() {
             new CloneFactory(dir.uri.toLocalDir(), list, {
                 resolve: function(){
                     new RoutesJob(dir.uri.toLocalDir());
+                    
+                    idfr.resolve();
                 }
             }).process();
         }
     }
 
-    // run it
-    Git.clone('');
+    include.exports = {
+        process: function(config, idfr){
+            Git.clone(idfr);
+        }
+    }
 
-}();
+}());

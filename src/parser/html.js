@@ -3,8 +3,7 @@ include.js({
 }).done(function(resp) {
 
 
-    var w = window,
-        r = ruqq,
+    var r = global.ruqq,
         helper = {
             rewriteResource: function(doc, resource) {
 
@@ -40,7 +39,7 @@ include.js({
 
 
 
-        w.include.promise('parser').html = {
+        include.promise('parser').html = {
             rewriteUrls: function(resource, line1, line2) {
                 var json = {},
                     doc = new resp.Document(resource.content),
@@ -97,7 +96,7 @@ include.js({
                         loaderMain = $loader.getAttribute('main');
 
 
-                    solution.loader = new w.parser.Loader(directory.combine(loaderUrl), loaderMain);
+                    solution.loader = new global.parser.Loader(directory.combine(loaderUrl), loaderMain);
 
 
                     var arr = solution.loader.includes;

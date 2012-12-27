@@ -122,7 +122,8 @@ var Helper = { /** TODO: improve url handling*/
 };
 var RoutesLib = function() {
 
-	var routes = {};
+	var routes = {},
+		regexpAlias = /([^\\\/]+)\.\w+$/;
 
 	return {
 		/**
@@ -262,6 +263,13 @@ var RoutesLib = function() {
 
 		getRoutes: function(){
 			return routes;
+		},
+		
+		parseAlias: function(resource){
+			var url = resource.url,
+				result = regexpAlias.exec(url);
+			
+			return result && result[1];			
 		}
 	};
 	
@@ -338,7 +346,13 @@ IncludeDeferred.prototype = {
 		return this;
 	},
 	readystatechanged: function(state) {
+		
 		this.state = state;
+		
+		if (this.state === 4){
+			global.include = this;
+		}
+		
 		for (var i = 0, x, length = this.callbacks.length; i < length; i++) {
 			x = this.callbacks[i];
 			
@@ -482,6 +496,13 @@ Include.prototype = {
 				(bin[key] || (bin[key] = {}))[id] = resource;
 			}
 		}
+	},
+	/**
+	 *	Create new Resource Instance,
+	 *	as sometimes it is necessary to call include. on new empty context
+	 */
+	instance: function(){
+		return new Resource();
 	}
 };
 var ScriptStack = (function() {
@@ -711,6 +732,9 @@ Resource.prototype = Helper.extend({}, IncludeDeferred, Include, {
 		if (this.includes == null) {
 			this.includes = [];
 		}
+		if (this.response == null){
+			this.response = {};
+		}
 
 
 		Routes.each(type, pckg, function(namespace, route, xpath) {
@@ -718,7 +742,8 @@ Resource.prototype = Helper.extend({}, IncludeDeferred, Include, {
 
 			this.includes.push(resource);
 
-			resource.index = this.calcIndex(type, namespace);
+			// obsolete - we only use alias
+			//////resource.index = this.calcIndex(type, namespace);
 			resource.on(4, this.childLoaded.bind(this));
 		}.bind(this));
 
@@ -727,48 +752,52 @@ Resource.prototype = Helper.extend({}, IncludeDeferred, Include, {
 	/** Deprecated
 	 *	Use Resource Alias instead
 	 */
-	calcIndex: function(type, namespace) {
-		if (this.response == null) {
-			this.response = {};
-		}
-		switch (type) {
-		case 'js':
-		case 'load':
-		case 'ajax':
-			var key = type + 'Index';
-			if (this.response[key] == null) {
-				this.response[key] = -1;
-			}
-			return ++this.response[key];
-		}
-		return -1;
-	},
+	//////calcIndex: function(type, namespace) {
+	//////	if (this.response == null) {
+	//////		this.response = {};
+	//////	}
+	//////	switch (type) {
+	//////	case 'js':
+	//////	case 'load':
+	//////	case 'ajax':
+	//////		var key = type + 'Index';
+	//////		if (this.response[key] == null) {
+	//////			this.response[key] = -1;
+	//////		}
+	//////		return ++this.response[key];
+	//////	}
+	//////	return -1;
+	//////},
 
 	childLoaded: function(resource) {
 
 
 		if (resource && resource.exports) {
 
-			switch (resource.type) {
+			var type = resource.type;
+			switch (type) {
 			case 'js':
 			case 'load':
 			case 'ajax':
-
-				//////if (this.response == null) {
-				//////	this.response = {};
-				//////}
 				
-				if (resource.route.alias){
-					this.response[resource.route.alias] = resource.exports;
+				var alias = resource.route.alias || Routes.parseAlias(resource),
+					obj = type == 'js' ? this.response : (this.response[type] || (this.response[type] = {}));
+				
+				
+				if (alias){
+					obj[alias] = resource.exports;
 					break;
+				}else{
+					console.warn('Resource Alias is Not defined', resource);
 				}
-
-				var obj = (this.response[resource.type] || (this.response[resource.type] = []));
-
-				if (resource.namespace != null) {
-					obj = Helper.ensureArray(obj, resource.namespace);
-				}
-				obj[resource.index] = resource.exports;
+				
+				///////@TODO - obsolete - use only alias				
+				//////var obj = (this.response[resource.type] || (this.response[resource.type] = []));
+				//////
+				//////if (resource.namespace != null) {
+				//////	obj = Helper.ensureArray(obj, resource.namespace);
+				//////}
+				//////obj[resource.index] = resource.exports;
 				break;
 			}
 		}

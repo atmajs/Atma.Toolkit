@@ -1,5 +1,5 @@
-;
-(function(w) {
+
+(function(global) {
     'use strict';
 
     var helper = {
@@ -10,12 +10,16 @@
             var args = arguments;
             var str = '';
             for (var i = 0; i < args.length; i++) {
-                if (!args[i]) continue;
+                if (!args[i]) {
+					continue;
+				}
                 if (!str) {
                     str = args[i];
                     continue;
                 }
-                if (str[str.length - 1] != '/') str += '/';
+                if (str[str.length - 1] != '/') {
+					str += '/';
+				}
                 str += args[i][0] == '/' ? args[i].substring(1) : args[i];
             }
             return str;
@@ -23,19 +27,20 @@
         parseProtocol: function(o){            
             var value = /^([a-zA-Z]+):\/(\/)?/.exec(o.value); // @ 'c:/file.txt'| 'protocol://host.com'
             
-            if (value == null) return;
+            if (value == null) {
+				return;
+			}
             if (value[2] == null){
                 o.protocol = 'file';
                 return;
             }            
             o.protocol = value[1];
-            if (value[0] == null || !o.value || !o.value.substring){
-                console.log('IS NULL', o);
-            }
             o.value = o.value.substring(value[0].length);
         },
         parseHost: function(o){
-            if (o.protocol == null) return;
+            if (o.protocol == null) {
+				return;
+			}
             var i = o.value.indexOf('/', 2);
             if (~i){
                 o.host = o.value.substring(0, i);
@@ -70,13 +75,18 @@
             }
         }
     }
+    
 
-    if (w.net == null) w.net = {};
-    w.net.URI = function(uri) {
-        if (uri == null) return this;
-        if (helper.isURI(uri)) return uri.combine('');
-        
-        uri = uri.replace(/\\/g,'/');
+    
+    var URI = function(uri) {
+        if (uri == null) {
+			return this;
+		}
+        if (typeof uri === 'object' && typeof uri.combine === 'function') {
+			return uri.combine('');
+		}
+
+        uri = uri.replace(/\\/g,'/');        
 
         this.value = uri;
         helper.parseProtocol(this);
@@ -88,9 +98,9 @@
         this.path = this.value;
         return this;      
     }
-    w.net.URI.combine = helper.combinePathes;
+    URI.combine = helper.combinePathes;
 
-    w.net.URI.prototype = {
+    URI.prototype = {
         cdUp: function() {
             if (!this.path || this.path == '/') return this;
             if (this.protocol == 'file' && /^\/?[a-zA-Z]+:\/?$/.test(this.path)) return this;
@@ -102,16 +112,20 @@
          * '../path', 'path','./path' - relative to current path
          */
         combine: function(path) {
-            if (helper.isURI(path)) path = path.toString();
+            if (typeof path === 'object' && typeof path.combine === 'function') {
+				path = path.toString();
+			}
 
-            var uri = new net.URI();
+            var uri = new URI();
             for (var key in this) {
                 if (typeof this[key] === 'string') {
                     uri[key] = this[key];
                 }
             }
             
-            if (!path) return uri;
+            if (!path) {
+				return uri;
+			}
             
             if (this.protocol == 'file' && path[0] == '/') path = path.substring(1);
             
@@ -140,19 +154,27 @@
             if (this.protocol === 'file') str += '/';
             
             return str + helper.combinePathes(this.host, this.path, this.file) + (this.search || '');
-        },        
+        },
+        toPathAndQuery: function(){
+            return helper.combinePathes(this.path, this.file) + (this.search || '');
+        },
         /**
          * @return Current URI Path{String} that is relative to @arg1 URI
          */
         toRelativeString: function(uri) {
-            if (typeof uri === 'string') uri = new w.net.URI(uri);
-            if (uri.protocol != this.protocol || uri.host != this.host) return this.toString();
+            if (typeof uri === 'string') {
+				uri = new URI(uri);
+			}
+            if (uri.protocol != this.protocol || uri.host != this.host) {
+				return this.toString();
+			}
 
             if (this.path.indexOf(uri.path) == 0) { /** host folder */
                 var p = this.path ? this.path.replace(uri.path, '') : '';
                 if (p[0] === '/') p = p.substring(1);
                 return helper.combinePathes(p, this.file) + (this.search || '');
             }
+
             /** sub folder */
             var current = this.path.split('/');
             var relative = uri.path.split('/');
@@ -160,7 +182,9 @@
             var i = 0,
                 length = Math.min(current.length, relative.length);
             for (; i < length; i++) {
-                if (current[i] == relative[i]) continue;
+                if (current[i] == relative[i]) {
+					continue;
+				}
                 break;
             }
             if (i > 0) {
@@ -180,29 +204,44 @@
                 }
                 return helper.combinePathes(sub, forward, this.file);
             }
+
+
             return this.toString();
         },
 
         toLocalFile: function() {
-            if (this.protocol !== 'file') return this.toString();
+            if (this.protocol !== 'file') {
+				return this.toString();
+			}
             return helper.combinePathes(this.host, this.path, this.file);
         },
         toLocalDir: function() {
-            if (this.protocol !== 'file') return this.toDir();
+            if (this.protocol !== 'file') {
+				return this.toDir();
+			}
             return helper.combinePathes(this.host, this.path, '/');
         },
-        toDir: function(){
+		toDir: function(){
             var str = this.toString();
-            
+			
             return this.file ? str.substring(0, str.lastIndexOf('/') + 1) : str;
-        },
+        },        
         isRelative: function() {
             return !this.host;
         },
-        getName: function(){
+		getName: function(){
             return this.file.replace('.' + this.extension,'');
         }
     }
 
-    w.net.URI.combinePathes = helper.combinePathes;
-})(window);
+    URI.combinePathes = helper.combinePathes;
+    
+	
+	if (global.net == null) {
+		global.net = {};
+	}
+    
+	global.net.URI = URI;
+    
+    
+})(typeof window === 'undefined' ? global : window);

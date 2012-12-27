@@ -1,73 +1,100 @@
 #!/usr/bin/env node
 
-!function(w) {
+!
+function(w) {
 
 
-    
-    
-	require('./node/app.help.js');    
+
+
+	require('./node/app.help.js');
 	require('./src/libjs/class.js');
 	require('./src/libjs/include.node.js');
 
-    var program = require('commander');
+	var program = require('commander');
 
-    
-    global.socketio = require('socket.io');
-     
-    
-    include.cfg({
+
+	global.socketio = require('socket.io');
+
+
+	include.cfg({
 		path: 'file:///' + __dirname + '/',
-        lockedToFolder: true
+		lockedToFolder: true
 	}).routes({
-		framework: '/src/libjs/{0}.js',
+		ruqq: '/src/libjs/{0}.js',
 		handler: '/src/handler/{0}.js',
 		parser: '/src/parser/{0}.js',
 		action: '/src/action/{0}.js',
 		script: '/src/{0}.js',
-        helper: '/src/helper/{0}.js',
-        base: '/src/base/{0}.js'
+		helper: '/src/helper/{0}.js',
+		base: '/src/base/{0}.js',
+		io: '/src/io/{0}.js'
 	}).js({
-		framework: ['net/uri', 'utils', 'arr'],
-        parser: ['config'],
+		ruqq: ['net/uri', 'utils', 'arr'],
+		parser: ['config'],
 		script: [ //
 		'sys', //
-		'helpers', //
-		'io/package', //
+		'helpers', //		
 		],
-
+        io: 'package',		
 	}).done(function() {
-        
-		
-		if (!(global.config && global.config.state == 4)){
+
+
+		if (!(global.config && global.config.state == 4)) {
 			console.error('Invalid Config', global.config)
 			return 0;
 		}
-		
-        switch (global.config.action) {
-		case '':
-		case null:
-			return console.error("Invalid Arguments Count");
-		case 'template':
-			include.js('/src/action/template.js');
-			break;
-		case 'reference':
-			include.js('/src/action/reference.js');
-			break;
-		case 'globals':
-			require('openurl').open(io.env.applicationDir.combine('globals.txt').toString());
-			break;
-		case 'git-clone':
-			include.js('/src/action/gitclone.js');
-			break;
-        case 'server':
-            include.js('/src/server/server.js');            
-            break;
-		default:			
-			include.js('/src/project/solutionWorker.js');            
-			break;
-		}
+
+
+		include.js({
+			action: 'action-processor'
+		}).done(function(resp) {
+			new resp['action-processor']({
+				resolve: function() {
+					console.log('/* Done */');
+				}
+			}).process();
+		});
+
+
 		return 1;
+
+		//        
+		//        switch (global.config.action) {
+		//		case '':
+		//		case null:
+		//			return console.error("Invalid Arguments Count");
+		//		case 'template':
+		//			include.js('/src/action/template.js');
+		//			break;
+		//		case 'reference':
+		//			include.js('/src/action/reference.js');
+		//			break;
+		//		case 'globals':
+		//			require('openurl').open(io.env.applicationDir.combine('globals.txt').toString());
+		//			break;
+		//		case 'git-clone':
+		//			include.js('/src/action/gitclone.js');
+		//			break;
+		//        case 'server':
+		//            include.js('/src/server/server.js');            
+		//            break;
+		//        case 'shell':
+		//            include.js('/src/cli/shell.js').done(function(resp){
+		//                new  resp.shell('ipconfig /?',{
+		//                    resolve: function(){
+		//                        console.log('DONE');
+		//                    }
+		//                }).process();
+		//            });
+		//            break;
+		//		default:			
+		//			include.js('/src/project/solutionWorker.js').done(function(resp){
+		//                resp.solutionWorker.process(global.config);
+		//            }); 
+		//			break;
+		//		}
+		//		return 1;
 	});
 
 
-}(global.window || (global.window = global));
+}(global);

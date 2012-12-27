@@ -18,10 +18,7 @@ include.js({
 	include.exports = new new Class({
 		Base: resp.Emitter,
 		request: function(request, response) {
-			//var path = url.parse(request.url).pathname,
-			//	fullPath = pathUtil.join(folder, path);
-			//             
-            
+			
             var uri = new net.URI(request.url);
             
             if (!uri.file){

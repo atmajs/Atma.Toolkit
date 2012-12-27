@@ -1,19 +1,44 @@
 include.js({
-	script: 'html/Document::Document'
+	script: 'html/Document'
 }).done(function(resp) {
 
 	include.exports = {
 		build: function(solution, builtOutput) {
 			var doc = new resp.Document(solution.resource.content);
 
-			doc.removeAll('script', 'src').removeAll('link', 'rel', 'stylesheet');
-
-
-
-			builtOutput.css && doc.appendResource('link', {
-				rel: 'stylesheet',
-				href: solution.uris.outputDirectory.combine('style.css').toRelativeString(solution.uri)
+			ruqq//
+            .arr(doc.getElementsByTagName('script')) //
+			.where(function(x) {
+				if (x.getAttribute('ignore') != null) {
+					return false;
+				}
+				return !!x.getAttribute('src');
+			}).each(function(x) {
+				x.parentNode.removeChild(x);
 			});
+
+
+			ruqq//
+            .arr(doc.getElementsByTagName('link')) //
+			.where(function(x) {
+				return x.getAttribute('rel') == 'stylesheet';
+			}).each(function(x) {
+				x.parentNode.removeChild(x);
+			});
+
+
+			if (builtOutput.css) {
+				var href = solution.uris.outputDirectory.combine('style.css').toRelativeString(solution.uri);
+
+				if (solution.config.version) {
+					href += '?v=' + solution.config.version;
+				}
+				doc.appendResource('link', {
+					rel: 'stylesheet',
+					href: href
+				});
+			}
+
 
 			if (builtOutput.lazy || builtOutput.load) {
 				var tag = doc.createTag('div', {
@@ -26,9 +51,14 @@ include.js({
 			}
 
 			if (builtOutput.js) {
+                var src = solution.uris.outputDirectory.combine('script.js').toRelativeString(solution.uri);
+                if (solution.config.version) {
+					src += '?v=' + solution.config.version;
+				}
+                
 				var tag = doc.createTag('script', {
 					type: 'application/javascript',
-					src: solution.uris.outputDirectory.combine('script.js').toRelativeString(solution.uri)
+					src: src
 				});
 				doc.first('body').appendChild(tag);
 			}

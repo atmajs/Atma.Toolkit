@@ -6,12 +6,13 @@ include.js({
 	script: 'io/file'
 }).done(function() {
 
-	var actions = ['template', //
+	var actions = [ //
+	'template', //
 	'reference', //
 	'globals', //
 	'git-clone', //
 	'server', //
-	],
+	'shell'],
 		program = require('commander'),
 		args = program.args,
 		config;
@@ -35,7 +36,7 @@ include.js({
 
 	var file = new io.File(entry),
 		config = {};
-		
+
 	global.config = config;
 
 	if (file.uri.extension == 'config') {
@@ -50,19 +51,32 @@ include.js({
 		}
 	}
 
-	parseFile(config);
-	parseType(config);
-	parseOverrides(program, config);
+	if (config instanceof Array === false) {
+		config = [config];
+	}
 
-	if (new io.File(config.uri.toLocalFile()).exists() == false) {
-		console.error('File doesnt exists (404)', config.uri.toLocalFile());
-		return;
+
+	for (var i = 0, x, length = config.length; i < length; i++) {
+		x = config[i];
+		if ('file' in x) {
+			parseFile(x);
+			parseType(x);
+		}
+		if (i == 0) {
+			parseOverrides(program, config);
+		}
 	}
-	if (!config.type) {
-		console.error('Unknown solution type', config.type);
-		return;
-	}
-	
+
+
+	//if (new io.File(config.uri.toLocalFile()).exists() == false) {
+	//	console.error('File doesnt exists (404)', config.uri.toLocalFile());
+	//	return;
+	//}
+	//if (!config.type) {
+	//	console.error('Unknown solution type', config.type);
+	//	return;
+	//}
+
 	config.state = 4;
 
 
@@ -76,7 +90,7 @@ include.js({
 
 	function parseType(config) {
 		if (!config.type) {
-			
+
 			var ext = config.uri.extension;
 			config.type = {
 				htm: 'html',
@@ -108,7 +122,7 @@ include.js({
 			config[key] = value;
 		}
 	}
-	
+
 
 	include.exports = (global.config = config);
 });

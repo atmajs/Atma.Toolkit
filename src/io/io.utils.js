@@ -77,7 +77,9 @@
 
 				}
 				var folder = urlhelper.getDir(to);
-				if (fs.existsSync(folder) == false) fsextra.mkdirpSync(folder);
+				if (fs.existsSync(folder) == false) {
+                    fsextra.mkdirpSync(folder);
+                }
 
 				copyFileSync(from, to);
 			},

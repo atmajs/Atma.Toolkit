@@ -96,7 +96,7 @@ include.js({
 			BuilderHelper[type](solution, stack, solution.output);
 		},
 
-		build: function(solution) {
+		build: function(solution, idfr) {
 			solution.output = {};
 			solution.bin = {};
 
@@ -118,6 +118,7 @@ include.js({
 
 			new io.File(solution.uris.outputMain).write(solution.output.html);
 
+            idfr.resolve && idfr.resolve();
 		}
 	}
 

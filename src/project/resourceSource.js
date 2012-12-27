@@ -3,7 +3,7 @@ include.js({
 }).done(function(resp) {
 
     include.exports = {
-        action: function(type) {
+        action: function(type, idfr) {
             switch (type) {
             case 'project-import':
                 importResources() && rewriteRoutes('reference','import');
@@ -15,6 +15,8 @@ include.js({
                 console.error('Unknown Resource Type');
                 break;
             }
+            
+            idfr.resolve && idfr.resolve();
         }
     }
 
