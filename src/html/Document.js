@@ -44,10 +44,12 @@
 			return tag;
 		},
 
-		getAllAttributes: function(tagName, attr) {
+		getAllAttributes: function(tagName, attr,fn) {
 			return r.arr(this.getElementsByTagName(tagName)).where(function(x) {
 				return !!x.getAttribute(attr) && /:\/\/|^\/\//.test(x.getAttribute(attr)) == false;
-			}).map(function(x) {
+			})
+            .where(fn || function(){return true;})
+            .map(function(x) {
 				return x.getAttribute(attr);
 			});
 		},

@@ -9,7 +9,7 @@ include.js({
 			ruqq//
             .arr(doc.getElementsByTagName('script')) //
 			.where(function(x) {
-				if (x.getAttribute('ignore') != null) {
+				if (x.getAttribute('ignore')) {
 					return false;
 				}
 				return !!x.getAttribute('src');

@@ -79,8 +79,13 @@ include.js({
                     });
                 }
 
-                doc.getAllAttributes('script', 'src').each(add.bind(this, 'js'));
-                doc.getAllAttributes('link', 'href').each(add.bind(this, 'css'));
+                doc.getAllAttributes('script', 'src', function(x){
+                    return !x.getAttribute('ignore');
+                }).each(add.bind(this, 'js'));
+                
+                doc.getAllAttributes('link', 'href', function(x){
+                    return !x.getAttribute('ignore');
+                }).each(add.bind(this, 'css'));
 
 
                 var loaderIndex = r.arr.indexOf(includes, function(x) {
