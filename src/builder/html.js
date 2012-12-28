@@ -57,7 +57,7 @@ include.js({
 				}
                 
 				var tag = doc.createTag('script', {
-					type: 'application/javascript',
+					type: 'text/javascript',
 					src: src
 				});
 				doc.first('body').appendChild(tag);
