@@ -34,23 +34,38 @@ include.js({
 		return;
 	}
 
-	var file = new io.File(entry),
-		config = {};
+	var file = new io.File(entry);
 
-	global.config = config;
-
-	if (file.uri.extension == 'config') {
-		if (file.exists() == false) {
-			console.error('File doesnt exists (404)', file.uri.toLocalFile());
-			return;
-		}
-		config = JSON.parse(file.read());
-	} else {
-		config = {
-			file: file.uri.toLocalFile()
-		}
-	}
-
+    
+    if (file.exists() == false) {
+        console.error('File doesnt exists (404)', file.uri.toLocalFile());
+        return;
+    }
+    
+    switch(file.uri.extension){
+        case 'config':
+            global.config = JSON.parse(file.read());
+            break;
+        case 'js':
+            eval(file.read());
+            if (global.config == null){
+                console.error('Included Javascript as configuration exposed no config property');
+                global.config = {
+                    state: 0
+                };
+                return;
+            }
+            break;
+        default:
+            global.config = {
+                file: file.uri.toLocalFile()
+            }    
+            break;
+    }
+    
+    config = global.config;
+    
+    
 	if (config instanceof Array === false) {
 		config = [config];
 	}
