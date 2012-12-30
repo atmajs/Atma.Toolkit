@@ -17,6 +17,7 @@ include.js({
 		args = program.args,
 		config;
 
+	global.program = program;
 
 	if (!(args && args.length > 0)) {
 		args = ['build.json'];
@@ -26,7 +27,7 @@ include.js({
 	var entry = args[0].trim();
 
 
-	if (actions.indexOf(entry) > 1) {
+	if (actions.indexOf(entry) > -1) {
 		global.config = [{
 			action: entry
 		}];
