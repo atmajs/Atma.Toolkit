@@ -1,18 +1,21 @@
-void
-
-function() {
-    var fs = require('fs');
-
+(function() {
+    
     global.urlhelper = {
         resolveAppUri: function(url, current) {
-            if (url[0] == '/') return url;
-            if (!current || url.substring(0, 4) == 'file') return '/';
+            if (url[0] == '/') {
+                return url;
+            }
+            if (!current || url.substring(0, 4) == 'file') {
+                return '/';
+            }
 
             var index = current.lastIndexOf('/');
             return (index == -1 ? '/' : (current.substring(index + 1, -index))) + url;
         },
         resolveUri: function(url, parentLocation) {
-            if (solution == null) return new net.URI('');
+            if (solution == null) {
+                return new net.URI('');
+            }
             
             if (url[0] == '/'){
                 parentLocation = solution.directory;
@@ -24,7 +27,9 @@ function() {
             return uri.isRelative() ? (new net.URI(parentLocation)).combine(uri) : uri;            
         },
         getDir: function(url) {
-            if (!url) return '/';
+            if (!url) {
+                return '/';
+            }
             var index = url.lastIndexOf('/');
             return index == -1 ? '' : url.substring(index + 1, -index);
         },
@@ -35,17 +40,5 @@ function() {
             return dir.toLowerCase().indexOf(basedir.toLowerCase()) == 0;
         }
     }
-
-    global.xhr = {
-        load: function(url, callback) {
-            var xhr = new XMLHttpRequest();
-            
-            xhr.onreadystatechange = function() {
-                xhr.readyState == 4 && callback(xhr.responseText);
-            };
-
-            xhr.open('GET', url, false);
-            xhr.send();
-        }
-    }
-}();
+    
+}());

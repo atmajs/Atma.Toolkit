@@ -26,7 +26,7 @@ include.js({
 					output.js.push(x.content);
 
 					if (i > includeIndex) {
-						output.js.push("includeLib.ScriptStack.afterScriptRun(include)");
+						output.js.push("include.readystatechanged(3)");
 					}
 				}
 

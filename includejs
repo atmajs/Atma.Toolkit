@@ -5,9 +5,9 @@ function(w) {
 
 
 
-
-	require('./node/app.help.js');
-	require('./src/libjs/class.js');
+    require('libjs-class');
+	
+    require('./node/app.help.js');	
 	require('./src/libjs/include.node.js');
 
 	var program = require('commander');

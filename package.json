@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "source.kit@gmail.com"
   },
-  "version": "0.4.4",
+  "version": "0.4.5",
   "bin": {
     "includejs": "./includejs"
   },
@@ -17,7 +17,8 @@
     "uglify-js": "~2.2.2",
     "clean-css": "~0.9.0",
     "jshint": "~0.9.1",
-    "socket.io": "~0.9.13"
+    "socket.io": "~0.9.13",
+    "libjs-class": "~1.0.1"
   },
   "repository": {
     "type": "git",

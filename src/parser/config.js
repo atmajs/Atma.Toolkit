@@ -27,10 +27,11 @@ include.js({
 
 
 	if (actions.indexOf(entry) > 1) {
-		global.config = {
-			action: entry,
-			state: 4
-		};
+		global.config = [{
+			action: entry
+		}];
+        
+        global.config.state = 4;
 		return;
 	}
 
@@ -82,15 +83,6 @@ include.js({
 		}
 	}
 
-
-	//if (new io.File(config.uri.toLocalFile()).exists() == false) {
-	//	console.error('File doesnt exists (404)', config.uri.toLocalFile());
-	//	return;
-	//}
-	//if (!config.type) {
-	//	console.error('Unknown solution type', config.type);
-	//	return;
-	//}
 
 	config.state = 4;
 

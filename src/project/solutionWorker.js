@@ -39,7 +39,7 @@ include.js({
             global.config = config;
             
 
-			new Solution(config.type, config.uri, config, {
+			new Solution(config, {
 				resolve: function(solution) {
 					console.log('Resources Loaded');
 					switch (solution.config.action) {

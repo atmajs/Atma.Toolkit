@@ -3,7 +3,7 @@
         
     include.exports = function(file){
         
-        if (!solution.config.minify) {
+        if (!global.config.minify) {
             return;
         }
         

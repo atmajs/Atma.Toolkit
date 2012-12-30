@@ -5,13 +5,13 @@ function() {
 
 
 	include.exports = function(file) {
-		if (!solution.config.minify) {
+		if (!global.config.minify) {
 			return;
 		}
 
 
 		console.log('Uglify... [start]');
-		var config = solution.config.uglify,
+		var config = global.config.uglify,
 			start = Date.now(),
 			compressor, ast;
 

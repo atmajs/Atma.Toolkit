@@ -7,10 +7,23 @@ include.js('resource.js::Resource').done(function(resp) {
     
 
     global.Solution = Class({
-        Construct: function(type, uri, config, idfr) {
+        Construct: function(config, idfr) {
             /** singleton */
             global.solution = this;
             
+            var uri = config.uri,
+                type = config.type;
+                
+			if (!uri || new io.File(uri.toLocalFile()).exists() == false) {
+				console.error('File doesnt exists (404)', uri.toLocalFile());
+                idfr.resolve(1);
+				return;
+			}
+			if (!type) {
+				console.error('Unknown solution type', type);
+                idfr.resolve(1);
+				return;
+			}
 
             this.directory = uri.toDir();
             this.uri = uri;
@@ -73,26 +86,11 @@ include.js('resource.js::Resource').done(function(resp) {
                 this.variables = arr.join(';');
             }
 
-
-            
-            
-            
-            ////config = global.include.cfg();
-            ////for(var key in config) {
-            ////    delete config[key];
-            ////}
-            ////
-            ////config = global.include.routes();
-            ////for(var key in config) {
-            ////    delete config[key];
-            ////}
-            
             console.log('Solution Ready');
         },
 
         
         process: function() {
-            //-this.resource.process();
             this.resource.load();
             
             this.idfr && this.idfr && this.idfr.resolve(this);

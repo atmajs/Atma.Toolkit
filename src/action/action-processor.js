@@ -31,6 +31,8 @@ function(resp) {
 				return;
 			}
             
+            global.config = current;
+            
             var handler;
             
             switch(current.action){
