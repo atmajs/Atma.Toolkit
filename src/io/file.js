@@ -86,7 +86,10 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 				return _hook;
 			}
 
-		}
+		},
+        stats: function(){
+            return utils.file.statsSync(this.uri.toLocalFile());
+        }
 	});
 
 });

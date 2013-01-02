@@ -12,7 +12,8 @@ include.js({
 	'globals', //
 	'git-clone', //
 	'server', //
-	'shell'],
+	'shell',
+    'custom'],
 		program = require('commander'),
 		args = program.args,
 		config;

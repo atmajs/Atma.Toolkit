@@ -88,7 +88,10 @@
 			},
 			readSync: function(file, asBuffer) {                
                 return fs.readFileSync(file, asBuffer ? null : 'utf-8');
-			}
+			},
+            statsSync: function(file){
+                return fs.statSync(file);
+            }
 		},
 		dir: {
 			filesSync: function(dir) {

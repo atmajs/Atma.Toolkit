@@ -1,3 +1,5 @@
+
+
 include.js([ //
 'template.js', //
 'reference.js', //
@@ -5,7 +7,8 @@ include.js([ //
 'git-clone.js',//
 'server.js', //
 'shell.js', //
-'solution.js']).done(
+'solution.js',
+'custom.js']).done(
 
 function(resp) {
 
