@@ -1,6 +1,6 @@
 include.js({
-	lib: 'compo',
-	framework: 'dom/zepto'
+	ruqq: 'dom/zepto',
+	lib: 'compo'
 }).ready(function(){
 	
 	new Compo('#layout').render().insert(document.body);
