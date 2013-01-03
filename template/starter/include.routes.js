@@ -7,3 +7,14 @@ if (window.DEBUG && window.location.hash.indexOf('!watch') > -1){
 		lib: 'include/include.autoreload'
 	});
 }
+
+include.cfg({
+	loader: {
+		'coffee': {
+			lib: 'include/loader/coffee/loader'
+		},
+		'less': {
+			lib: 'include/loader/less/loader'	
+		}
+	}
+});

@@ -27,7 +27,7 @@
 				return false;
 			});
 
-			return handler && handler.handler || null;
+			return (handler && handler.handler) || null;
 		}
 	});
 

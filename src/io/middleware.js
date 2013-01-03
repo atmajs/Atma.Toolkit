@@ -1,7 +1,7 @@
 include.routes({
 	middleware: 'middleware/{0}.js'
 }).js({
-	middleware: ['hint::hint', 'uglify::uglify', 'cssmin::cssmin']
+	middleware: ['hint', 'uglify', 'cssmin', 'coffee', 'less']
 }).done(function(resp) {
 
 
@@ -24,7 +24,7 @@ include.routes({
 				handler = parts[0],
 				funcName = parts[1];
 
-			if (resp[handler] == null) {
+			if (resp[handler] == null) {				
 				return;
 			}
 

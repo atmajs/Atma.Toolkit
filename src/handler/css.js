@@ -12,7 +12,13 @@ include.js({
 	include.exports = Class({
 		Construct: function(solutionUri, outputDirectoryUri, resource) {
 			
-            resource.content = new io.File(resource.uri).copyImagesTo(outputDirectoryUri).content;
+            var file = new io.File(resource.uri);
+            
+            if (file.copyImagesTo == null){
+                console.error('Error: No copyImagesTo', resource.uri.toLocalFile());
+            }
+            
+            resource.content = file.copyImagesTo(outputDirectoryUri).content;
 		}
 	});
 

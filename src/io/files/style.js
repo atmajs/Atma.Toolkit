@@ -10,7 +10,7 @@ include.js({
 
 
 	
-	global.io.File.getFactory().registerHandler([/\.css$/], Class({
+	global.io.File.getFactory().registerHandler([/\.css$/, /\.less$/], Class({
 		Base: io.File,
 		read: function() {
             if (this.images && this.content){
