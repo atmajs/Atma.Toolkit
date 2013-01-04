@@ -6,7 +6,7 @@ include.js('socketConnection.js::SocketConnection').done(function(resp) {
 	include.exports = {
 		listen: function(httpServer) {
 			
-			console.log('WebSocket server started at 5777');
+			console.log('WebSocket server started');
             
             
             
