@@ -20,9 +20,7 @@ include.js('controllers/static.js::Statics').done(function(resp) {
 				this.socket.emit('filechange', path);
 			},
 			disconnected: function(){
-				console.log('disconnected');
-				staticHandler.off('filechange', this.fileChanged);
-				console.log('disconnected.off');
+				staticHandler.off('filechange', this.fileChanged);				
 			}
 		});
 	
