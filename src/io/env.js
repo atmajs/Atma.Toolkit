@@ -1,6 +1,7 @@
 (function(G) {
 
-	var uri = new net.URI(process.argv[1].replace(/\\/g, '/'));
+	var mainFile = process.mainModule.filename,
+		uri = new net.URI(mainFile.replace(/\\/g, '/'));
 
 	if (uri.file == null) {
 		uri.path = G.urlhelper.getDir(uri.path);

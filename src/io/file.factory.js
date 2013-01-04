@@ -26,7 +26,6 @@
 				}
 				return false;
 			});
-
 			return (handler && handler.handler) || null;
 		}
 	});

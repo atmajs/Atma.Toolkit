@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-!
-function(w) {
+(function(w) {
 
 
 
@@ -58,43 +57,7 @@ function(w) {
 
 		return 1;
 
-		//        
-		//        switch (global.config.action) {
-		//		case '':
-		//		case null:
-		//			return console.error("Invalid Arguments Count");
-		//		case 'template':
-		//			include.js('/src/action/template.js');
-		//			break;
-		//		case 'reference':
-		//			include.js('/src/action/reference.js');
-		//			break;
-		//		case 'globals':
-		//			require('openurl').open(io.env.applicationDir.combine('globals.txt').toString());
-		//			break;
-		//		case 'git-clone':
-		//			include.js('/src/action/gitclone.js');
-		//			break;
-		//        case 'server':
-		//            include.js('/src/server/server.js');            
-		//            break;
-		//        case 'shell':
-		//            include.js('/src/cli/shell.js').done(function(resp){
-		//                new  resp.shell('ipconfig /?',{
-		//                    resolve: function(){
-		//                        console.log('DONE');
-		//                    }
-		//                }).process();
-		//            });
-		//            break;
-		//		default:			
-		//			include.js('/src/project/solutionWorker.js').done(function(resp){
-		//                resp.solutionWorker.process(global.config);
-		//            }); 
-		//			break;
-		//		}
-		//		return 1;
 	});
 
 
-}(global);
+}(global));

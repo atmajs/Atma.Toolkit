@@ -34,7 +34,9 @@ function() {
             
             for(var key in projects){
                 var folder = referenceDir.toLocalDir();
-                if (fs.existsSync(folder) == false) fs.mkdirSync(folder);
+                if (fs.existsSync(folder) == false) {
+                    fs.mkdirSync(folder);
+                }
                 
                 var target = referenceDir.combine(key + '/').toLocalDir();
                 if (fs.existsSync(target)) {

@@ -54,7 +54,7 @@
                 },
                 defaultRoutes: {
                     lib: "{libjs}/{0}/lib/{1}.js",
-                    framework: "{libjs}/ruqq/lib/{0}.js",
+                    ruqq: "{libjs}/ruqq/lib/{0}.js",
                     compo: "{libjs}/compos/{0}/lib/{1}.js"
                 }
             }

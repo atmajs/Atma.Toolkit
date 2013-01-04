@@ -1,6 +1,5 @@
 (function() {
 
-
 	include.exports = {
 		process: function(config, idfr) {
 
@@ -10,7 +9,7 @@
 
 				var folder = config.folder || global.program.args[1],
 					targetUri = new net.URI(process.cwd() + '/'),
-					sourceDir = new io.Directory(io.env.applicationDir.combine('/template/').combine(folder));
+					sourceDir = new io.Directory(io.env.applicationDir.combine('template').combine(folder));
 
 				if (sourceDir.exists() == false) {
 					console.error('Source Directory Not Found - ', sourceDir.uri.toString());

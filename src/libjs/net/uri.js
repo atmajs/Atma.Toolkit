@@ -219,12 +219,12 @@
             if (this.protocol !== 'file') {
 				return this.toDir();
 			}
-            return helper.combinePathes(this.host, this.path, '/');
+            return helper.combinePathes(this.host, this.path);
         },
 		toDir: function(){
             var str = this.toString();
 			
-            return this.file ? str.substring(0, str.lastIndexOf('/') + 1) : str;
+            return this.file ? str.substring(0, str.lastIndexOf('/')) : str;
         },        
         isRelative: function() {
             return !this.host;
