@@ -2,17 +2,10 @@
 
 (function(w) {
 
-
-
-    require('libjs-class');
-	
-    require('./node/app.help.js');	
+	require('libjs-class');
+	require('./node/app.help.js');
 	require('./src/libjs/include.node.js');
-
-	var program = require('commander');
-
-
-	global.socketio = require('socket.io');
+	require('socket.io');
 
 
 	include.cfg({
@@ -34,7 +27,7 @@
 		'sys', //
 		'helpers', //		
 		],
-        io: 'package',		
+		io: 'package',
 	}).done(function() {
 
 
