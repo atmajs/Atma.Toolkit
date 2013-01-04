@@ -29,11 +29,15 @@ include.js({
 
 
 	if (actions.indexOf(entry) > -1) {
-		global.config = [{
+        var cfg = [{
 			action: entry
 		}];
         
-        global.config.state = 4;
+        parseOverrides(program, cfg[0]);
+        
+        cfg.state = 4;
+        
+        global.config = cfg;
 		return;
 	}
 
