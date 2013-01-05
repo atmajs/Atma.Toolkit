@@ -21,7 +21,7 @@ include.js({
 	global.program = program;
 
 	if (!(args && args.length > 0)) {
-		args = ['build.json'];
+		args = ['build.js'];
 	}
 
 
@@ -65,7 +65,8 @@ include.js({
             break;
         default:
             global.config = {
-                file: file.uri.toLocalFile()
+                file: file.uri.toLocalFile(),
+                action: 'build'
             }    
             break;
     }
