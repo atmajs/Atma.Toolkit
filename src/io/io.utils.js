@@ -1,5 +1,12 @@
-
 (function(g) {
+
+	var color;
+
+	include.js({
+		helper: 'stdout'
+	}).done(function(resp) {
+		color = resp.stdout.color;
+	});
 
 	var fs = require('fs'),
 		fsextra = require('fs.extra'),
@@ -52,7 +59,11 @@
 					fsextra.mkdirpSync(folder);
 				}
 
-				fs.writeFileSync(path, content);
+				try {
+					fs.writeFileSync(path, content);
+				}catch(error){
+					console.log(color('red{.save():} red{bold{' + error + '}}'));
+				}
 			},
 			copy: function(from, to, callback) {
 				console.assert(from, 'file/copy - invalid copyFrom');
@@ -68,8 +79,12 @@
 				if (fs.existsSync(folder) == false) {
 					fsextra.mkdirpSync(folder);
 				}
-
-				fs.copy(from, to, callback);
+				
+				try{
+					fs.copy(from, to, callback);
+				}catch(error){
+					console.log(color('red{.copy():} red{bold{' + error + '}}'));
+				}
 			},
 			copySync: function(from, to) {
 				if (fs.existsSync(from) == false) {
@@ -78,20 +93,27 @@
 				}
 				var folder = urlhelper.getDir(to);
 				if (fs.existsSync(folder) == false) {
-                    fsextra.mkdirpSync(folder);
-                }
+					fsextra.mkdirpSync(folder);
+				}
 
 				copyFileSync(from, to);
 			},
 			exists: function(file) {
 				return fs.existsSync(file);
 			},
-			readSync: function(file, asBuffer) {                
-                return fs.readFileSync(file, asBuffer ? null : 'utf-8');
+			readSync: function(file, asBuffer) {
+				var content = '';
+				try {
+					content = fs.readFileSync(file, asBuffer ? null : 'utf-8');
+				} catch (error) {
+					console.log(color('red{.read():} red{bold{' + error + '}}'));
+				}
+
+				return content;
 			},
-            statsSync: function(file){
-                return fs.statSync(file);
-            }
+			statsSync: function(file) {
+				return fs.statSync(file);
+			}
 		},
 		dir: {
 			filesSync: function(dir) {
