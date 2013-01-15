@@ -56,25 +56,26 @@
 			for (var i = 0, x, length = files.length; i < length; i++) {
 				x = files[i];
 
-				var stats = fs.lstatSync(combine(dir, x));
+				var stats = fs.lstatSync(combine(dir, x)),
+                    path = combine(root, x),
+					match = true;
+                    
 				if (stats.isDirectory()) {
 					if (stats.isSymbolicLink()){
 						continue;
 					}
-					if (data.depth < data.maxdepth) {
+					if (data.depth >= data.maxdepth) {
+                        continue;
+                    }
 
-						var dirroot = combine(root, x);
+					var dirroot = combine(root, x);
 
-						//@TODO if patterns exists chech if this dirroot can be matched by any pattern
+                    //@TODO if patterns exists chech if this dirroot can be matched by any pattern
 
-						results = results.concat(walk(combine(dir, x), dirroot, data));
-					}
+                    results = results.concat(walk(combine(dir, x), dirroot, data));
+                
 					continue;
 				}
-
-
-				var path = combine(root, x),
-					match = true;
 
 				if (patterns) {
 					match = false;
