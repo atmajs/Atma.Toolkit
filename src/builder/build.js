@@ -12,7 +12,8 @@ include.js({
 					return x.url.indexOf('include.js') > -1;
 				});
 
-				for (var i = 0, x, length = stack.length; x = stack[i], i < length; i++) {
+				for (var i = 0, x, length = stack.length; i < length; i++) {
+                    x = stack[i];
 
 					if (i > includeIndex) {
 						var s = String.format("include.setCurrent({ id: '#{id}', namespace: '#{namespace}', url: '#{url}'});", {
@@ -21,6 +22,7 @@ include.js({
 							url: x.appuri
 						});
 						output.js.push(s);
+                        
 					}
 
 					output.js.push(x.content);
@@ -36,9 +38,6 @@ include.js({
 					function appendInfo(method, object) {
 						arr.push(String.format('include.%1(%2);', method, JSON.stringify(object)));
 					}
-
-					//appendInfo('cfg', G.include.cfg());
-					//appendInfo('routes', G.include.routes());
                     
 					appendInfo('register', solution.bin);
 

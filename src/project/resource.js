@@ -19,7 +19,7 @@
 
             console.log('R:', this.appuri);
 
-            this.url = _url;
+            this.url = this.appuri;//_url;
 
             this.location = global.urlhelper.getDir(this.appuri);
             this.directory = global.urlhelper.getDir(this.uri.toString());

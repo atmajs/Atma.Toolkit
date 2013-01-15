@@ -4,6 +4,7 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 	global.io == null && (global.io = {});
 
 	var utils = resp.IOUtils,
+		fs = require('fs'),
 		_cache = {},
 		_hook, _factory;
 
@@ -60,6 +61,15 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 		},
 		exists: function() {
 			return utils.file.exists(this.uri.toLocalFile());
+		},
+		rename: function(fileName){
+			var oldpath = this.uri.toLocalFile(),
+				uri = this.uri.combine(''),
+				newpath;
+
+			uri.file = fileName;
+
+			fs.renameSync(oldpath, uri.toLocalFile());
 		},
 		Static: {
 			clearCache: function(path) {
