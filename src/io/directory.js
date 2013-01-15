@@ -2,10 +2,10 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 
 	global.io == null && (global.io = {});
 
-    var utils = resp.IOUtils,
-        URI = global.net.URI,
-        fs = require('fs');
-        
+	var utils = resp.IOUtils,
+		URI = global.net.URI,
+		fs = require('fs');
+
 
 	io.Directory = Class({
 		Construct: function(directory) {
@@ -19,16 +19,20 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 			utils.dir.ensure(this.uri.toLocalDir());
 			return this;
 		},
-		readFiles: function() {
+		readFiles: function(pattern) {
 
-			this.files = ruqq.arr.map(utils.dir.filesSync(this.uri.toLocalDir()), function(x) {
+			var patterns = parsePatterns(pattern);
+			this.files = ruqq.arr.map(utils.dir.filesSync(this.uri.toLocalDir(), patterns), function(x) {
 				return new io.File(this.uri.combine(x));
 			}.bind(this));
 
 			return this;
 		},
 		copyTo: function(targetUri, options, index, idfr) {
-			if (this.files instanceof Array === false) return this;
+			if (this.files instanceof Array === false) {
+				console.warn('No files to copy');
+				return this;
+			}
 
 			for (var i = index || 0, x, length = this.files.length; x = this.files[i], i < length; i++) {
 				var relative = x.uri.toRelativeString(this.uri),
@@ -62,5 +66,75 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 			fs.renameSync(oldpath, newpath);
 		}
 	});
+
+    function countDepth(pattern){
+        if (pattern[0] === '/'){
+            pattern = pattern.substring(1);
+        }
+        
+        if (~pattern.indexOf('**')){
+            return Infinity;
+        }
+        return pattern.split('/').length;
+    }
+
+	function parsePatterns(pattern, out) {
+		if (out == null) {
+			out = [];
+		}
+		if (pattern instanceof Array) {
+			for (var i = 0, x, length = pattern.length; i < length; i++) {
+				parsePatterns(pattern[i], out);
+			}
+			return out;
+		}
+		if (pattern instanceof RegExp) {
+			out.push(pattern);
+			return out;
+		}
+		if (typeof pattern === 'string') {
+            var depth, regexp;
+            if (pattern[0] === '/'){
+                depth = countDepth(pattern = pattern.substring(1));
+            }
+            
+            regexp = globToRegex(pattern);
+            
+            if (depth){
+                regexp.depth = depth;
+            }
+            
+            out.push(regexp);
+			return out;
+		}
+        
+        console.error('Unsupported pattern', pattern);
+		return out;
+	}
+
+	function globToRegex(glob) {
+		var specialChars = "\\^$*+?.()|{}[]",
+            regexChars = ["^"],
+            c;
+		for (var i = 0; i < glob.length; ++i) {
+			c = glob.charAt(i);
+			switch (c) {
+			case '?':
+				regexChars.push(".");
+				break;
+			case '*':
+				regexChars.push(".*");
+				break;
+			default:
+				if (specialChars.indexOf(c) >= 0) {
+					regexChars.push("\\");
+				}
+				regexChars.push(c);
+                break;
+			}
+		}
+		regexChars.push("$");
+		return new RegExp(regexChars.join(""));
+	}
 
 });

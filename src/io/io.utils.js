@@ -26,12 +26,25 @@
 			fs.closeSync(fdr);
 			return fs.closeSync(fdw);
 		},
-		walk = function(dir, root) {
+		walk = function(dir, root, data) {
 			var results = [],
 				files = fs.readdirSync(dir);
 
-			if (root == null) root = '';
-
+			if (root == null) {
+                root = '';
+            }
+            if (data == null){
+                data = {
+                    depth: 0,
+                    maxdepth: Infinity
+                }
+            }
+            
+            var currentDepth = data.depth,
+                patterns = data.patterns;
+            
+            data.depth++;
+            
 			function combine(_1, _2) {
 				if (!_1) return _2;
 				if (!_2) return _1;
@@ -40,13 +53,42 @@
 				return _1 + '/' + _2;
 			}
 
-			for (var i = 0, x, length = files.length; x = files[i], i < length; i++) {
+			for (var i = 0, x, length = files.length; i < length; i++) {
+                x = files[i];
+                
 				if (fs.statSync(combine(dir, x)).isDirectory()) {
-					results = results.concat(walk(combine(dir, x), combine(root, x)));
+                    if (data.depth < data.maxdepth){
+                        
+                        var dirroot = combine(root, x);
+                        
+                        //@TODO if patterns exists chech if this dirroot can be matched by any pattern
+                        
+                        results = results.concat(walk(combine(dir, x), dirroot, data));
+                    }
 					continue;
 				}
-				results.push(combine(root, x));
+                
+                
+                var path = combine(root, x),
+                    match = true;
+                
+                if (patterns){
+                    match = false;
+                    for(var i = 0, x, length = patterns.length; i<length; i++){
+						if (patterns[i].test(path)){
+                            match = true;
+                            break;
+                        }
+					}
+                }
+                
+                if (match){
+                    results.push(path);
+                }
 			}
+            
+            data.depth = currentDepth;
+            
 			return results;
 		};
 
@@ -61,7 +103,7 @@
 
 				try {
 					fs.writeFileSync(path, content);
-				}catch(error){
+				} catch (error) {
 					console.log(color('red{.save():} red{bold{' + error + '}}'));
 				}
 			},
@@ -79,10 +121,10 @@
 				if (fs.existsSync(folder) == false) {
 					fsextra.mkdirpSync(folder);
 				}
-				
-				try{
+
+				try {
 					fs.copy(from, to, callback);
-				}catch(error){
+				} catch (error) {
 					console.log(color('red{.copy():} red{bold{' + error + '}}'));
 				}
 			},
@@ -116,8 +158,12 @@
 			}
 		},
 		dir: {
-			filesSync: function(dir) {
-				return walk(dir);
+			filesSync: function(dir, patterns) {
+				return walk(dir, '', {
+					depth: 0,
+					maxdepth: ruqq.arr.max(patterns, 'depth') || Infinity,
+					patterns: patterns
+				});
 			},
 			ensure: function(dir) {
 				if (fs.existsSync(dir) == false) {
