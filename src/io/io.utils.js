@@ -56,7 +56,11 @@
 			for (var i = 0, x, length = files.length; i < length; i++) {
 				x = files[i];
 
-				if (fs.statSync(combine(dir, x)).isDirectory()) {
+				var stats = fs.lstatSync(combine(dir, x));
+				if (stats.isDirectory()) {
+					if (stats.isSymbolicLink()){
+						continue;
+					}
 					if (data.depth < data.maxdepth) {
 
 						var dirroot = combine(root, x);
