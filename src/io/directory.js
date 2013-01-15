@@ -79,6 +79,9 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
     }
 
 	function parsePatterns(pattern, out) {
+        if (pattern == null){
+            return null;
+        }
 		if (out == null) {
 			out = [];
 		}

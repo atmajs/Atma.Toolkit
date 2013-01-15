@@ -31,20 +31,20 @@
 				files = fs.readdirSync(dir);
 
 			if (root == null) {
-                root = '';
-            }
-            if (data == null){
-                data = {
-                    depth: 0,
-                    maxdepth: Infinity
-                }
-            }
-            
-            var currentDepth = data.depth,
-                patterns = data.patterns;
-            
-            data.depth++;
-            
+				root = '';
+			}
+			if (data == null) {
+				data = {
+					depth: 0,
+					maxdepth: Infinity
+				}
+			}
+
+			var currentDepth = data.depth,
+				patterns = data.patterns;
+
+			data.depth++;
+
 			function combine(_1, _2) {
 				if (!_1) return _2;
 				if (!_2) return _1;
@@ -54,41 +54,41 @@
 			}
 
 			for (var i = 0, x, length = files.length; i < length; i++) {
-                x = files[i];
-                
+				x = files[i];
+
 				if (fs.statSync(combine(dir, x)).isDirectory()) {
-                    if (data.depth < data.maxdepth){
-                        
-                        var dirroot = combine(root, x);
-                        
-                        //@TODO if patterns exists chech if this dirroot can be matched by any pattern
-                        
-                        results = results.concat(walk(combine(dir, x), dirroot, data));
-                    }
+					if (data.depth < data.maxdepth) {
+
+						var dirroot = combine(root, x);
+
+						//@TODO if patterns exists chech if this dirroot can be matched by any pattern
+
+						results = results.concat(walk(combine(dir, x), dirroot, data));
+					}
 					continue;
 				}
-                
-                
-                var path = combine(root, x),
-                    match = true;
-                
-                if (patterns){
-                    match = false;
-                    for(var i = 0, x, length = patterns.length; i<length; i++){
-						if (patterns[i].test(path)){
-                            match = true;
-                            break;
-                        }
+
+
+				var path = combine(root, x),
+					match = true;
+
+				if (patterns) {
+					match = false;
+					for (var _i = 0, _length = patterns.length; _i < _length; _i++) {
+						if (patterns[_i].test(path)) {
+							match = true;
+							break;
+						}
 					}
-                }
-                
-                if (match){
-                    results.push(path);
-                }
+				}
+
+				if (match) {
+					results.push(path);
+				}
 			}
-            
-            data.depth = currentDepth;
-            
+
+			data.depth = currentDepth;
+
 			return results;
 		};
 
