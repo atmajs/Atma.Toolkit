@@ -20,6 +20,10 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 			}
 
 			this.uri = new net.URI(path);
+            
+            if (this.uri.isRelative()){
+                this.uri = io.env.currentDir.combine(this.uri);
+            }
 
 
 			if (this.__proto__ == io.File.prototype) {
