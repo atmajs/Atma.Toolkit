@@ -3,10 +3,10 @@ include.js('controllers/static.js::Statics').done(function(resp) {
 	var staticHandler = resp.Statics,
 	
 		SocketConnection = Class({
-			Construct: function(socket) {
+			Construct: function(socket) {                
+                Class.bind(this, 'fileChanged', 'disconnected');
 				
-				this.fileChanged = this.fileChanged.bind(this);
-				this.disconnected = this.disconnected.bind(this);
+				
 				this.socket = socket;
 
 				socket.on('disconnect', this.disconnected);
@@ -15,8 +15,10 @@ include.js('controllers/static.js::Statics').done(function(resp) {
 				
 				
 			},
-			fileChanged: function(path) {
-				console.log('changed path', path);
+			fileChanged: function(path, root) {
+                path = path.replace(root, '');
+				
+                console.log('changed path', path);
 				this.socket.emit('filechange', path);
 			},
 			disconnected: function(){

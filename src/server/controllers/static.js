@@ -51,11 +51,8 @@ include.js({
 		},
 
 		fileChanged: function(path) {
-			console.log('Changed', path);
 			io.File.clearCache(path);
-
-
-			this.trigger('filechange', path);
+			this.trigger('filechange', path, folder);
 		}
 	});
 
