@@ -21,7 +21,7 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 
 			this.uri = new net.URI(path);
             
-            if (this.uri.isRelative()){
+            if (path && this.uri.isRelative() && io.env){
                 this.uri = io.env.currentDir.combine(this.uri);
             }
 
