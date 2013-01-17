@@ -11,7 +11,11 @@ function() {
 
 
 		console.log('Uglify... [start]');
-		var config = global.config.uglify,
+		var config = global.config.uglify || {
+			global_defs: {
+				DEBUG: false
+			}
+		},
 			start = Date.now(),
 			compressor, ast;
 
