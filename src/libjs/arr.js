@@ -1,12 +1,37 @@
-;
-(function(r) {
+(function(global) {
 
     'use strict';
+	
+	var r = global.ruqq || (global.ruqq = {});
 
+    function getProperty(o, chain) {
+        if (typeof o !== 'object' || chain == null) {
+			return o;
+		}
+		
+		var value = o,
+			props = chain.split('.'),
+			length = props.length,
+			i = 0,
+			key;
+		
+		for (; i < length; i++) {
+			key = props[i];
+			value = value[key];
+			if (value == null) {
+				return value;
+			}
+		}
+		return value;
+    }
 
 
     function extend(target, source) {
-        for (var key in source) if (source[key]) target[key] = source[key];
+        for (var key in source) {
+			if (source[key]) {
+				target[key] = source[key];
+			}
+		}
         return target;
     }
 
@@ -18,18 +43,18 @@
 
     function check(item, arg1, arg2, arg3) { /** get value */
 
-        if (typeof arg1 === 'function') return arg1(item) ? item : null;
+        if (typeof arg1 === 'function') {
+			return arg1(item) ? item : null;
+		}
+        if (typeof arg2 === 'undefined') {
+			return item == arg1 ? item : null;
+		}
 
-        var value, compareToValue, comparer;
-        //if (arguments.length == 3) {
-        //    value = item;
-        //    comparer = arg1;
-        //    compareToValue = arg2;
-        //} else if (arguments.length == 4) {
-        value = arg1 != null ? Object.getProperty(item, arg1) : item;
-        comparer = arg2;
-        compareToValue = arg3;
-        //}
+        
+        var value = arg1 != null ? getProperty(item, arg1) : item,
+			comparer = arg2,
+			compareToValue = arg3;
+
         switch (comparer) {
         case '>':
             return value > compareToValue ? item : null;
@@ -44,9 +69,9 @@
         case '==':
             return value == compareToValue ? item : null;
         }
-        console.error('InvalidArgumentException: linq.js:check', arguments);
+        console.error('InvalidArgumentException: arr.js:check', arguments);
         return null;
-    };
+    }
 
     var arr = {
         /**
@@ -54,29 +79,42 @@
          */
         where: function(items, arg1, arg2, arg3) {
             var array = [];
-            if (items == null) return array;
-            var argsLength = arguments.length;
+            if (items == null) {
+				return array;
+			}
+            
+			var i = 0,
+				length = items.length,
+				item;
 
-            for (var item, i = 0, length = items.length; item = items[i], i < length; i++) {
-                if (check(item, arg1, arg2, arg3) != null) array.push(item);
+            for (; i < length; i++) {
+				item = items[i];
+                if (check(item, arg1, arg2, arg3) != null) {
+					array.push(item);
+				}
             }
 
             return array;
         },
-        each: Array.prototype.forEach ?
+        each: typeof Array.prototype.forEach !== 'undefined' ?
         function(items, fn) {
-            if (items == null) return items;
-            
+            if (items == null) {
+				return items;
+			}
             items.forEach(fn);
             return items;
         } : function(items, func) {
-            if (items == null) return items;
-            for (var item, i = 0, length = items.length; item = items[i], i < length; i++) func(item);
+            if (items == null) {
+				return items;
+			}
+            for (var i = 0, length = items.length; i < length; i++) {
+				func(items[i]);
+			}
             return items;
         },
         remove: function(items, arg1, arg2, arg3) {
-            for (var item, i = 0; item = items[i], item != null; i++) {
-                if (check(item, arg1, arg2, arg3) != null) {
+            for (var i = 0, length = items.length; i < length; i++) {
+				if (check(items[i], arg1, arg2, arg3) != null) {
                     items.splice(i, 1);
                     i--;
                 }
@@ -89,7 +127,7 @@
                 method = args.shift(),
                 results = [];
             for (var i = 0; i < items.length; i++) {
-                if (typeof items[i][method] == 'function') {
+                if (typeof items[i][method] === 'function') {
                     results.push(items[i][method].apply(items[i], args));
                 } else {
                     results.push(null);
@@ -97,30 +135,66 @@
             }
             return results;
         },
+        last: function(items, arg1, arg2, arg3) {
+			if (items == null){
+				return null;
+			}
+            if (arg1 == null) {
+				return items[items.length - 1];
+			}
+            for (var i = items.length; i > -1; --i) {
+				if (check(items[i], arg1, arg2, arg3) != null) {
+					return items[i];
+				}
+			}
+            return null;
+
+        },
         /**
          * @see where()
          * Last Argument is default value
          */
         first: function(items, arg1, arg2, arg3) {
-            for (var item, i = 0; item = items[i], i < items.length; i++) if (check(items[i], arg1, arg2, arg3) != null) return items[i];
+            if (arg1 == null) {
+				return items[0];
+			}
+            for (var i = 0, length = items.length; i < length; i++) {
+				if (check(items[i], arg1, arg2, arg3) != null) {
+					return items[i];
+				}
+			}
             return null;
         },
         any: function(items, arg1, arg2, arg3) {
-            for (var item, i = 0; item = items[i], i < items.length; i++) if (check(items[i], arg1, arg2, arg3) != null) return true;
+            for (var i = 0, length = items.length; i < length; i++) {
+				if (check(items[i], arg1, arg2, arg3) != null) {
+					return true;
+				}
+			}
             return false;
         },
         isIn: function(items, checkValue) {
-            for (var item, i = 0; item = items[i], i < items.length; i++) if (checkValue == item) return true;
+            for (var i = 0; i < items.length; i++) {
+				if (checkValue == items[i]) {
+					return true;
+				}
+			}
             return false;
         },
-        map: Array.prototype.map ?
+        map: typeof Array.prototype.map !== 'undefined' ?
         function(items, func) {
-            if (items == null) return [];
-            return items.map(func)
+            if (items == null) {
+				return [];
+			}
+            return items.map(func);
         } : function(items, func) {
             var agg = [];
-            if (items == null) return agg;
-            for (var x, i = 0; x = items[i], i < items.length; i++) agg.push(func(x, i));
+            if (items == null) {
+				return agg;
+			}
+            for (var i = 0, length = items.length; i < length; i++) {
+				agg.push(func(items[i], i));
+			}
             return agg;
         },
         /**
@@ -130,35 +204,55 @@
          *          {Array}[{String}] - property names
          */
         select: function(items, arg) {
-            if (items == null) return [];
+            if (items == null) {
+				return [];
+			}
             var arr = [];
-            for (var item, i = 0; item = items[i], i < items.length; i++) {
+            for (var item, i = 0, length = items.length; i < length; i++) {
+				item = items[i];
+				
                 if (typeof arg === 'string') {
                     arr.push(item[arg]);
                 } else if (typeof arg === 'function') {
                     arr.push(arg(item));
-                } else if (arg instanceof Array){
+                } else if (arg instanceof Array) {
                     var obj = {};
-                    for (var j=0; j < arg.length; j++) {
-                        obj[arg[j]] = items[i][arg[j]]; 
+                    for (var j = 0; j < arg.length; j++) {
+                        obj[arg[j]] = items[i][arg[j]];
                     }
                     arr.push(obj);
                 }
             }
             return arr;
         },
-        indexOf: function(items, fn){
-            for (var i=0; i < items.length; i++) {
-                if (fn(items[i]) == true) return i;
+        indexOf: function(items, arg1, arg2, arg3) {
+            for (var i = 0, length = items.length; i < length; i++) {
+                if (check(items[i], arg1, arg2, arg3) != null) {
+					return i;
+				}
             }
             return -1;
         },
+        count: function(items, arg1, arg2, arg3) {
+            var count = 0,
+				i = 0,
+				length = items.length;
+            for (; i < length; i++) {
+				if (check(items[i], arg1, arg2, arg3) != null) {
+					count++;
+				}
+			}
+            return count;
+        },
         distinct: function(items, compareF) {
             var array = [];
-            if (items == null) return array;
+            if (items == null) {
+				return array;
+			}
 
-            var length = items.length;
-            for (var i = 0; i < length; i++) {
+            var i  = 0,
+				length = items.length;
+            for (; i < length; i++) {
                 var unique = true;
                 for (var j = 0; j < array.length; j++) {
                     if ((compareF && compareF(items[i], array[j])) || (compareF == null && items[i] == array[j])) {
@@ -166,15 +260,45 @@
                         break;
                     }
                 }
-                if (unique) array.push(items[i]);
+                if (unique) {
+					array.push(items[i]);
+				}
             }
             return array;
         }
     };
+	
+	arr.each(['min','max'], function(x){
+		arr[x] = function(array, property){
+			if (array == null){
+				return null;
+			}
+			var number = null;
+			for(var i = 0, length = array.length; i<length; i++){
+				var prop = getProperty(array[i], property);
+				
+				if (number == null){
+					number = prop;
+					continue;
+				}
+				
+				if (x === 'max' && prop > number){
+					number = prop;
+					continue;
+				}
+				if (x === 'min' && prop < number){
+					number = prop;
+					continue;
+				}
+				
+			}
+			return number;
+		}
+	});
 
     r.arr = function(items) {
         return new Expression(items);
-    }
+    };
 
     extend(r.arr, arr);
 
@@ -184,19 +308,25 @@
 
     function extendClass(method) {
         Expression.prototype[method] = function() {
-            var args = Array.prototype.slice.call(arguments);
-            args.unshift(this.items);
+            // @see http://jsperf.com/arguments-transform-vs-direct
 
-            var result = arr[method].apply(this, args);
+            var l = arguments.length,
+                result = arr[method](this.items, //
+                l > 0 ? arguments[0] : null, //
+                l > 1 ? arguments[1] : null, //
+                l > 2 ? arguments[2] : null, //
+                l > 3 ? arguments[3] : null);
+
             if (result instanceof Array) {
-                this.items = result;
-                return this;
-            }
+				this.items = result;
+			}
+
             return this;
         };
     }
-    for (var method in arr) {
+    
+	for (var method in arr) {
         extendClass(method);
     }
 
-})(include.promise('ruqq'));
+}(typeof window !== 'undefined' ? window : global));
