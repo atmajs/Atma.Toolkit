@@ -145,7 +145,14 @@ include.js({
 			}
             
             if (actionFound){
+                var c = x[0];
+                if (c == '"' || c == "'"){
+                    x = x.substring(1, x.length - 1);
+                }
+                
                 (config.args || (config.args = [])).push(x);
+                
+                continue;
             }
             
             if (x == action){
