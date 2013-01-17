@@ -3,6 +3,10 @@ include.exports = {
         
         var script = config.script;
         
+        if (config.args && !script){
+            script = config.args[0];
+        }
+        
         if (!(script && new io.File(script).exists())){
             console.error('Custom script not exists', script);
             idfr && idfr.resolve();
