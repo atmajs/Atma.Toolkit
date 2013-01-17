@@ -115,25 +115,42 @@ include.js({
 	}
 
 	function parseOverrides(program, config) {
-		var array = program.rawArgs;
-		for (var i = 0, x, length = array.length; i < length; i++) {
+		var array = program.rawArgs,
+            i = 0,
+            length = array.length,
+            action = config.action,
+            actionFound = false,
+            key, value, x;
+            
+            
+		for (; i < length; i++) {
 			x = array[i];
 
-			if (x[0] != '-') {
+			if (x[0] === '-') {
+                key = x.substring(1);
+                value = i < length - 1 ? array[i+1] : null;
+                if (value){
+                    var c = value[0];
+                    
+                    if (c == '"' || c == "'"){
+                        value = value.substring(1, value.length - 1);
+                    }
+                    
+                    config[key] = value;
+                    continue;
+                }
+                
+                config[key] = true;                
 				continue;
 			}
-
-			var key = x.substring(1),
-				value = array[++i];
-
-			if (!value) {
-				continue;
-			}
-
-			if (value[0] == '"') {
-				value = value.substring(1, value.length - 1);
-			}
-			config[key] = value;
+            
+            if (actionFound){
+                (config.args || (config.args = [])).push(x);
+            }
+            
+            if (x == action){
+                actionFound = true;
+            }
 		}
 	}
 
