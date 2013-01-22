@@ -24,16 +24,16 @@
             }
             return str;
         },
-        parseProtocol: function(o){            
+        parseProtocol: function(o){
             var value = /^([a-zA-Z]+):\/(\/)?/.exec(o.value); // @ 'c:/file.txt'| 'protocol://host.com'
-            
+
             if (value == null) {
 				return;
 			}
             if (value[2] == null){
                 o.protocol = 'file';
                 return;
-            }            
+            }
             o.protocol = value[1];
             o.value = o.value.substring(value[0].length);
         },
@@ -48,7 +48,7 @@
                 o.host = o.value;
             }
             o.value = o.value.replace(o.host,'');
-            
+
             if (o.protocol === 'file' && o.host[0] == '/'){
                 o.host = o.host.substring(1);
             }
@@ -61,12 +61,12 @@
             }
         },
         parseFile: function(o){
-            var value = /\/?([^\/]+\.[^\/]+)$/i.exec(o.value); 
+            var value = /\/?([^\/]+\.[^\/]+)$/i.exec(o.value);
             var file = value ? value[1] : null;
             if (file) {
                 o.file = file;
                 o.value = o.value.replace(file, '');
-                
+
                 if (o.value[o.value.length - 1] == '/') {
                     o.value = o.value.substring(0, o.value.length - 1);
                 }
@@ -75,9 +75,9 @@
             }
         }
     }
-    
 
-    
+
+
     var URI = function(uri) {
         if (uri == null) {
 			return this;
@@ -86,17 +86,17 @@
 			return uri.combine('');
 		}
 
-        uri = uri.replace(/\\/g,'/');        
+        uri = uri.replace(/\\/g,'/');
 
         this.value = uri;
         helper.parseProtocol(this);
         helper.parseHost(this);
-        
+
         helper.parseSearch(this);
         helper.parseFile(this);
-        
+
         this.path = this.value;
-        return this;      
+        return this;
     }
     URI.combine = helper.combinePathes;
 
@@ -122,20 +122,20 @@
                     uri[key] = this[key];
                 }
             }
-            
+
             if (!path) {
 				return uri;
 			}
-            
+
             if (this.protocol == 'file' && path[0] == '/') path = path.substring(1);
-            
+
             uri.value = path;
             helper.parseSearch(uri);
             helper.parseFile(uri);
-            
+
             if (uri.value) {
                 path = uri.value.replace(/^\.\//i, '');
-                
+
                 if (path[0] == '/') {
                     uri.path = path;
                     return uri;
@@ -144,15 +144,17 @@
                     uri.cdUp();
                     path = path.substring(3);
                 }
-                
+
                 uri.path = helper.combinePathes(uri.path, path);
             }
             return uri;
         },
         toString: function() {
             var str = this.host ? this.protocol + '://' : '';
-            if (this.protocol === 'file') str += '/';
-            
+            if (this.protocol === 'file') {
+				str += '/';
+			}
+
             return str + helper.combinePathes(this.host, this.path, this.file) + (this.search || '');
         },
         toPathAndQuery: function(){
@@ -210,22 +212,19 @@
         },
 
         toLocalFile: function() {
-            if (this.protocol !== 'file') {
-				return this.toString();
-			}
             return helper.combinePathes(this.host, this.path, this.file);
         },
         toLocalDir: function() {
             if (this.protocol !== 'file') {
 				return this.toDir();
 			}
-            return helper.combinePathes(this.host, this.path);
+            return helper.combinePathes(this.host, this.path, '/');
         },
 		toDir: function(){
             var str = this.toString();
-			
-            return this.file ? str.substring(0, str.lastIndexOf('/')) : str;
-        },        
+
+            return this.file ? str.substring(0, str.lastIndexOf('/') + 1) : str;
+        },
         isRelative: function() {
             return !this.host;
         },
@@ -235,13 +234,13 @@
     }
 
     URI.combinePathes = helper.combinePathes;
-    
-	
+
+
 	if (global.net == null) {
 		global.net = {};
 	}
-    
+
 	global.net.URI = URI;
-    
-    
+
+
 })(typeof window === 'undefined' ? global : window);
