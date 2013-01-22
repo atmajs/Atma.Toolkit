@@ -3,7 +3,7 @@
 (function(w) {
 
 	require('libjs-class');
-	require('./node/app.help.js');
+	require('./src/app.help.js');
 	require('./src/libjs/include.node.js');
 	require('socket.io');
 
