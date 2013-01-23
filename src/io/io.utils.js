@@ -135,8 +135,8 @@
 			},
 			copySync: function(from, to) {
 				if (fs.existsSync(from) == false) {
-					console.error('file/copy - 404 Error', from);
-
+					console.error(color('file/copy - red{404 Error}'), from);
+					return;
 				}
 				var folder = urlhelper.getDir(to);
 				if (fs.existsSync(folder) == false) {
