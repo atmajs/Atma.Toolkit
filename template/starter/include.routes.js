@@ -8,13 +8,17 @@ if (window.DEBUG ){ //&& window.location.hash.indexOf('!watch') > -1
 	});
 }
 
-include.cfg({
-	loader: {
-		'coffee': {
-			lib: 'include/loader/coffee/loader'
-		},
-		'less': {
-			lib: 'include/loader/less/loader'	
+if (window.location.href.indexOf('file') != -1){
+
+	include.cfg({
+		loader: {
+			'coffee': {
+				lib: 'include/loader/coffee/loader'
+			},
+			'less': {
+				lib: 'include/loader/less/loader'	
+			}
 		}
-	}
-});
+	});
+	
+}

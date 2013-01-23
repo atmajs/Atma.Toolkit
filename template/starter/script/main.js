@@ -3,6 +3,6 @@ include.js({
 	lib: 'compo'
 }).ready(function(){
 	
-	new Compo('#layout').render().insert(document.body);
+	new Compo(document.getElementById('layout').innerHTML).render().insert(document.body);
 	
 });
