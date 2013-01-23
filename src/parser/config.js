@@ -13,6 +13,8 @@ include.js({
 	'git-clone', //
 	'server', //
 	'shell',
+    'project-import',
+    'project-reference',
     'custom'],
 		program = require('commander'),
 		args = program.args,
@@ -32,23 +34,25 @@ include.js({
         var cfg = [{
 			action: entry
 		}];
-        
+
         parseOverrides(program, cfg[0]);
-        
+        parseFile(cfg[0]);
+		parseType(cfg[0]);
+
         cfg.state = 4;
-        
+
         global.config = cfg;
 		return;
 	}
 
 	var file = new io.File(entry);
 
-    
+
     if (file.exists() == false) {
         console.error('File doesnt exists (404)', file.uri.toLocalFile());
         return;
     }
-    
+
     switch(file.uri.extension){
         case 'config':
             global.config = JSON.parse(file.read());
@@ -67,13 +71,13 @@ include.js({
             global.config = {
                 file: file.uri.toLocalFile(),
                 action: 'build'
-            }    
+            }
             break;
     }
-    
+
     config = global.config;
-    
-    
+
+
 	if (config instanceof Array === false) {
 		config = [config];
 	}
@@ -121,8 +125,8 @@ include.js({
             action = config.action,
             actionFound = false,
             key, value, x;
-            
-            
+
+
 		for (; i < length; i++) {
 			x = array[i];
 
@@ -131,30 +135,30 @@ include.js({
                 value = i < length - 1 ? array[i+1] : null;
                 if (value){
                     var c = value[0];
-                    
+
                     if (c == '"' || c == "'"){
                         value = value.substring(1, value.length - 1);
                     }
-                    
+
                     config[key] = value;
                     continue;
                 }
-                
-                config[key] = true;                
+
+                config[key] = true;
 				continue;
 			}
-            
+
             if (actionFound){
                 var c = x[0];
                 if (c == '"' || c == "'"){
                     x = x.substring(1, x.length - 1);
                 }
-                
+
                 (config.args || (config.args = [])).push(x);
-                
+
                 continue;
             }
-            
+
             if (x == action){
                 actionFound = true;
             }
