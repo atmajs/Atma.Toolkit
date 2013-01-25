@@ -59,7 +59,7 @@
 				var stats = fs.lstatSync(combine(dir, x)),
                     path = combine(root, x),
 					match = true;
-                    
+
 				if (stats.isDirectory()) {
 					if (stats.isSymbolicLink()){
 						continue;
@@ -73,7 +73,7 @@
                     //@TODO if patterns exists chech if this dirroot can be matched by any pattern
 
                     results = results.concat(walk(combine(dir, x), dirroot, data));
-                
+
 					continue;
 				}
 
@@ -98,7 +98,12 @@
 		};
 
 
-	include.exports = {
+	if (global.io == null){
+		global.io = {};
+	}
+
+
+	include.exports = io.utils = {
 		file: {
 			save: function(path, content) {
 				var folder = g.urlhelper.getDir(path);
@@ -174,8 +179,15 @@
 				if (fs.existsSync(dir) == false) {
 					fsextra.mkdirpSync(dir);
 				}
-			}
+			},
+            symlinkSync: function(source, target){
+                try {
+                    fs.symlinkSync(source, target, 'dir');
+                }catch(error){
+                    console.log(color('red{symlink: bold{'+error.toString()+'}}'));
+                }
+            }
 		}
-	}
+	};
 
 }(global));
