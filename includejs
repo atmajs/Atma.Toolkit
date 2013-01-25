@@ -25,7 +25,8 @@
 		parser: ['config'],
 		script: [ //
 		'sys', //
-		'helpers', //		
+		'helpers', //
+        'helper/stdout', //
 		],
 		io: 'package',
 	}).done(function() {
