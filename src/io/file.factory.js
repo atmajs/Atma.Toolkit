@@ -1,7 +1,7 @@
 (function() {
-    
+
     var  _handlers = [];
-    
+
 	io.File.registerFactory({
 		registerHandler: function(regexp, handler) {
 			_handlers.push({
@@ -19,7 +19,9 @@
 					x = null;
 
 				for (var i = 0; isarray ? i < length : i < 1; i++) {
-                    x = isarray ? item.regexp[i] : item.regexp
+                    x = isarray ? item.regexp[i] : item.regexp;
+                    x.lastIndex = 0;
+                    
 					if (x.test(str)) {
                         return true;
                     }
