@@ -1,0 +1,4 @@
+
+div {
+	'Compo Template'
+}
