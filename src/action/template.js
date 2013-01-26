@@ -29,10 +29,6 @@
 					return;
 				}
 
-
-
-
-
                 var handler = new io.File(config.sourceDir.uri.combine('/.handler/handler.js'));
 
                 if (handler.exists()){
@@ -48,7 +44,7 @@
 	}
 
     function execute(Handler, config, done){
-        (new Handler).process(config, done);
+        (Handler instanceof Function ? new Handler : Handler).process(config, done);
     }
 
 
