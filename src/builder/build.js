@@ -1,5 +1,5 @@
 include.js({
-    handler: 'css::CssHandler',    
+    handler: 'css::CssHandler',
 }).js('html.js::HtmlBuilder').done(function(resp) {
 
     var G = global,
@@ -22,13 +22,13 @@ include.js({
 							url: x.appuri
 						});
 						output.js.push(s);
-                        
+
 					}
 
 					output.js.push(x.content);
 
 					if (i > includeIndex) {
-						output.js.push("include.readystatechanged(3)");
+						output.js.push(String.format("include.getResource('%1', 'js').readystatechanged(3);", x.appuri));
 					}
 				}
 
@@ -38,7 +38,7 @@ include.js({
 					function appendInfo(method, object) {
 						arr.push(String.format('include.%1(%2);', method, JSON.stringify(object)));
 					}
-                    
+
 					appendInfo('register', solution.bin);
 
 					return arr.join(Sys.newLine);
@@ -77,7 +77,7 @@ include.js({
 					}));
 				}
 				output[type] = stream.join(Sys.newLine);
-				
+
 			}
 		};
 
