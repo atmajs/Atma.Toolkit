@@ -1,20 +1,20 @@
 (function(global) {
 
     'use strict';
-	
+
 	var r = global.ruqq || (global.ruqq = {});
 
     function getProperty(o, chain) {
         if (typeof o !== 'object' || chain == null) {
 			return o;
 		}
-		
+
 		var value = o,
 			props = chain.split('.'),
 			length = props.length,
 			i = 0,
 			key;
-		
+
 		for (; i < length; i++) {
 			key = props[i];
 			value = value[key];
@@ -50,7 +50,7 @@
 			return item == arg1 ? item : null;
 		}
 
-        
+
         var value = arg1 != null ? getProperty(item, arg1) : item,
 			comparer = arg2,
 			compareToValue = arg3;
@@ -82,7 +82,7 @@
             if (items == null) {
 				return array;
 			}
-            
+
 			var i = 0,
 				length = items.length,
 				item;
@@ -197,6 +197,15 @@
 			}
             return agg;
         },
+		aggr: function(items, aggr, fn){
+			for(var i = 0, length = items.length; i < length; i++){
+				var result = fn(items[i], aggr, i);
+				if (result != null){
+					aggr = result;
+				}
+			}
+			return aggr;
+		},
         /**
          * @arg arg -
          *          {Function} - return value to select)
@@ -210,7 +219,7 @@
             var arr = [];
             for (var item, i = 0, length = items.length; i < length; i++) {
 				item = items[i];
-				
+
                 if (typeof arg === 'string') {
                     arr.push(item[arg]);
                 } else if (typeof arg === 'function') {
@@ -267,7 +276,7 @@
             return array;
         }
     };
-	
+
 	arr.each(['min','max'], function(x){
 		arr[x] = function(array, property){
 			if (array == null){
@@ -276,12 +285,12 @@
 			var number = null;
 			for(var i = 0, length = array.length; i<length; i++){
 				var prop = getProperty(array[i], property);
-				
+
 				if (number == null){
 					number = prop;
 					continue;
 				}
-				
+
 				if (x === 'max' && prop > number){
 					number = prop;
 					continue;
@@ -290,7 +299,7 @@
 					number = prop;
 					continue;
 				}
-				
+
 			}
 			return number;
 		}
@@ -324,7 +333,7 @@
             return this;
         };
     }
-    
+
 	for (var method in arr) {
         extendClass(method);
     }
