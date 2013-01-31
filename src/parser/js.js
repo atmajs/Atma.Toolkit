@@ -1,10 +1,10 @@
 include.js([ //
 'util/textParser.js::TextParser', //
-'util/includeMock.js::Include', //
+'util/IncludeMock.js::Include', //
 'util/codeTraverser.js::traverse', //
 ]).done(function(resp) {
 
-	
+
 	var fns = {
 		cfg: 1,
 		js: 1,
@@ -14,7 +14,7 @@ include.js([ //
 		routes: 1
 	}
 
-	
+
 	var Parser = {
 		include: function(textParser, stream) {
 			if (stream == null) {
@@ -27,7 +27,7 @@ include.js([ //
 			out: for (; textParser.index < textParser.length; textParser.index++) {
 				textParser.skipWhitespace();
 
-				
+
 				switch (textParser.Char()) {
 				case '/':
 					resp.traverse.commentEnd(textParser);
@@ -56,7 +56,7 @@ include.js([ //
                     }
 
 
-					//-console.log('args',fnName, args, textParser.text[textParser.index + 1]);                    
+					//-console.log('args',fnName, args, textParser.text[textParser.index + 1]);
 					if (fns[fnName] != null) {
 
 						buffer.push('.');
@@ -102,12 +102,12 @@ include.js([ //
 				if (textParser.skipTo(regexp).eof()) {
                     break;
                 }
-				
+
                 if (resp.traverse.isInComment(textParser)) {
 					textParser.next();
 					continue;
 				}
-				
+
 				textParser.next();
 				resp.traverse.nameEnd(textParser);
 

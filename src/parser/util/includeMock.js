@@ -1,4 +1,5 @@
 (function(global){
+  
 	var Routes = global.includeLib.Routes();
 
 	include.exports = Class({
@@ -27,9 +28,12 @@
 				return Routes.getRoutes();
 			}
 			for (var key in arg) {
-				Routes.register(key, arg[key]);
+                Routes.register(key, arg[key]);
 			}
 			return this;
-		}
+		},
+        Static: {
+            Routes: Routes
+        }
 	});
 }(typeof window === 'undefined' ? global : window));

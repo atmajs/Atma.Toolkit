@@ -13,11 +13,11 @@
 				if (this.regexp.test(file.uri.toString()) === false) {
 					return;
 				}
-                
-                if (typeof file.content == 'object'){
-                    file.content = file.content.toString();
-                }
-                
+
+                ////if (typeof file.content == 'object'){
+                ////    file.content = file.content.toString();
+                ////}
+
 				this.handler(file);
 			}
 		});

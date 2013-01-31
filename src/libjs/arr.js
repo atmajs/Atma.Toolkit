@@ -117,6 +117,7 @@
 				if (check(items[i], arg1, arg2, arg3) != null) {
                     items.splice(i, 1);
                     i--;
+					length--;
                 }
             }
             return items;

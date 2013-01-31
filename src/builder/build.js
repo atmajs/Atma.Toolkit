@@ -1,19 +1,20 @@
 include.js({
-    handler: 'css::CssHandler',
+	handler: 'css::CssHandler',
+	parser: 'js.ast::JS',
 }).js('html.js::HtmlBuilder').done(function(resp) {
 
-    var G = global,
+	var G = global,
 		Sys = G.sys,
 		R = G.ruqq,
-
+		UglifyJS = require('uglify-js'),
 		BuilderHelper = {
-			js: function(solution, stack, output) {
+			jsRaw: function(solution, stack, output) {
 				var includeIndex = R.arr.indexOf(stack, function(x) {
 					return x.url.indexOf('include.js') > -1;
 				});
 
 				for (var i = 0, x, length = stack.length; i < length; i++) {
-                    x = stack[i];
+					x = stack[i];
 
 					if (i > includeIndex) {
 						var s = String.format("include.setCurrent({ id: '#{id}', namespace: '#{namespace}', url: '#{url}'});", {
@@ -48,9 +49,87 @@ include.js({
 				output.js.splice(includeIndex + 1, 0, info);
 
 				if (solution.type == 'js') {
-                    output.push(resource.content);
-                }
-				output.js = output.js.join(Sys.newLine + ';');
+					output.push(resource.content);
+				}
+				return (output.js = output.js.join(Sys.newLine + ';'));
+			},
+			jsAst: function(solution, stack, output) {
+				var ast = UglifyJS.parse(''),
+					includeIndex = R.arr.indexOf(stack, function(x) {
+						return x.url.indexOf('include.js') > -1;
+					}),
+					embedInfo = function() {
+						var info = (function() {
+							var arr = [];
+
+							function appendInfo(method, object) {
+								arr.push(String.format('include.%1(%2);', method, JSON.stringify(object)));
+							}
+
+							appendInfo('register', solution.bin);
+
+							return arr.join(Sys.newLine);
+						})();
+
+
+						ast.body = ast.body.concat(UglifyJS.parse(info).body);
+					},
+
+					defineCurrentInclude = function(index, resource) {
+						if (i <= includeIndex) {
+							return false;
+						}
+
+						if (resource.info.hasExports) {
+							return true;
+						}
+
+						if (resource.info.IncludeSymbolRef == false) {
+							return false;
+						}
+
+						return true;
+					};
+
+				for (var i = 0, resource, length = stack.length; i < length; i++) {
+					resource = stack[i];
+
+					resp.JS.reduceIncludes(resource);
+
+                    var setCurrentInclude = defineCurrentInclude(i, resource);
+					if (setCurrentInclude) {
+						var code = String.format("include.setCurrent({ id: '#{id}', namespace: '#{namespace}', url: '#{url}'});", {
+							id: resource.appuri,
+							namespace: resource.namespace || '',
+							url: resource.appuri
+						}),
+							body = UglifyJS.parse(code).body;
+
+						ast.body = ast.body.concat(body);
+					}
+
+
+
+					ast.body = ast.body.concat(resource.ast.body);
+					ast.body = ast.body.concat(UglifyJS.parse(';').body);
+
+					if (setCurrentInclude) {
+						var code = String.format("include.getResource('%1', 'js').readystatechanged(3);", resource.appuri),
+							body = UglifyJS.parse(code).body;
+
+						ast.body = ast.body.concat(body);
+					}
+
+					if (i == includeIndex) {
+						embedInfo();
+					}
+				}
+
+
+				return (output.js = ast);
+			},
+			js: function() {
+				return this.jsAst.apply(this, arguments);
 			},
 			css: function(solution, stack, output) {
 				console.log('Build css... [start]');
@@ -58,7 +137,7 @@ include.js({
 					new resp.CssHandler(solution.uri, solution.uris.outputDirectory, x);
 				}
 				output.css = R.arr.select(stack, 'content').join(Sys.newLine);
-                console.log('Build css... [end]');
+				console.log('Build css... [end]');
 			},
 			lazy: function(solution, stack, output) {
 				this.ofType('lazy', solution, stack, output);
@@ -73,7 +152,7 @@ include.js({
 						type: type,
 						appuri: x.namespace || x.appuri,
 						content: x.content,
-						id: x.id.replace(/\W/g,'')
+						id: x.id.replace(/\W/g, '')
 					}));
 				}
 				output[type] = stream.join(Sys.newLine);
@@ -86,8 +165,8 @@ include.js({
 		ofType: function(type, solution) {
 			var stack = includesStack.resolve(type, solution.resource.includes);
 			if (!stack.length) {
-                return;
-            }
+				return;
+			}
 
 			solution.bin[type] = R.arr.select(stack, ['id', 'url', 'namespace']);
 			solution.output[type] = [];
@@ -117,7 +196,7 @@ include.js({
 
 			new io.File(solution.uris.outputMain).write(solution.output.html);
 
-            idfr.resolve && idfr.resolve();
+			idfr.resolve && idfr.resolve();
 		}
 	}
 
@@ -166,7 +245,7 @@ include.js({
 			resolve: resolve,
 			distinct: distinct
 		}
-	})();
+	}());
 
 
 });

@@ -2,12 +2,12 @@
 var __eval = function(source, include) {
 	"use strict";
 	
-	var iparams = include.route.params;
+	var iparams = include && include.route.params;
 	
 	try {
 		return eval(source);
 	} catch (error) {
-		error.url = include.url;
+		error.url = include && include.url;
 		//Helper.reportError(error);
 		console.error(error);
 	}
@@ -55,21 +55,27 @@ var Helper = { /** TODO: improve url handling*/
 			if (cfg.path && url[0] == '/') {
 				url = cfg.path + url.substring(1);
 			}
-			if (url[0] == '/') {
-				if (isWeb === false || cfg.lockedToFolder === true) {
-					return url.substring(1);
-				}
-				return url;
-			}
+
 			switch (url.substring(0, 5)) {
-			case 'file:':
-			case 'http:':
-				return url;
+				case 'file:':
+				case 'http:':
+					return url;
+			}
+			
+
+			if (url[0] === '/') {
+				if (isWeb === false || cfg.lockedToFolder === true) {
+					url = url.substring(1);
+				}
+			}else if (parent != null && parent.location != null) {
+				url = parent.location + url;
+			}
+		
+
+			while(url.indexOf('../') > -1){
+				url = url.replace(/[^\/]+\/\.\.\//,'');
 			}
 
-			if (parent != null && parent.location != null) {
-				return parent.location + url;
-			}
 			return url;
 		}
 	},
@@ -125,7 +131,7 @@ var Helper = { /** TODO: improve url handling*/
 			xhr.readyState == 4 && callback && callback(resource, xhr.responseText);
 		};
 
-		xhr.open('GET', resource.url, true);
+		xhr.open('GET', typeof resource === 'object' ? resource.url : resource, true);
 		xhr.send();
 	};
 var RoutesLib = function() {
@@ -273,9 +279,9 @@ var RoutesLib = function() {
 			return routes;
 		},
 		
-		parseAlias: function(resource){
-			var url = resource.url,
-				result = regexpAlias.exec(url);
+		parseAlias: function(route){
+			var path = route.path,
+				result = regexpAlias.exec(path);
 			
 			return result && result[1];			
 		}
@@ -339,55 +345,88 @@ var Events = (function(document) {
 		}
 	};
 })(document);
+
+/**
+ * STATES:
+ * 0: Resource Created
+ * 1: Loading
+ * 2: Loaded - Evaluating
+ * 3: Evaluated - Childs Loading
+ * 4: Childs Loaded - Completed
+ */
+
 var IncludeDeferred = function() {
 	this.callbacks = [];
 	this.state = 0;
 };
 
-IncludeDeferred.prototype = {
-	/**	state observer */
+IncludeDeferred.prototype = { /**	state observer */
 
 	on: function(state, callback) {
-		state <= this.state ? callback(this) : this.callbacks.unshift({
+		state <= this.state ? callback(this) : this.callbacks[this.state < 3 ? 'unshift':'push']({
 			state: state,
 			callback: callback
 		});
 		return this;
 	},
 	readystatechanged: function(state) {
-		var i, x, length;
-		
-		if (state > this.state){
+
+		var i, length, x, currentInclude;
+
+		if (state > this.state) {
 			this.state = state;
-			
-			if (this.state === 3){
-				var includes = this.includes;
-			
-				if (includes != null && includes.length) {
-					for (i = 0; i < includes.length; i++) {
-						if (includes[i].state != 4) {
-							return;
-						}
-					}
-				}			
-				
-				this.state = 4;
-			}			
 		}
-		
+
+		if (this.state === 3) {
+			var includes = this.includes;
+
+			if (includes != null && includes.length) {
+				for (i = 0; i < includes.length; i++) {
+					if (includes[i].resource.state != 4) {
+						return;
+					}
+				}
+			}
+
+			this.state = 4;
+		}
+
+		i = 0;
+		length = this.callbacks.length;
+
+		if (length === 0){
+			return;
+		}
+
 		//do not set asset resource to global
-		if (this.type === 'js' && this.state === 4){
+		if (this.type === 'js' && this.state === 4) {
+			currentInclude = global.include;
 			global.include = this;
 		}
-		
-		for (i = 0, length = this.callbacks.length; i < length; i++) {
+
+		for (; i < length; i++) {
 			x = this.callbacks[i];
-			
-			if (x.state > this.state || x.callback == null) {
+			if (x.state > this.state) {
 				continue;
 			}
-			x.callback(this);
-			x.callback = null;
+
+			this.callbacks.splice(i,1);
+			length--;
+			i--;
+
+			try {
+				x.callback(this);
+			} catch(error){
+				console.error(error.toString(), 'file:', this.url);
+			}
+
+			if (this.state < 4){
+				break;
+			}
+		}
+
+		if (currentInclude != null){
+			global.include = currentInclude;
 		}
 	},
 
@@ -405,139 +444,252 @@ IncludeDeferred.prototype = {
 		});
 	},
 	/** assets loaded */
-	done: function(callback) {		
+	done: function(callback) {
 		return this.on(4, this.resolve.bind(this, callback));
 	},
-	resolve: function(callback) {		
-		callback(this.response);		
-	}
-};
-var Include = function(){};
-Include.prototype = {
-	setCurrent: function(data) {
-		
-		var resource = new Resource('js', {
-			path: data.id
-		}, data.namespace, null, null, data.id);
-		
-		if (resource.state != 4){
-			console.error("Current Resource should be loaded");
-		}
-		
-		resource.state = 2;
-		global.include = resource;
-		
-	},
-	incl: function(type, pckg) {
+	resolve: function(callback) {
+		var includes = this.includes,
+			length = includes == null ? 0 : includes.length;
 
-		if (this instanceof Resource) {
-			return this.include(type, pckg);
-		}
-		var r = new Resource();
-		
-		r.type = 'js';
-		
-		return r.include(type, pckg);		
-	},
-	js: function(pckg) {
-		return this.incl('js', pckg);
-	},
-	css: function(pckg) {
-		return this.incl('css', pckg);
-	},
-	load: function(pckg) {
-		return this.incl('load', pckg);
-	},
-	ajax: function(pckg) {
-		return this.incl('ajax', pckg);
-	},
-	embed: function(pckg) {
-		return this.incl('embed', pckg);
-	},
-	lazy: function(pckg) {
-		return this.incl('lazy', pckg);
-	},
+		if (length > 0 && this.response == null){
+			this.response = {};
 
-	cfg: function(arg) {
-		switch (typeof arg) {
-		case 'object':
-			for (var key in arg) {
-				cfg[key] = arg[key];				
-			}
-			break;
-		case 'string':
-			if (arguments.length == 1){
-				return cfg[arg];
-			}
-			if (arguments.length == 2) {
-				cfg[arg] = arguments[1];
-			}
-			break;
-		case 'undefined':
-			return cfg;
-		}
-		return this;
-	},
-	routes: function(arg){
-		if (arg == null){
-			return Routes.getRoutes();
-		}
-		for (var key in arg) {
-			Routes.register(key, arg[key]);
-		}
-		return this;
-	},
-	promise: function(namespace) {
-		var arr = namespace.split('.'),
-			obj = global;
-		while (arr.length) {
-			var key = arr.shift();
-			obj = obj[key] || (obj[key] = {});
-		}
-		return obj;
-	},
-	register: function(_bin) {		
-		for (var key in _bin) {
-			for (var i = 0; i < _bin[key].length; i++) {
-				var id = _bin[key][i].id,
-					url = _bin[key][i].url,
-					namespace = _bin[key][i].namespace,
-					resource = new Resource();
+			var resource, route;
 
-				resource.state = 4;
-				resource.namespace = namespace;
-				resource.type = key;
+			for(var i = 0, x; i < length; i++){
+				x = includes[i];
+				resource = x.resource;
+				route = x.route;
 
-				if (url) {
-					if (url[0] == '/') {
-						url = url.substring(1);
-					}
-					resource.location = Helper.uri.getDir(url);
+				if (!resource.exports){
+					continue;
 				}
 
-				switch (key) {
+				var type = resource.type;
+				switch (type) {
+				case 'js':
 				case 'load':
-				case 'lazy':						
-					var container = document.querySelector('#includejs-' + id.replace(/\W/g,''));
-					if (container == null) {
-						console.error('"%s" Data was not embedded into html', id);
-						return;
+				case 'ajax':
+
+					var alias = route.alias || Routes.parseAlias(route),
+						obj = type == 'js' ? this.response : (this.response[type] || (this.response[type] = {}));
+
+					if (alias) {
+						obj[alias] = resource.exports;
+						break;
+					} else {
+						console.warn('Resource Alias is Not defined', resource);
 					}
-					resource.exports = container.innerHTML;						
 					break;
 				}
-				(bin[key] || (bin[key] = {}))[id] = resource;
+
 			}
 		}
-	},
-	/**
-	 *	Create new Resource Instance,
-	 *	as sometimes it is necessary to call include. on new empty context
-	 */
-	instance: function(){
-		return new Resource();
+		callback(this.response);
 	}
 };
+
+var Include = (function() {
+
+	function embedPlugin(source) {
+		eval(source);
+	}
+
+	function enableModules() {
+		Object.defineProperty(global, 'module', {
+			get: function() {
+				return global.include;
+			}
+		});
+
+		Object.defineProperty(global, 'exports', {
+			get: function() {
+				var current = global.include;
+				return (current.exports || (current.export = {}));
+			},
+			set: function(exports) {
+				global.include.exports = exports;
+			}
+		});
+	}
+
+	var Include = function() {};
+	Include.prototype = {
+		setCurrent: function(data) {
+
+			var resource = new Resource('js', {
+				path: data.id
+			}, data.namespace, null, null, data.id);
+
+			if (resource.state != 4) {
+				console.error("Current Resource should be loaded");
+			}
+
+			/**@TODO - probably state shoulb be changed to 2 at this place */
+			resource.state = 3;
+			global.include = resource;
+
+		},
+		incl: function(type, pckg) {
+
+			if (this instanceof Resource) {
+				return this.include(type, pckg);
+			}
+			var r = new Resource();
+
+			r.type = 'js';
+
+			return r.include(type, pckg);
+		},
+		js: function(pckg) {
+			return this.incl('js', pckg);
+		},
+		css: function(pckg) {
+			return this.incl('css', pckg);
+		},
+		load: function(pckg) {
+			return this.incl('load', pckg);
+		},
+		ajax: function(pckg) {
+			return this.incl('ajax', pckg);
+		},
+		embed: function(pckg) {
+			return this.incl('embed', pckg);
+		},
+		lazy: function(pckg) {
+			return this.incl('lazy', pckg);
+		},
+
+		cfg: function(arg) {
+			switch (typeof arg) {
+			case 'object':
+				for (var key in arg) {
+					cfg[key] = arg[key];
+
+					if (key == 'modules' && arg[key] === true) {
+						enableModules();
+					}
+				}
+				break;
+			case 'string':
+				if (arguments.length == 1) {
+					return cfg[arg];
+				}
+				if (arguments.length == 2) {
+					cfg[arg] = arguments[1];
+				}
+				break;
+			case 'undefined':
+				return cfg;
+			}
+			return this;
+		},
+		routes: function(arg) {
+			if (arg == null) {
+				return Routes.getRoutes();
+			}
+			for (var key in arg) {
+				Routes.register(key, arg[key]);
+			}
+			return this;
+		},
+		promise: function(namespace) {
+			var arr = namespace.split('.'),
+				obj = global;
+			while (arr.length) {
+				var key = arr.shift();
+				obj = obj[key] || (obj[key] = {});
+			}
+			return obj;
+		},
+		register: function(_bin) {
+			for (var key in _bin) {
+				for (var i = 0; i < _bin[key].length; i++) {
+					var id = _bin[key][i].id,
+						url = _bin[key][i].url,
+						namespace = _bin[key][i].namespace,
+						resource = new Resource();
+
+					resource.state = 4;
+					resource.namespace = namespace;
+					resource.type = key;
+
+					if (url) {
+						if (url[0] == '/') {
+							url = url.substring(1);
+						}
+						resource.location = Helper.uri.getDir(url);
+					}
+
+					switch (key) {
+					case 'load':
+					case 'lazy':
+						var container = document.querySelector('#includejs-' + id.replace(/\W/g, ''));
+						if (container == null) {
+							console.error('"%s" Data was not embedded into html', id);
+							return;
+						}
+						resource.exports = container.innerHTML;
+						break;
+					}(bin[key] || (bin[key] = {}))[id] = resource;
+				}
+			}
+		},
+		/**
+		 *	Create new Resource Instance,
+		 *	as sometimes it is necessary to call include. on new empty context
+		 */
+		instance: function() {
+			return new Resource();
+		},
+
+		getResource: function(url, type) {
+			var id = (url[0] == '/' ? '' : '/') + url;
+
+			if (type != null){
+				return bin[type][id];
+			}
+
+			for (var key in bin) {
+				if (bin[key].hasOwnProperty(id)) {
+					return bin[key][id];
+				}
+			}
+			return null;
+		},
+
+		plugin: function(pckg, callback) {
+
+			var urls = [],
+				length = 0,
+				j = 0,
+				i = 0,
+				onload = function(url, response) {
+					j++;
+
+					embedPlugin(response);
+
+					if (j == length - 1 && callback) {
+						callback();
+						callback = null;
+					}
+				};
+			Routes.each('', pckg, function(namespace, route) {
+				urls.push(route.path[0] == '/' ? route.path.substring(1) : route.path);
+			});
+
+			length = urls.length;
+
+			for (; i < length; i++) {
+				XHR(urls[i], onload);
+			}
+			return this;
+		}
+	};
+
+	return Include;
+}());
+
 /** @TODO Refactor loadBy* {combine logic} */
 
 var ScriptStack = (function() {
@@ -838,7 +990,7 @@ var Resource = (function(Include, IncludeDeferred, Routes, ScriptStack, CustomLo
 		} else {
 			CustomLoader.load(resource, onXHRCompleted);
 		}
-		
+
 		return resource;
 	}
 
@@ -873,6 +1025,22 @@ var Resource = (function(Include, IncludeDeferred, Routes, ScriptStack, CustomLo
 		resource.readystatechanged(4);
 	}
 
+	function childLoaded(resource, child) {
+		var includes = resource.includes;
+		if (includes && includes.length) {
+			if (resource.state < 3 /* && resource.url != null */ ) {
+				// resource still loading/include is in process, but one of sub resources are already done
+				return;
+			}
+			for (var i = 0; i < includes.length; i++) {
+				if (includes[i].resource.state != 4) {
+					return;
+				}
+			}
+		}
+		resource.readystatechanged(4);
+	}
+
 	var Resource = function(type, route, namespace, xpath, parent, id) {
 		Include.call(this);
 		IncludeDeferred.call(this);
@@ -902,8 +1070,8 @@ var Resource = (function(Include, IncludeDeferred, Routes, ScriptStack, CustomLo
 				ScriptStack.moveToParent(resource, parent);
 			}
 
-			// @TODO - [fix] - multiple routes by one resource for multiple parents
-			resource.route = route;
+			//// @done - @remove - @TODO - [fix] - multiple routes by one resource for multiple parents
+			////resource.route = route;
 			return resource;
 		}
 
@@ -919,80 +1087,48 @@ var Resource = (function(Include, IncludeDeferred, Routes, ScriptStack, CustomLo
 
 		(bin[type] || (bin[type] = {}))[id] = this;
 
+		if (cfg.version){
+			this.url += (!~this.url.indexOf('?') ? '?' : '&' ) + 'v=' + cfg.version;
+		}
+
 		return process(this);
 
 	};
 
 	Resource.prototype = Helper.extend({}, IncludeDeferred, Include, {
 		include: function(type, pckg) {
-			//-this.state = 1;
-			this.state = this.state >= 3 ? 3 : 1;
+			this.state = this.state >= 3 ? 3 : 2;
 
 			if (this.includes == null) {
 				this.includes = [];
 			}
-			if (this.response == null) {
-				this.response = {};
+			if (this.childLoaded == null){
+				this.childLoaded = childLoaded.bind(this, this);
 			}
 
+			this.response = null;
+
+			var _childLoaded = childLoaded.bind(this);
 
 			Routes.each(type, pckg, function(namespace, route, xpath) {
+
 				var resource = new Resource(type, route, namespace, xpath, this);
 
-				this.includes.push(resource);
-				resource.on(4, this.childLoaded.bind(this));
+				this.includes.push({
+					resource: resource,
+					route: route
+				});
+				resource.on(4, this.childLoaded);
 			}.bind(this));
 
 			return this;
-		},
-
-		childLoaded: function(resource) {
-
-
-			if (resource && resource.exports) {
-
-				var type = resource.type;
-				switch (type) {
-				case 'js':
-				case 'load':
-				case 'ajax':
-
-					var alias = resource.route.alias || Routes.parseAlias(resource),
-						obj = type == 'js' ? this.response : (this.response[type] || (this.response[type] = {}));
-
-
-					if (alias) {
-						obj[alias] = resource.exports;
-						break;
-					} else {
-						console.warn('Resource Alias is Not defined', resource);
-					}
-
-					break;
-				} 
-			}
-
-			var includes = this.includes;
-			if (includes && includes.length) {
-				if (this.state < 3 /* && this.url != null */ ) {
-					// resource still loading/include is in process, but one of sub resources are already done 
-					return;
-				}
-				for (var i = 0; i < includes.length; i++) {
-					if (includes[i].state != 4) {
-						return;
-					}
-				}
-			}
-
-			this.readystatechanged(4);
-
 		}
 	});
 
 	return Resource;
 
 }(Include, IncludeDeferred, Routes, ScriptStack, CustomLoader));
+
 
 global.include = new Include();
 
