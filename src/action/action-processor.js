@@ -8,7 +8,8 @@ include.js([ //
 'server.js', //
 'shell.js', //
 'solution.js',
-'custom.js']).done(
+'custom.js',
+'concat.js']).done(
 
 function(resp) {
 
@@ -22,7 +23,7 @@ function(resp) {
 
 	var processor = Class({
 		Construct: function(idfr) {
-			this.idfr = idfr;            
+			this.idfr = idfr;
             this.process = this.process.bind(this);
 		},
 		process: function() {
@@ -33,11 +34,11 @@ function(resp) {
 				this.idfr.resolve();
 				return;
 			}
-            
+
             global.config = current;
-            
+
             var handler;
-            
+
             switch(current.action){
                 case 'build':
                 case 'project-import':
@@ -50,17 +51,17 @@ function(resp) {
                     break;
                 default:
                     handler = resp[current.action];
-                    break;                
+                    break;
             }
-            
+
             if (handler == null){
                 console.error('Error: Unknown Handler', current.action);
                 return;
             }
-            
+
             handler.process(current, {
                 resolve: this.process
-            });            
+            });
 		}
 	});
 

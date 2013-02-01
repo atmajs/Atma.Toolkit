@@ -15,7 +15,8 @@ include.js({
 	'shell',
     'project-import',
     'project-reference',
-    'custom'],
+    'custom',
+    'concat'],
 		program = require('commander'),
 		args = program.args,
 		config;
