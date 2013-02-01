@@ -161,20 +161,27 @@ include.js({
 		};
 
 
+    var _filesCount = null;
+
 	include.exports = {
 		ofType: function(type, solution) {
-			var stack = includesStack.resolve(type, solution.resource.includes);
-			if (!stack.length) {
+			var stack = includesStack.resolve(type, solution.resource.includes),
+                length = stack.length;
+
+            _filesCount[type] = length;
+			if (length == 0) {
 				return;
 			}
 
 			solution.bin[type] = R.arr.select(stack, ['id', 'url', 'namespace']);
 			solution.output[type] = [];
 
+
 			BuilderHelper[type](solution, stack, solution.output);
 		},
 
 		build: function(solution, idfr) {
+            _filesCount = {};
 			solution.output = {};
 			solution.bin = {};
 
@@ -184,7 +191,7 @@ include.js({
 			this.ofType('load', solution);
 			this.ofType('js', solution);
 
-			if (solution.output.js) {
+            if (solution.output.js) {
 				new io.File(solution.uris.outputDirectory.combine('script.js')).write(solution.output.js);
 			}
 
@@ -192,9 +199,17 @@ include.js({
 				new io.File(solution.uris.outputDirectory.combine('style.css')).write(solution.output.css);
 			}
 
+            console.log( //
+            color( //
+            String.format( //
+            'bold{green{Files: [JS: #{js.length}] [CSS: #{css.length}] [LOAD: #{load.length}] [LAZY: #{lazy.length}]}}', _filesCount)));
+
 			resp.HtmlBuilder.build(solution, solution.output);
 
 			new io.File(solution.uris.outputMain).write(solution.output.html);
+
+
+
 
 			idfr.resolve && idfr.resolve();
 		}

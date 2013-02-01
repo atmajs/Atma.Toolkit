@@ -33,4 +33,21 @@
 
     global.color = include.exports.color;
 
+
+    var _log = console.log;
+    console.log = function(){
+        if (arguments.length > 0){
+            arguments[0] = '  ' + arguments[0];
+        }
+
+        _log.apply(console, arguments);
+    }
+    console.warn = function(){
+        var args = Array.prototype.slice.call(arguments);
+        args.unshift('  \u001b[33m');
+        args.push('\u001b[0m');
+
+        _log.apply(console, args);
+    }
+
 }());

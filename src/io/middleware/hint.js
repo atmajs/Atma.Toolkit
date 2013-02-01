@@ -13,12 +13,12 @@ include.js({
 	include.exports = function(file) {
 
 		var config = global.config.jshint;
-		
+
         if (!config){
             return;
         }
-        
-        
+
+
         var globals = config.globals,
 			options = config.options,
 			ignore = config.ignore;
@@ -46,7 +46,10 @@ include.js({
 			result = jshint(file.content, options, globals);
 
 
-		console.log('JSHINT...[%sms] %s', Date.now() - start, file.uri.file, result ? color('green{Success}') : color('red{' + jshint.errors.length + '}'));
+		console.log( //
+        color(String.format( //
+        '%1 [%2ms] %3',  result ? 'green{Success}' : 'red{Warn ' + jshint.errors.length + '}', Date.now() - start, file.uri.file //
+        )));
 
 		if (!result) {
 			jshint.errors.forEach(function(e) {

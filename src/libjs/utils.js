@@ -26,7 +26,7 @@ function() {
             output += str.substring(lastIndex, index);
             var end = str.indexOf('}', index);
 
-            output += obj[str.substring(index + 2, end)];
+            output += Object.getProperty(obj,str.substring(index + 2, end));
             lastIndex = ++end;
         }
         output += str.substring(lastIndex);
