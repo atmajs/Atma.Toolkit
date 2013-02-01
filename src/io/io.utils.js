@@ -111,6 +111,8 @@
 					fsextra.mkdirpSync(folder);
 				}
 
+                Log && Log('io.utils:file.save', path, 99);
+
 				try {
 					fs.writeFileSync(path, content);
 				} catch (error) {
@@ -154,6 +156,8 @@
 				return fs.existsSync(file);
 			},
 			readSync: function(file, asBuffer) {
+                Log && Log('io.utils:file.read', file, 99);
+
 				var content = '';
 				try {
 					content = fs.readFileSync(file, asBuffer ? null : 'utf-8');

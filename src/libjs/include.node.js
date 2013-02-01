@@ -1,24 +1,24 @@
 
 var __eval = function(source, include) {
 	"use strict";
-	
+
 	var iparams = include && include.route.params;
-	
+
 	try {
 		return eval(source);
 	} catch (error) {
 		error.url = include && include.url;
 		//Helper.reportError(error);
-		console.error(error);
+		console.error(error.toString());
 	}
-	
+
 };
 
 ;(function(global, document) {
 
 	"use strict";
-	
-	
+
+
 
 
 /**
@@ -34,12 +34,12 @@ var bin = {},
 	isWeb = !! (global.location && global.location.protocol && /^https?:/.test(global.location.protocol)),
 	cfg = {
 		eval: document == null
-	},	
+	},
 	handler = {},
 	hasOwnProp = {}.hasOwnProperty,
 	//-currentParent = null,
 	XMLHttpRequest = global.XMLHttpRequest;
-	
+
 var Helper = { /** TODO: improve url handling*/
 	uri: {
 		getDir: function(url) {
@@ -61,7 +61,7 @@ var Helper = { /** TODO: improve url handling*/
 				case 'http:':
 					return url;
 			}
-			
+
 
 			if (url[0] === '/') {
 				if (isWeb === false || cfg.lockedToFolder === true) {
@@ -70,7 +70,7 @@ var Helper = { /** TODO: improve url handling*/
 			}else if (parent != null && parent.location != null) {
 				url = parent.location + url;
 			}
-		
+
 
 			while(url.indexOf('../') > -1){
 				url = url.replace(/[^\/]+\/\.\.\//,'');
@@ -156,13 +156,13 @@ var RoutesLib = function() {
 			var questionMark = template.indexOf('?'),
 				aliasIndex = template.indexOf('::'),
 				alias, path, params, route, i, x, length;
-				
-			
+
+
 			if (~aliasIndex){
 				alias = template.substring(aliasIndex + 2);
 				template = template.substring(0, aliasIndex);
 			}
-			
+
 			if (~questionMark) {
 				var arr = template.substring(questionMark + 1).split('&');
 
@@ -177,7 +177,7 @@ var RoutesLib = function() {
 
 			template = template.split('/');
 			route = routes[namespace];
-			
+
 			if (route == null){
 				return {
 					path: template.join('/'),
@@ -185,25 +185,25 @@ var RoutesLib = function() {
 					alias: alias
 				};
 			}
-			
+
 			path = route[0];
-			
+
 			for (i = 1; i < route.length; i++) {
 				if (i % 2 === 0) {
 					path += route[i];
 				} else {
 					/** if template provides less "breadcrumbs" than needed -
 					 * take always the last one for failed peaces */
-					
+
 					var index = route[i] << 0;
 					if (index > template.length - 1) {
 						index = template.length - 1;
 					}
-					
-					
-					
+
+
+
 					path += template[index];
-					
+
 					if (i == route.length - 2){
 						for(index++;index < template.length; index++){
 							path += '/' + template[index];
@@ -266,8 +266,8 @@ var RoutesLib = function() {
 				var x = this.resolve(namespace, includeData);
 				if (namespace){
 					namespace += '.' + includeData;
-				}				
-				
+				}
+
 				fn(namespace, x, xpath);
 				return;
 			}
@@ -278,15 +278,15 @@ var RoutesLib = function() {
 		getRoutes: function(){
 			return routes;
 		},
-		
+
 		parseAlias: function(route){
 			var path = route.path,
 				result = regexpAlias.exec(path);
-			
-			return result && result[1];			
+
+			return result && result[1];
 		}
 	};
-	
+
 };
 
 var Routes = RoutesLib();
@@ -327,7 +327,7 @@ var Events = (function(document) {
 
 		Helper.invokeEach(readycollection);
 		readycollection = null;
-		
+
 
 		if (document.readyState == 'complete') {
 			Events.load = Helper.doNothing;
@@ -418,6 +418,7 @@ IncludeDeferred.prototype = { /**	state observer */
 				x.callback(this);
 			} catch(error){
 				console.error(error.toString(), 'file:', this.url);
+                console.trace();
 			}
 
 			if (this.state < 4){
@@ -787,7 +788,7 @@ var ScriptStack = (function() {
 			resource.state = 1;
 			global.include = resource;
 
-			//console.log('evaling', resource.url, stack.length);			
+			//console.log('evaling', resource.url, stack.length);
 			__eval(resource.source, resource);
 
 			for (var i = 0, x, length = stack.length; i < length; i++) {
@@ -909,7 +910,7 @@ var CustomLoader = (function() {
 		load: function(resource, callback) {
 
 			var loader = createLoader(resource.url);
-			loader.done(function() {				
+			loader.done(function() {
 				XHR(resource, function(resource, response) {
 					callback(resource, loader.exports.process(response, resource));
 				});
@@ -1140,28 +1141,28 @@ global.includeLib = {
 	registerLoader: CustomLoader.register
 };
 var fs = require('fs');
- 	
+
 XMLHttpRequest = function(){};
 XMLHttpRequest.prototype = {
 	open: function(method, url){
 		this.url = url;
 	},
 	send: function(){
-		
+
 		if (this.url.indexOf('file:///') > -1){
 			this.url = this.url.replace('file:///','');
 		}
-		
+
 		var that = this;
 		fs.readFile(this.url, 'utf-8', function(err, data){
 			if (err) {
 				console.error('>>', err.code, err.path);
-				data = '';		
+				data = '';
 			}
 
 			that.readyState = 4;
 			that.responseText = data;
-			that.onreadystatechange();			
+			that.onreadystatechange();
 		});
 	}
 };

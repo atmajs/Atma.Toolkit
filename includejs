@@ -2,7 +2,7 @@
 
 (function(w) {
 
-	require('libjs-class');
+    require('libjs-class');
 	require('./src/app.help.js');
 	require('./src/libjs/include.node.js');
 	require('socket.io');
@@ -21,6 +21,7 @@
 		base: '/src/base/{0}.js',
 		io: '/src/io/{0}.js'
 	}).js({
+        _: '/src/helper/logger.js',
 		ruqq: ['net/uri', 'utils', 'arr'],
 		parser: ['config'],
 		script: [ //
@@ -30,6 +31,9 @@
 		],
 		io: 'package',
 	}).done(function() {
+
+        Log('PROCESS', process, 99);
+        Log('CONFIG', global.config, 99);
 
 
 		if (!(global.config && global.config.state == 4)) {

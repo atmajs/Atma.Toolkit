@@ -7,10 +7,12 @@ var program = require('commander'),
 
 function write(message, indent) {
     if (indent != null){
-        currentIndent = indent;  
-    } 
+        currentIndent = indent;
+    }
     var _ = '';
-    if (currentIndent) for (var i = 0; i < currentIndent; i++) _ += '   ';
+    if (currentIndent) {
+        for (var i = 0; i < currentIndent; i++) _ += '   ';
+    }
     console.log(_ + message);
 }
 
@@ -53,7 +55,7 @@ program.on('--help', function() {
 
 
     write('Further options at http://libjs.it/#/includeBuilder/commands')
-    
+
 });
 
 
