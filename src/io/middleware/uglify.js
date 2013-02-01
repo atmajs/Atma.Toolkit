@@ -46,12 +46,14 @@ function() {
 			start = Date.now(),
 			compressor, ast;
 
-		ast = typeof file.content === 'string' ? uglify.parse(file.content) : file.content;
-		ast.figure_out_scope();
 
+		if ('defines' in global.config){
+			config.global_defs = global.config.defines;
+		}
 
 		compressor = uglify.Compressor(config);
-
+		ast = typeof file.content === 'string' ? uglify.parse(file.content) : file.content;
+		ast.figure_out_scope();
 		ast = ast.transform(compressor);
 
         if (minify){

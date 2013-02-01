@@ -1,12 +1,12 @@
 include.routes({
 	middleware: 'middleware/{0}.js'
 }).js({
-	middleware: ['hint', 'uglify', 'cssmin', 'coffee', 'less']
+	middleware: ['hint', 'uglify', 'cssmin', 'coffee', 'less', 'condcomments']
 }).done(function(resp) {
 
 
 	var extensions = {
-		'js': ['hint:read', 'uglify:write'],
+		'js': ['condcomments:read','hint:read', 'uglify:write'],
 		'css': ['cssmin:write'],
 		'coffee': ['coffee:read', 'hint:read', 'uglify:write'],
 		'less': ['less:read', 'cssmin:write']
