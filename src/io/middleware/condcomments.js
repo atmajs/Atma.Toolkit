@@ -17,13 +17,19 @@
 
 
 	include.exports = function(file) {
+        var code = file.content,
+            defines;
 
-        var code = file.content;
+        if (defines == null){
+            return;
+        }
+
+
         if (typeof code !== 'string'){
             code = code.toString();
         }
 
-		file.content = process(code, 0, global.config.defines || {});
+		file.content = process(code, 0, defines);
 
 	};
 
