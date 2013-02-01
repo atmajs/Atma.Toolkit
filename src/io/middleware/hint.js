@@ -40,7 +40,9 @@ include.js({
 			return;
 		}
 
-
+        if (typeof file.content !== 'string'){
+            file.content = file.content.toString();
+        }
 
 		var start = Date.now(),
 			result = jshint(file.content, options, globals);

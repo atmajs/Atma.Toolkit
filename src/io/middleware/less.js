@@ -9,6 +9,10 @@
 			}),
 			css;
 
+        if (typeof file.content !== 'string'){
+            file.content = file.content.toString();
+        }
+
 		parser.parse(file.content, function(error, tree) {
 			if (error) {
 				console.error(filename, error);
@@ -20,6 +24,6 @@
 				console.error(filename, error);
 			}
 		});
-        
+
 	}
 }());

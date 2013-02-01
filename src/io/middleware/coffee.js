@@ -1,10 +1,14 @@
 (function() {
 
-        
+
     include.exports = function(file){
         var coffee = require('coffee-script');
-        
-        file.content = coffee.compile(file.content);        
+
+        if (typeof file.content !== 'string'){
+            file.content = file.content.toString();
+        }
+
+        file.content = coffee.compile(file.content);
     }
 
 }());

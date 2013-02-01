@@ -18,7 +18,12 @@
 
 	include.exports = function(file) {
 
-		file.content = process(file.content, 0, global.config.defines || {});
+        var code = file.content;
+        if (typeof code !== 'string'){
+            code = code.toString();
+        }
+
+		file.content = process(code, 0, global.config.defines || {});
 
 	};
 
