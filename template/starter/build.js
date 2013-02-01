@@ -5,10 +5,12 @@ global.config = [{
 	outputSources: "index.build",
 	action: "build",
 	minify: true,
-	uglify: {
-		global_defs: {
-			DEBUG: false
-		}
+	/** UglifyJS compressor settings */
+	uglify: {		
+	},
+	/** is used in UglifJS:def_globals and in conditional comment derectives */
+	defines: {
+		DEBUG: false
 	},
 	jshint: {
 		options: {
@@ -44,6 +46,7 @@ global.config = [{
 			"$": false
 		},
 
+		/** files to ingore */
 		ignore: {
 			"iscroll-full.js": 1,
 			"mobiscroll.js": 1,
