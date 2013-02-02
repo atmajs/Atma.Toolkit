@@ -7,10 +7,12 @@
 	require('./src/libjs/include.node.js');
 	require('socket.io');
 
-
 	include.cfg({
 		path: 'file:///' + __dirname + '/',
-		lockedToFolder: true
+		lockedToFolder: true,
+		loader: {
+			coffee: '/src/libjs/loader/coffee/loader.js'
+		}
 	}).routes({
 		ruqq: '/src/libjs/{0}.js',
 		handler: '/src/handler/{0}.js',
