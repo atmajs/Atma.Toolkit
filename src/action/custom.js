@@ -18,8 +18,17 @@ include.exports = {
         include.js({
             app: script + '::Script'
         }).done(function(resp){
-            resp.Script.process(config, done);
-        });
 
+            var nodeModulesPath = net.URI.combine(process.cwd(), 'node_modules'),
+                paths = module.paths;
+
+            paths.push(nodeModulesPath);
+
+            resp.Script.process(config, done);
+
+            ruqq.arr.remove(paths, function(x){
+                return x === nodeModulesPath;
+            });
+        });
     }
 }
