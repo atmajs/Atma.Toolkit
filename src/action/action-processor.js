@@ -21,10 +21,10 @@ function(resp) {
 	}
 
 
-	var processor = Class({
+	include.exports = Class({
 		Construct: function(idfr) {
 			this.idfr = idfr;
-            this.process = this.process.bind(this);
+            Class.bind(this, 'process');
 		},
 		process: function() {
 
@@ -59,14 +59,8 @@ function(resp) {
                 return;
             }
 
-            handler.process(current, {
-                resolve: this.process
-            });
+            handler.process(current, this.process);
 		}
 	});
-
-
-	include.exports = processor;
-
 
 });

@@ -9,7 +9,7 @@
     });
 
 	include.exports = {
-		process: function(config, idfr) {
+		process: function(config, done) {
 
 			include.js({
 				io: ['files/templateHandler']
@@ -23,22 +23,19 @@
                 });
 
                 if (config.sourceDir.exists() == false) {
-					console.error('Source Directory Not Found - ', sourceDir.uri.toString());
-					idfr.resolve(1);
-
-					return;
+					return done && done(new Error('Source Directory Not Found - ' + sourceDir.uri.toString()));
 				}
 
                 var handler = new io.File(config.sourceDir.uri.combine('/.handler/handler.js'));
 
                 if (handler.exists()){
                     include.js(handler.uri.toString() + '::Handler').done(function(resp){
-                        execute(resp.Handler, config, idfr.resolve);
+                        execute(resp.Handler, config, done);
                     });
-                    return;
+                    return null;
                 }
 
-                execute(CopyHandler, config, idfr.resolve);
+                return execute(CopyHandler, config, done);
 			});
 		}
 	}

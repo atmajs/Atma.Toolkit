@@ -1,37 +1,38 @@
 (function() {
 
-	var spawn = require('child_process').spawn
+	var spawn = require('child_process').spawn,
+        ShellExec;
 
-	var ShellExec = Class({
-		Construct: function(command, idfr) {
+	include.exports = Class({
+		Construct: function(command, done) {
 			this.commands = typeof command === 'string' ? [command] : command;
-            
+
             for(var i = 0, x, length = this.commands.length; i<length; i++){
 				x = this //
                 .commands[i] //
                 .trim() //
                 .replace(/[ ]{2,}/g,' ') //
                 .split(' ');
-				
+
                 this.commands[i] = {
                     exec: x.shift(),
                     args: x
                 };
-                
+
 			}
-            
-			this.idfr = idfr;            
+
+			this.done = done;
 		},
 		process: function() {
 
 			var command = this.commands.shift();
 
 			if (!command) {
-				this.idfr.resolve();
+				this.done();
                 return;
 			}
-            
-            
+
+
 			var child = spawn(command.exec, command.args);
 
 			child.stdout.on('data', function(data) {
@@ -48,7 +49,5 @@
 			}.bind(this));
 		}
 	});
-    
-    include.exports = ShellExec;
 
 }());

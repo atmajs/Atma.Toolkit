@@ -10,14 +10,14 @@
      */
 
     include.exports = {
-        process: function(config, idfr){
+        process: function(config, done){
 
             var files = config.files,
                 dist = config.dist;
 
             if (files instanceof Array === false){
                 console.error('Specify array of files to concatenate in {config}.files');
-                idfr && idfr.resolve(new Error('No files'));
+                done && done(new Error('No files'));
             }
 
 
@@ -36,7 +36,7 @@
             new io.File(dist).write(output.join(''));
 
 
-            idfr && idfr.resolve();
+            done && done();
         }
     }
 

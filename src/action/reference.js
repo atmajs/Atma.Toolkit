@@ -1,7 +1,7 @@
 (function() {
 
 	include.exports = {
-		process: function(config, idfr) {
+		process: function(config, done) {
 
 			include.js({
 				helper: 'referenceHelper::refHelper'
@@ -14,16 +14,13 @@
 					projects;
 
 				if (!resp.load.globals){
-					console.error('Globals.txt is not in includejs root');
-					idfr.resolve && idfr.resolve(1);
+					return done && done(new Error('Globals.txt is not under includejs root'));
 				}
 
 				try {
 					projects = JSON.parse(resp.load.globals).projects;
 				}catch(error){
-					console.error('Globals.txt, in includejs root, contains no valid json data, or contains no projects property');
-					idfr.resolve && idfr.resolve(1);
-					return;
+					return done && done(new Error('Globals.txt, in includejs root, contains no valid json data, or contains no projects property'));
 				}
 
 				if (projects.hasOwnProperty(path)){
@@ -31,15 +28,13 @@
 				}
 
 				if (!path || new io.Directory(path).exists() == false) {
-
-					console.error('Symbolic link points to undefined path', path);
-					idfr.resolve && idfr.resolve(1);
-					return;
+					return done && done(new Error('Symbolic link points to undefined path: ' + path));
 				}
 
 
 				resp.refHelper.create(io.env.currentDir, name, path);
-				idfr.resolve && idfr.resolve();
+
+                return done && done();
 			});
 		}
 	}

@@ -18,12 +18,12 @@
             var repo = this.list[this.index];
             exec('git clone ' + repo.path, {
                 cwd: this.dir
-            }, function(error, stdout, stderr) {                
+            }, function(error, stdout, stderr) {
                 if (error) {
                     console.log('error', error, stderr);
                     return;
                 }
-                
+
                 if (repo.name) {
                     var dirname = repo.path.replace(/.+\/([^\/]+)\.git/g, '$1');
 
@@ -44,7 +44,7 @@
             if (libjsDir[libjsDir.length - 1] != '/') {
                 libjsDir = libjsDir + '/';
             }
-            
+
             var file = new io.File(new net.URI(io.env.applicationDir).combine('globals.txt'));
             var globals = {
                 projects: {
@@ -65,16 +65,16 @@
     var Git = {
         clone: function(idfr) {
             var dir = new io.Directory(io.env.currentDir);
-            
+
             dir.uri = dir.uri.combine('libjs/');
             if (dir.exists()) {
                 console.error('LibJS Directory Already Exists');
-                
+
                 idfr.resolve(1);
                 return;
             }
             dir.ensure();
-            
+
             var list = [{
                 path: 'git://github.com/tenbits/ClassJS.git',
                 name: 'class'
@@ -98,7 +98,7 @@
             new CloneFactory(dir.uri.toLocalDir(), list, {
                 resolve: function(){
                     new RoutesJob(dir.uri.toLocalDir());
-                    
+
                     idfr.resolve();
                 }
             }).process();
@@ -106,8 +106,8 @@
     }
 
     include.exports = {
-        process: function(config, idfr){
-            Git.clone(idfr);
+        process: function(config, done){
+            Git.clone(done);
         }
     }
 
