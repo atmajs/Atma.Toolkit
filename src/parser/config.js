@@ -16,7 +16,8 @@ include.js({
     'project-import',
     'project-reference',
     'custom',
-    'concat'],
+    'concat',
+    'npm'],
 		program = require('commander'),
 		args = program.args,
 		config;

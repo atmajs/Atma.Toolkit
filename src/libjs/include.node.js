@@ -61,7 +61,11 @@ var Helper = { /** TODO: improve url handling*/
 				case 'http:':
 					return url;
 			}
-			
+
+			if (url.substring(0,2) === './'){
+				url = url.substring(2);
+			}
+
 
 			if (url[0] === '/') {
 				if (isWeb === false || cfg.lockedToFolder === true) {
@@ -70,7 +74,7 @@ var Helper = { /** TODO: improve url handling*/
 			}else if (parent != null && parent.location != null) {
 				url = parent.location + url;
 			}
-		
+
 
 			while(url.indexOf('../') > -1){
 				url = url.replace(/[^\/]+\/\.\.\//,'');
@@ -134,6 +138,7 @@ var Helper = { /** TODO: improve url handling*/
 		xhr.open('GET', typeof resource === 'object' ? resource.url : resource, true);
 		xhr.send();
 	};
+
 var RoutesLib = function() {
 
 	var routes = {},
@@ -414,15 +419,15 @@ IncludeDeferred.prototype = { /**	state observer */
 			length--;
 			i--;
 
-			
+			/* if (!DEBUG)
 			try {
-			
+			*/
 				x.callback(this);
-			
+			/* if (!DEBUG)
 			} catch(error){
 				console.error(error.toString(), 'file:', this.url);
 			}
-			
+			*/
 
 			if (this.state < 4){
 				break;
@@ -1145,32 +1150,58 @@ global.includeLib = {
 	ScriptStack: ScriptStack,
 	registerLoader: CustomLoader.register
 };
-var fs = require('fs');
- 	
-XMLHttpRequest = function(){};
-XMLHttpRequest.prototype = {
-	open: function(method, url){
-		this.url = url;
-	},
-	send: function(){
-		
-		if (this.url.indexOf('file:///') > -1){
-			this.url = this.url.replace('file:///','');
-		}
-		
-		var that = this;
-		fs.readFile(this.url, 'utf-8', function(err, data){
-			if (err) {
-				console.error('>>', err.code, err.path);
-				data = '';		
+(function(){
+
+	var fs = require('fs'),
+		vm = require('vm');
+
+	 	
+	XMLHttpRequest = function(){};
+	XMLHttpRequest.prototype = {
+		open: function(method, url){
+			this.url = url;
+		},
+		send: function(){
+			
+			if (this.url.indexOf('file:///') > -1){
+				this.url = this.url.replace('file:///','');
 			}
+			
+			var that = this;
+			fs.readFile(this.url, 'utf-8', function(err, data){
+				if (err) {
+					console.error('>>', err.code, err.path);
+					data = '';		
+				}
 
-			that.readyState = 4;
-			that.responseText = data;
-			that.onreadystatechange();			
-		});
+				that.readyState = 4;
+				that.responseText = data;
+				that.onreadystatechange();			
+			});
+		}
+	};
+
+	__eval = function(source, include){	
+
+		global.include = include;
+		global.require = require;
+	    global.exports = module.exports;
+	    global.__filename = getFile(include.url);
+	    global.__dirname = getDir(global.__filename);
+	    global.module = module;
+
+		vm.runInThisContext(source, include.url);
+		
+	};
+
+
+	function getFile(url){
+		return url.replace('file:///', '');
 	}
-};
+	function getDir(url){
+		return url.substring(0, url.lastIndexOf('/'));
+	}
 
+}());
 
 })(typeof window === 'undefined' ? global : window, typeof document == 'undefined' ? null : document);

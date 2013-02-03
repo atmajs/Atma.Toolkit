@@ -7,8 +7,9 @@ include.js([ //
 'git-clone.js',//
 'server.js', //
 'shell.js', //
-'solution.js',
-'custom.js',
+'solution.js', //
+'custom.js', //
+'npm.js', //
 'concat.js']).done(
 
 function(resp) {
