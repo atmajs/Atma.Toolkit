@@ -26,7 +26,11 @@ function(resp) {
 			this.idfr = idfr;
             Class.bind(this, 'process');
 		},
-		process: function() {
+		process: function(error) {
+
+            if (error){
+                console.error(error.toString());
+            }
 
 			var current = config.shift();
 
