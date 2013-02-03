@@ -33,15 +33,11 @@
 			}
 
 
-			var child = spawn(command.exec, command.args);
-
-			child.stdout.on('data', function(data) {
-				console.log('stdout: ' + data);
-			});
-
-			child.stderr.on('data', function(data) {
-				console.error('stderr: ' + data);
-			});
+			var child = spawn(command.exec, command.args, {
+                cwd: process.cwd(),
+                env: process.env,
+                stdio: 'inherit'
+            });
 
 			child.on('exit', function(code) {
 				console.log('child process exited with code ' + code);
