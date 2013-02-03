@@ -3,14 +3,14 @@
 		process: function(config, done) {
 
             if (!config.command){
-                console.error('Shell Command(s) is not defined.');
-                idfr.resolve(1);
-                return;
+                return done(new Error('Shell Command(s) is not defined.'));
             }
 
 			include.js('/src/cli/shell.js').done(function(resp) {
 				new resp.shell(config.command, done).process();
 			});
+
+            return 0;
 		}
 	}
 
