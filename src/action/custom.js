@@ -15,6 +15,13 @@ include.exports = {
             app: net.URI.combine('file:///',process.cwd(),'{0}')
         });
 
+
+        var _path = /[^;]+[\\\/]npm[\\\/][^;]*/g.exec(process.env.path);
+
+        globalPath = _path && _path[0].replace(/\\/g,'/');
+        globalPath = net.URI.combine(globalPath, 'node_modules');
+
+
         include.js({
             app: script + '::Script'
         }).done(function(resp){
@@ -24,10 +31,14 @@ include.exports = {
 
             paths.push(nodeModulesPath);
 
+            if (globalPath){
+                paths.push(globalPath);
+            }
+
             resp.Script.process(config, done);
 
             ruqq.arr.remove(paths, function(x){
-                return x === nodeModulesPath;
+                return x === nodeModulesPath || x === globalPath;
             });
         });
     }
