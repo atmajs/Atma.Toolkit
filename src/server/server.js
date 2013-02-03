@@ -1,5 +1,6 @@
 (function() {
 
+    var resource = include;
 
 	include.routes({
 		controller: 'controllers/{0}.js'
@@ -17,13 +18,13 @@
 
 					var controller = resp.Routes.resolve(request.url) || 'static';
 
-					include.js({
+					resource.js({
 						controller: controller + '::Controller'
 					}).done(function(resp) {
 						resp.Controller.request(request, response);
 					});
 				});
-                
+
 				resp.WebSocket.listen(server);
 				server.listen(port);
 				sys.puts(String.format('Server Running on %1', port));
