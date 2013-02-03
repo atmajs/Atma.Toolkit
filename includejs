@@ -26,6 +26,7 @@
         _: '/src/helper/logger.js',
 		ruqq: ['net/uri', 'utils', 'arr'],
 		parser: ['config'],
+        yyy: '/src/app.settings.js',
 		script: [ //
 		'sys', //
 		'helpers', //
