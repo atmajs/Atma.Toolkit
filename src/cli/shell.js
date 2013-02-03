@@ -40,7 +40,7 @@
 			});
 
 			child.stderr.on('data', function(data) {
-				console.log('stderr: ' + data);
+				console.error('stderr: ' + data);
 			});
 
 			child.on('exit', function(code) {
