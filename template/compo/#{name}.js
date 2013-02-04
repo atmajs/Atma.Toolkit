@@ -7,7 +7,8 @@ include //
 		Base: Compo,
 		Construct: function(){
 			this.attr = {
-				template: resp.load.Template;
+				'template': resp.load.Template,
+				'class': '#{name}'
 			};
 		},
 		render: function(model, container, cntx){
