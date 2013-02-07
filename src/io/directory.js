@@ -9,8 +9,14 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 
 	io.Directory = Class({
 		Construct: function(directory) {
-			this.uri = new URI(directory);
-			delete this.uri.file;
+
+            if (directory == null || directory === '/'){
+                this.uri = io.env.currentDir;
+            }
+            else{
+                this.uri = new URI(directory);
+                delete this.uri.file;
+            }
 		},
 		exists: function() {
 			return fs.existsSync(this.uri.toLocalDir());
@@ -71,7 +77,7 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
         if (pattern[0] === '/'){
             pattern = pattern.substring(1);
         }
-        
+
         if (~pattern.indexOf('**')){
             return Infinity;
         }
@@ -100,17 +106,17 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
             if (pattern[0] === '/'){
                 depth = countDepth(pattern = pattern.substring(1));
             }
-            
+
             regexp = globToRegex(pattern);
-            
+
             if (depth){
                 regexp.depth = depth;
             }
-            
+
             out.push(regexp);
 			return out;
 		}
-        
+
         console.error('Unsupported pattern', pattern);
 		return out;
 	}

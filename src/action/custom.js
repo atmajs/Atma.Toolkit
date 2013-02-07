@@ -22,20 +22,28 @@ include.exports = {
         globalPath = net.URI.combine(globalPath, 'node_modules');
 
 
+        var nodeModulesPath = net.URI.combine(process.cwd(), 'node_modules'),
+            paths = module.paths;
+
+        paths.push(nodeModulesPath);
+
+        console.log(nodeModulesPath);
+
+        if (globalPath){
+            paths.push(globalPath);
+        }
+
         include.js({
             app: script + '::Script'
         }).done(function(resp){
 
-            var nodeModulesPath = net.URI.combine(process.cwd(), 'node_modules'),
-                paths = module.paths;
-
-            paths.push(nodeModulesPath);
-
-            if (globalPath){
-                paths.push(globalPath);
+            if (resp.Script && resp.Script.process){
+                resp.Script.process(config, done);
+            }else{
+                console.error("Custom Script should exports 'process' function: include.exports = { process: function(config, done){ ...} }");
             }
 
-            resp.Script.process(config, done);
+            
 
             ruqq.arr.remove(paths, function(x){
                 return x === nodeModulesPath || x === globalPath;
