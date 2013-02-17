@@ -5,6 +5,11 @@
             if (url[0] == '/') {
                 return url;
             }
+
+            if (url.substring(0,2) === './'){
+                url = url.substring(2);
+            }
+
             if (!current || url.substring(0, 4) == 'file') {
                 return '/';
             }

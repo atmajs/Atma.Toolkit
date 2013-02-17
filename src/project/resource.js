@@ -94,6 +94,22 @@ include.js({
         Static: {
             getResource: function(appuri){
                 return cache[appuri];
+            },
+            clearCache: function(path){
+
+                if (!path){
+                    cache = {};
+                    return;
+                }
+
+                for (var key in cache){
+                    var resource = cache[key];
+                    if (resource.uri.toLocalFile().toLowerCase() == path.toLowerCase()){
+                        delete cache[key];
+                        return;
+                    }
+                }
+
             }
         }
     });

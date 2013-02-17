@@ -5,16 +5,16 @@ include.js({
 	var config = global.config;
 
 
-	
+
 	include.exports = {
 		process: function(config, idfr) {
-       
+
             if (config.uri instanceof net.URI === false){
                 console.error('File is not defined', config.file);
                 idfr.resolve && idfr.resolve(1);
                 return;
             }
-            
+
 			if (new io.File(config.uri.toLocalFile()).exists() == false) {
 				console.error('File doesnt exists (404)', config.uri.toLocalFile());
                 idfr.resolve && idfr.resolve(1);
@@ -25,9 +25,9 @@ include.js({
                 idfr.resolve && idfr.resolve(1);
 				return;
 			}
-            
-            
-            /** @TODO lots of modules, depends on global config, so that current config to global */
+
+
+            /** @TODO lots of modules, depends on global config, so put that current config to global */
             var globalConfig = global.config,
                 listener = {
                     resolve: function(){
@@ -35,9 +35,9 @@ include.js({
                         idfr && idfr.resolve();
                     }
                 };
-            
+
             global.config = config;
-            
+
 
 			new Solution(config, {
 				resolve: function(solution) {

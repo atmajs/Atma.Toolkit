@@ -10,11 +10,12 @@ include.js([ //
 'solution.js', //
 'custom.js', //
 'npm.js', //
-'concat.js']).done(
+'concat.js', //
+'watch.js']).done(
 
 function(resp) {
 
-	var config = global.config;
+    var config = global.config;
 
 	if (config.state != 4) {
 		console.error('Invalid Config State', config);
@@ -25,6 +26,7 @@ function(resp) {
 	include.exports = Class({
 		Construct: function(idfr) {
 			this.idfr = idfr;
+            config = (this.config = global.config);
             Class.bind(this, 'process');
 		},
 		process: function(error) {

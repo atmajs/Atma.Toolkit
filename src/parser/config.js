@@ -3,51 +3,50 @@
  **/
 
 include.js({
-	script: 'io/file'
+    script: 'io/file'
 }).done(function() {
 
-	var actions = [ //
-	'template', //
-	'reference', //
-	'globals', //
-	'git-clone', //
-	'server', //
-	'shell',
-    'project-import',
-    'project-reference',
-    'custom',
-    'concat',
-    'npm'],
-		program = require('commander'),
-		args = program.args,
-		config;
+    include.exports = {
+        prepairConfig: prepairConfig
+    };
 
-	global.program = program;
+    var actions = [ //
+    'template', //
+    'reference', //
+    'globals', //
+    'git-clone', //
+    'server', //
+    'shell', 'project-import', 'project-reference', 'custom', 'concat', 'npm', 'watch'],
+        program = require('commander'),
+        args = program.args,
+        config;
 
-	if (!(args && args.length > 0)) {
-		args = ['build.js'];
-	}
+    global.program = program;
 
-
-	var entry = args[0].trim();
+    if (!(args && args.length > 0)) {
+        args = ['build.js'];
+    }
 
 
-	if (actions.indexOf(entry) > -1) {
+    var entry = args[0].trim();
+
+
+    if (actions.indexOf(entry) > -1) {
         var cfg = [{
-			action: entry
-		}];
+            action: entry
+        }];
 
         parseOverrides(program, cfg[0]);
         parseFile(cfg[0]);
-		parseType(cfg[0]);
+        parseType(cfg[0]);
 
         cfg.state = 4;
 
         global.config = cfg;
-		return;
-	}
+        return;
+    }
 
-	var file = new io.File(entry);
+    var file = new io.File(entry);
 
 
     if (file.exists() == false) {
@@ -55,73 +54,75 @@ include.js({
         return;
     }
 
-    switch(file.uri.extension){
-        case 'config':
-            global.config = JSON.parse(file.read());
-            break;
-        case 'js':
-            eval(file.read());
-            if (global.config == null){
-                console.error('Included Javascript as configuration exposed no config property');
-                global.config = {
-                    state: 0
-                };
-                return;
-            }
-            break;
-        default:
+    switch (file.uri.extension) {
+    case 'config':
+        global.config = JSON.parse(file.read());
+        break;
+    case 'js':
+        eval(file.read());
+        if (global.config == null) {
+            console.error('Included Javascript as configuration exposed no config property');
             global.config = {
-                file: file.uri.toLocalFile(),
-                action: 'build'
-            }
-            break;
+                state: 0
+            };
+            return;
+        }
+        break;
+    default:
+        global.config = {
+            file: file.uri.toLocalFile(),
+            action: 'build'
+        }
+        break;
     }
 
-    config = global.config;
+    global.config = prepairConfig(global.config);
+    global.config.state = 4;
 
 
-	if (config instanceof Array === false) {
-		config = [config];
-	}
+    /** HELPERS */
 
 
-	for (var i = 0, x, length = config.length; i < length; i++) {
-		x = config[i];
-		if ('file' in x) {
-			parseFile(x);
-			parseType(x);
-		}
-		if (i == 0) {
-			parseOverrides(program, config);
-		}
-	}
+    function prepairConfig(config) {
+        if (config instanceof Array === false) {
+            config = [config];
+        }
+        for (var i = 0, x, length = config.length; i < length; i++) {
+            x = config[i];
+            if ('file' in x) {
+                parseFile(x);
+                parseType(x);
+            }
+            if (i == 0) {
+                parseOverrides(program, config);
+            }
+        }
+        return config;
+    }
 
 
-	config.state = 4;
+    function parseFile(config) {
+        var uri = new net.URI(config.file);
+        if (uri.isRelative()) {
+            uri = new net.URI(net.URI.combine(process.cwd(), config.file));
+        }
+        config.uri = uri;
+    }
 
+    function parseType(config) {
+        if (!config.type) {
 
-	function parseFile(config) {
-		var uri = new net.URI(config.file);
-		if (uri.isRelative()) {
-			uri = new net.URI(net.URI.combine(process.cwd(), config.file));
-		}
-		config.uri = uri;
-	}
+            var ext = config.uri.extension;
+            config.type = {
+                htm: 'html',
+                html: 'html',
+                js: 'js'
+            }[ext];
+        }
+    }
 
-	function parseType(config) {
-		if (!config.type) {
-
-			var ext = config.uri.extension;
-			config.type = {
-				htm: 'html',
-				html: 'html',
-				js: 'js'
-			}[ext];
-		}
-	}
-
-	function parseOverrides(program, config) {
-		var array = program.rawArgs,
+    function parseOverrides(program, config) {
+        var array = program.rawArgs,
             i = 0,
             length = array.length,
             action = config.action,
@@ -129,16 +130,16 @@ include.js({
             key, value, x;
 
 
-		for (; i < length; i++) {
-			x = array[i];
+        for (; i < length; i++) {
+            x = array[i];
 
-			if (x[0] === '-') {
+            if (x[0] === '-') {
                 key = x.substring(1);
-                value = i < length - 1 ? array[i+1] : null;
-                if (value){
+                value = i < length - 1 ? array[i + 1] : null;
+                if (value) {
                     var c = value[0];
 
-                    if (c == '"' || c == "'"){
+                    if (c == '"' || c == "'") {
                         value = value.substring(1, value.length - 1);
                     }
 
@@ -147,12 +148,12 @@ include.js({
                 }
 
                 config[key] = true;
-				continue;
-			}
+                continue;
+            }
 
-            if (actionFound){
+            if (actionFound) {
                 var c = x[0];
-                if (c == '"' || c == "'"){
+                if (c == '"' || c == "'") {
                     x = x.substring(1, x.length - 1);
                 }
 
@@ -161,12 +162,10 @@ include.js({
                 continue;
             }
 
-            if (x == action){
+            if (x == action) {
                 actionFound = true;
             }
-		}
-	}
+        }
+    }
 
-
-	include.exports = (global.config = config);
 });
