@@ -41,7 +41,8 @@
 			}
 
 			var currentDepth = data.depth,
-				patterns = data.patterns;
+				patterns = data.patterns,
+                excludes = data.excludes;
 
 			data.depth++;
 
@@ -86,6 +87,15 @@
 						}
 					}
 				}
+
+                if (match && excludes){
+                    for (var _i = 0, _length = excludes.length; _i < _length; _i++) {
+						if (excludes[_i].test(path)) {
+							match = false;
+							break;
+						}
+					}
+                }
 
 				if (match) {
 					results.push(path);
@@ -172,11 +182,12 @@
 			}
 		},
 		dir: {
-			filesSync: function(dir, patterns) {
+			filesSync: function(dir, patterns, excludes) {
 				return walk(dir, '', {
 					depth: 0,
 					maxdepth: ruqq.arr.max(patterns, 'depth') || Infinity,
-					patterns: patterns
+					patterns: patterns,
+                    excludes: excludes
 				});
 			},
 			ensure: function(dir) {

@@ -10,17 +10,17 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 
 	io.File = Class({
 		Construct: function(path, data) {
-			
+
 			if (path instanceof net.URI){
 				path = path.toLocalFile();
 			}
-			
-			if (_cache.hasOwnProperty(path)) {				
+
+			if (_cache.hasOwnProperty(path)) {
 				return _cache[path];
 			}
 
 			this.uri = new net.URI(path);
-            
+
             if (path && this.uri.isRelative() && io.env){
                 this.uri = io.env.currentDir.combine(this.uri);
             }

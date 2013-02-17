@@ -10,13 +10,12 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 	io.Directory = Class({
 		Construct: function(directory) {
 
-            if (directory == null || directory === '/'){
-                this.uri = io.env.currentDir;
-            }
-            else{
-                this.uri = new URI(directory);
-                delete this.uri.file;
-            }
+			if (directory == null || directory === '/') {
+				this.uri = io.env.currentDir;
+			} else {
+				this.uri = new URI(directory);
+				delete this.uri.file;
+			}
 		},
 		exists: function() {
 			return fs.existsSync(this.uri.toLocalDir());
@@ -25,10 +24,12 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 			utils.dir.ensure(this.uri.toLocalDir());
 			return this;
 		},
-		readFiles: function(pattern) {
+		readFiles: function(pattern, exclude) {
 
-			var patterns = parsePatterns(pattern);
-			this.files = ruqq.arr.map(utils.dir.filesSync(this.uri.toLocalDir(), patterns), function(x) {
+			var patterns = parsePatterns(pattern),
+                excludes = parsePatterns(exclude);
+
+			this.files = ruqq.arr.map(utils.dir.filesSync(this.uri.toLocalDir(), patterns, excludes), function(x) {
 				return new io.File(this.uri.combine(x));
 			}.bind(this));
 
@@ -73,28 +74,28 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 		}
 	});
 
-    function countDepth(pattern){
-        if (pattern[0] === '/'){
-            pattern = pattern.substring(1);
-        }
+	function countDepth(pattern) {
+		if (pattern[0] === '/') {
+			pattern = pattern.substring(1);
+		}
 
-        if (~pattern.indexOf('**')){
-            return Infinity;
-        }
-        return pattern.split('/').length;
-    }
+		if (~pattern.indexOf('**')) {
+			return Infinity;
+		}
+		return pattern.split('/').length;
+	}
 
 	function parsePatterns(pattern, out) {
-        if (pattern == null){
-            return null;
-        }
+		if (pattern == null) {
+			return null;
+		}
 		if (out == null) {
 			out = [];
 		}
 		if (pattern instanceof Array) {
-			for (var i = 0, x, length = pattern.length; i < length; i++) {
-				parsePatterns(pattern[i], out);
-			}
+            ruqq.arr.each(pattern, function(x){
+                parsePatterns(x, out);
+            })
 			return out;
 		}
 		if (pattern instanceof RegExp) {
@@ -102,48 +103,93 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 			return out;
 		}
 		if (typeof pattern === 'string') {
-            var depth, regexp;
-            if (pattern[0] === '/'){
-                depth = countDepth(pattern = pattern.substring(1));
-            }
+			var depth, regexp;
+			if (pattern[0] === '/') {
+				depth = countDepth(pattern = pattern.substring(1));
+			}
 
-            regexp = globToRegex(pattern);
+			regexp = globToRegex(pattern);
 
-            if (depth){
-                regexp.depth = depth;
-            }
+			if (depth) {
+				regexp.depth = depth;
+			}
 
-            out.push(regexp);
+			out.push(regexp);
 			return out;
 		}
 
-        console.error('Unsupported pattern', pattern);
+		console.error('Unsupported pattern', pattern);
 		return out;
 	}
 
 	function globToRegex(glob) {
 		var specialChars = "\\^$*+?.()|{}[]",
-            regexChars = ["^"],
-            c;
-		for (var i = 0; i < glob.length; ++i) {
-			c = glob.charAt(i);
+			stream = '',
+			i = -1,
+			length = glob.length;
+
+        glob = glob.replace(/(\*\*\/){2,}/g, '**/');
+
+
+		while (++i < length) {
+			var c = glob[i];
 			switch (c) {
 			case '?':
-				regexChars.push(".");
+				stream += '.';
 				break;
 			case '*':
-				regexChars.push(".*");
+				if (glob[i + 1] === '*') {
+
+                    if (i == 0 && /[\\\/]/.test(glob[i + 2])){
+                        stream += '.+';
+                        i+=2;
+                    }
+
+					stream += '.+';
+					i++;
+					break;
+				}
+
+				stream += '[^/]+';
+				break;
+			case '{':
+				var close = glob.indexOf('}', i);
+				if (~close) {
+					stream += '(' + glob.substring(i + 1, close).replace(/,/g, '|') + ')';
+					i = close;
+					break;
+				}
+				stream += c;
+				break;
+			case '[':
+				var close = glob.indexOf(']', i);
+				if (~close) {
+					stream = glob.substring(i, close);
+					i = close;
+					break;
+				}
+				stream += c;
 				break;
 			default:
-				if (specialChars.indexOf(c) >= 0) {
-					regexChars.push("\\");
+				if (~specialChars.indexOf(c)) {
+					stream += '\\';
 				}
-				regexChars.push(c);
-                break;
+				stream += c;
+				break;
 			}
 		}
-		regexChars.push("$");
-		return new RegExp(regexChars.join(""));
+
+		stream = '^' + stream + '$';
+
+		return new RegExp(stream, 'i');
 	}
+
+/*{test}
+
+	console.log(globToRegex('*.{png,jpg}').test('file.jpg') == true);
+	console.log(globToRegex('*.{png,jpg}').test('sub/file.jpg') == false);
+	console.log(globToRegex('**.{png,jpg}').test('sub/file.jpg') == true);
+	console.log(globToRegex('*.*').test('file.ext') == true);
+*/
 
 });
