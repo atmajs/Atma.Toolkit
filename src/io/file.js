@@ -50,7 +50,14 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 		},
 		write: function(content) {
 
-			this.content = content;
+            if (content != null){
+                this.content = content;
+            }
+
+            if (this.content == null){
+                console.error('io.file.write: Content is empty');
+                return this;
+            }
 
 			_hook && _hook.trigger('write', this);
 
