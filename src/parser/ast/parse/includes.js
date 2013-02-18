@@ -1,4 +1,4 @@
-include.js(['../util.js::AstUtil','../../util/IncludeMock.js::Include']).done(function(resp) {
+include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(function(resp) {
 
 	var util = resp.AstUtil,
 		typeOf = util.is.type,

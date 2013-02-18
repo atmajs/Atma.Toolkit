@@ -1,6 +1,6 @@
 include.js([ //
 'util/textParser.js::TextParser', //
-'util/IncludeMock.js::Include', //
+'util/includeMock.js::Include', //
 'util/codeTraverser.js::traverse', //
 ]).done(function(resp) {
 

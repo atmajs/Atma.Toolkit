@@ -1,5 +1,5 @@
 include.js([ //
-'../../util/IncludeMock.js::Include', //
+'../../util/includeMock.js::Include', //
 '../util.js::AstUtil']).done(function(resp) {
 
 

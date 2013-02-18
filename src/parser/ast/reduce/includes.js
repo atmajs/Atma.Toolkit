@@ -1,4 +1,4 @@
-include.js(['arguments.js::reduceArguments', '../util.js::AstUtil', '../../util/IncludeMock.js::Include']).done(function(resp) {
+include.js(['arguments.js::reduceArguments', '../util.js::AstUtil', '../../util/includeMock.js::Include']).done(function(resp) {
 
 
 
