@@ -7,8 +7,13 @@ function() {
 	 *  Handler can accept as file content - JavaScript String or UglifJS AST Tree
 	 */
 
-	include.exports = function(file) {
-        var minify = global.config.minify;
+	include.exports = function(file, globalConfig) {
+
+        if (globalConfig == null){
+            globalConfig = global.config.minify;
+        }
+
+        var minify = globalConfig.minify;
 
 		if (!minify && typeof file.content === 'string') {
 			return;
@@ -16,7 +21,7 @@ function() {
 
 
 		console.log('Uglify... [start]');
-		var config = minify ? (global.config.uglify || {
+		var config = minify ? (globalConfig.uglify || {
 			global_defs: {
 				DEBUG: false
 			}
@@ -47,8 +52,8 @@ function() {
 			compressor, ast;
 
 
-		if ('defines' in global.config){
-			config.global_defs = global.config.defines;
+		if ('defines' in globalConfig){
+			config.global_defs = globalConfig.defines;
 		}
 
 		compressor = uglify.Compressor(config);

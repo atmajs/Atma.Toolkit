@@ -11,7 +11,10 @@ include.js([ //
 'custom.js', //
 'npm.js', //
 'concat.js', //
-'watch.js']).done(
+'watch.js', //
+'uglify.js', //
+'jshint.js', //
+]).done(
 
 function(resp) {
 

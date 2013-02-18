@@ -35,6 +35,8 @@
 
             new io.File(dist).write(output.join(''));
 
+            console.log('Done - ', dist.file);
+
 
             done && done();
         }

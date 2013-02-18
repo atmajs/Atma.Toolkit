@@ -16,7 +16,16 @@ include.js({
     'globals', //
     'git-clone', //
     'server', //
-    'shell', 'project-import', 'project-reference', 'custom', 'concat', 'npm', 'watch'],
+    'shell', //
+    'project-import', //
+    'project-reference', //
+    'custom', //
+    'concat', //
+    'npm', //
+    'watch', //
+    'jshint', //
+    'uglify', //
+    ],
         program = require('commander'),
         args = program.args,
         config;

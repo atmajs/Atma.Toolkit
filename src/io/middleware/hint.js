@@ -10,9 +10,11 @@ include.js({
 		color = resp.stdout.color;
 
 
-	include.exports = function(file) {
+	include.exports = function(file, config) {
 
-		var config = global.config.jshint;
+        if (config == null){
+		    config = global.config.jshint;
+        }
 
         if (!config){
             return;
@@ -23,11 +25,6 @@ include.js({
 			options = config.options,
 			ignore = config.ignore;
 
-
-
-		if (!global.config.jshint) {
-			return;
-		}
 
 		/**
 		 *  DO not apply jshint on minimized scripts
