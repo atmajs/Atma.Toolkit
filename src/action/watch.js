@@ -3,13 +3,13 @@
  */
 
 include.js({
-	parser: 'config::Config',
+	helper: 'configHelper::configHelper',
     script: 'project/resource::Resource'
 }).done(function(resp) {
 
 
 	function prepairConfig(config) {
-		config = resp.Config.prepairConfig(config);
+		config = resp.configHelper.prepairConfig(config);
 
 		ruqq.arr.remove(config, function(x) {
 			return x.action === 'watch';

@@ -86,7 +86,7 @@
 			return uri.combine('');
 		}
 
-        uri = uri.replace(/\\/g,'/');
+        uri = uri.replace(/\\/g,'/').replace(/^\.\//,'');
 
         this.value = uri;
         helper.parseProtocol(this);
@@ -102,8 +102,12 @@
 
     URI.prototype = {
         cdUp: function() {
-            if (!this.path || this.path == '/') return this;
-            if (this.protocol == 'file' && /^\/?[a-zA-Z]+:\/?$/.test(this.path)) return this;
+            if (!this.path || this.path == '/') {
+                return this;
+            }
+            if (this.protocol == 'file' && /^\/?[a-zA-Z]+:\/?$/.test(this.path)) {
+                return this;
+            }
             this.path = this.path.replace(/\/?[^\/]+\/?$/i, '');
             return this;
         },
@@ -127,7 +131,9 @@
 				return uri;
 			}
 
-            if (this.protocol == 'file' && path[0] == '/') path = path.substring(1);
+            if (this.protocol == 'file' && path[0] == '/') {
+                path = path.substring(1);
+            }
 
             uri.value = path;
             helper.parseSearch(uri);
@@ -173,7 +179,9 @@
 
             if (this.path.indexOf(uri.path) == 0) { /** host folder */
                 var p = this.path ? this.path.replace(uri.path, '') : '';
-                if (p[0] === '/') p = p.substring(1);
+                if (p[0] === '/') {
+                    p = p.substring(1);
+                }
                 return helper.combinePathes(p, this.file) + (this.search || '');
             }
 

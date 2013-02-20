@@ -2,7 +2,7 @@
 
 (function(w) {
 
-    require('libjs-class');
+	require('libjs-class');
 	require('./src/app.help.js');
 	require('./src/libjs/include.node.js');
 	require('socket.io');
@@ -23,20 +23,22 @@
 		base: '/src/base/{0}.js',
 		io: '/src/io/{0}.js'
 	}).js({
-        _: '/src/helper/logger.js',
+		_: '/src/helper/logger.js',
 		ruqq: ['net/uri', 'utils', 'arr'],
 		parser: ['config'],
-        yyy: '/src/app.settings.js',
+		yyy: '/src/app.settings.js',
 		script: [ //
 		'sys', //
 		'helpers', //
-        'helper/stdout', //
+		'helper/stdout', //
 		],
 		io: 'package',
-	}).done(function() {
+		//
+		action: 'action-processor::Action'
+	}).done(function(resp) {
 
-        Log('PROCESS', process, 99);
-        Log('CONFIG', global.config, 99);
+		Log('PROCESS', process, 99);
+		Log('CONFIG', global.config, 99);
 
 
 		if (!(global.config && global.config.state == 4)) {
@@ -44,16 +46,7 @@
 			return 0;
 		}
 
-
-		include.js({
-			action: 'action-processor'
-		}).done(function(resp) {
-			new resp['action-processor']({
-				resolve: function() {
-					console.log('/* Done */');
-				}
-			}).process();
-		});
+		(new resp['Action']()).run(global.config);
 
 
 		return 1;

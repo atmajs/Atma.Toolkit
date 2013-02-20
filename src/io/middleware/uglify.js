@@ -10,7 +10,7 @@ function() {
 	include.exports = function(file, globalConfig) {
 
         if (globalConfig == null){
-            globalConfig = global.config.minify;
+            globalConfig = global.config;
         }
 
         var minify = globalConfig.minify;

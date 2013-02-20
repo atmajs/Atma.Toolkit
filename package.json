@@ -10,6 +10,7 @@
   "bin": {
     "includejs": "includejs"
   },
+  "main": "module.js",
   "dependencies": {
     "jsdom": ">= 0.2.15",
     "fs.extra": ">= 1.2.0",

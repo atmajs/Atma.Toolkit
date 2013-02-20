@@ -3,12 +3,10 @@
  **/
 
 include.js({
-    script: 'io/file'
-}).done(function() {
+    script: 'io/file',
+    helper: 'configHelper'
+}).done(function(resp) {
 
-    include.exports = {
-        prepairConfig: prepairConfig
-    };
 
     var actions = [ //
     'template', //
@@ -41,13 +39,9 @@ include.js({
 
 
     if (actions.indexOf(entry) > -1) {
-        var cfg = [{
+        var cfg = resp.configHelper.prepairConfig({
             action: entry
-        }];
-
-        parseOverrides(program, cfg[0]);
-        parseFile(cfg[0]);
-        parseType(cfg[0]);
+        });
 
         cfg.state = 4;
 
@@ -85,96 +79,10 @@ include.js({
         break;
     }
 
-    global.config = prepairConfig(global.config);
+    global.config = resp.configHelper.prepairConfig(global.config);
     global.config.state = 4;
 
 
-    /** HELPERS */
 
-
-    function prepairConfig(config) {
-        if (config instanceof Array === false) {
-            config = [config];
-        }
-        for (var i = 0, x, length = config.length; i < length; i++) {
-            x = config[i];
-            if ('file' in x) {
-                parseFile(x);
-                parseType(x);
-            }
-            if (i == 0) {
-                parseOverrides(program, config);
-            }
-        }
-        return config;
-    }
-
-
-    function parseFile(config) {
-        var uri = new net.URI(config.file);
-        if (uri.isRelative()) {
-            uri = new net.URI(net.URI.combine(process.cwd(), config.file));
-        }
-        config.uri = uri;
-    }
-
-    function parseType(config) {
-        if (!config.type) {
-
-            var ext = config.uri.extension;
-            config.type = {
-                htm: 'html',
-                html: 'html',
-                js: 'js'
-            }[ext];
-        }
-    }
-
-    function parseOverrides(program, config) {
-        var array = program.rawArgs,
-            i = 0,
-            length = array.length,
-            action = config.action,
-            actionFound = false,
-            key, value, x;
-
-
-        for (; i < length; i++) {
-            x = array[i];
-
-            if (x[0] === '-') {
-                key = x.substring(1);
-                value = i < length - 1 ? array[i + 1] : null;
-                if (value) {
-                    var c = value[0];
-
-                    if (c == '"' || c == "'") {
-                        value = value.substring(1, value.length - 1);
-                    }
-
-                    config[key] = value;
-                    continue;
-                }
-
-                config[key] = true;
-                continue;
-            }
-
-            if (actionFound) {
-                var c = x[0];
-                if (c == '"' || c == "'") {
-                    x = x.substring(1, x.length - 1);
-                }
-
-                (config.args || (config.args = [])).push(x);
-
-                continue;
-            }
-
-            if (x == action) {
-                actionFound = true;
-            }
-        }
-    }
 
 });

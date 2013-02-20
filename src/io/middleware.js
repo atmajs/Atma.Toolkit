@@ -5,15 +5,13 @@ include.routes({
 }).done(function(resp) {
 
 
-    // - MOVED to global.Settings.io.extensions
-	//var extensions = {
-	//	'js': ['condcomments:read','hint:read', 'uglify:write'],
-	//	'css': ['cssmin:write'],
-	//	'coffee': ['coffee:read', 'hint:read', 'uglify:write'],
-	//	'less': ['less:read', 'cssmin:write']
-	//};
+    var extensions = Object.getProperty(global, 'Settings.io.extensions') || {
+		'js': ['condcomments:read'],
+		'css': ['cssmin:write'],
+		'coffee': ['coffee:read'],
+		'less': ['less:read']
+	};
 
-    var extensions = global.Settings.io.extensions;
 
 
 	var hook = io.File.getHookHandler();
