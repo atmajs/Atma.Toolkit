@@ -22,6 +22,10 @@ include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(fu
 			return true;
 		});
 
+        if (getPropertySetter('exports', ast) != null) {
+			_info.hasExports = true;
+		}
+
         return _info;
 	}
 
@@ -99,9 +103,10 @@ include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(fu
 			}
 		}
 
-		if (getPropertySetter('exports', Callback) != null) {
-			_info.hasExports = true;
-		}
+        //////////
+		//////////if (getPropertySetter('exports', Callback) != null) {
+		//////////	_info.hasExports = true;
+		//////////}
 	}
 
 	/**
