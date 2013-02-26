@@ -12,6 +12,7 @@ include.js([ //
 'watch.js', //
 'uglify.js', //
 'jshint.js', //
+'copy.js', //
 ]).done(
 
 function(resp) {

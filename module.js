@@ -31,4 +31,11 @@ include.cfg({
     action: 'action-processor::ActionProcessor'
 }).done(function(resp){
     module.exports = resp
+
+    include.cfg({
+        path: 'file:///' + process.cwd() + '/'
+    });
+
+    global.include = include.instance();
+    global.include.location = include.cfg('path');
 });

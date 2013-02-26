@@ -65,6 +65,14 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 			return this;
 		},
 		copyTo: function(targetUri) {
+
+            if (typeof targetUri === 'string'){
+                targetUri = new net.URI(targetUri);
+                if (targetUri.isRelative()){
+                    targetUri = io.env.currentDir.combine(targetUri);
+                }
+            }
+
 			console.log('Copy:', this.uri.toLocalFile(), targetUri.toLocalFile());
 
 			utils.file.copySync(this.uri.toLocalFile(), targetUri.toLocalFile());

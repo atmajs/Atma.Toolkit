@@ -23,6 +23,7 @@ include.js({
     'watch', //
     'jshint', //
     'uglify', //
+    'copy', //
     ],
         program = require('commander'),
         args = program.args,
