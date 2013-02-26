@@ -12,7 +12,7 @@ include.js({
 
 	include.exports = function(file, config) {
 
-        if (config == null){
+        if (!config){
 		    config = global.config.jshint;
         }
 

@@ -71,7 +71,8 @@ function(resp) {
         }
 
         if (handler == null) {
-            console.error('Error: Unknown Handler', current.action);
+            console.warn('Error: Unknown Handler', current.action);
+            process();
             return;
         }
 

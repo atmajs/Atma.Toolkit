@@ -4,7 +4,7 @@
 
 include.js({
 	helper: 'configHelper::configHelper',
-    script: 'project/resource::Resource'
+	script: 'project/resource::Resource'
 }).done(function(resp) {
 
 
@@ -59,21 +59,18 @@ include.js({
 			});
 
 			io.File.clearCache(path);
-            resp.Resource.clearCache(path);
+			resp.Resource.clearCache(path);
 
 			include.js({
 				action: 'action-processor::Processor'
 			}).done(function(resp) {
-				new resp.Processor({
-					resolve: function() {
-						setTimeout(function() {
-                            console.log('/* Done */');
-							watcher.isBusy = false;
-							console.log(color('green{Listen...}'));
-						}, 500);
-
-					}
-				}).process();
+               
+				(new resp.Processor()).run(global.config, function(){
+					setTimeout(function() {
+						watcher.isBusy = false;
+						console.log(color('green{Listen...}'));
+					}, 500);
+				});
 			});
 
 		}

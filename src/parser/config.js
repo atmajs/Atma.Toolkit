@@ -80,6 +80,7 @@ include.js({
         break;
     }
 
+    global.Settings.initialize(global.config);
     global.config = resp.configHelper.prepairConfig(global.config);
     global.config.state = 4;
 

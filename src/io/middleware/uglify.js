@@ -9,11 +9,11 @@ function() {
 
 	include.exports = function(file, globalConfig) {
 
-        if (globalConfig == null){
-            globalConfig = global.config;
-        }
+		if (globalConfig == null) {
+			globalConfig = global.config;
+		}
 
-        var minify = globalConfig.minify;
+		var minify = globalConfig.minify;
 
 		if (!minify && typeof file.content === 'string') {
 			return;
@@ -52,22 +52,35 @@ function() {
 			compressor, ast;
 
 
-		if ('defines' in globalConfig){
+		if ('defines' in globalConfig) {
 			config.global_defs = globalConfig.defines;
 		}
 
 		compressor = uglify.Compressor(config);
-		ast = typeof file.content === 'string' ? uglify.parse(file.content) : file.content;
+
+		ast = file.content;
+
+		if (typeof ast === 'string') {
+			try {
+				ast = uglify.parse(file.content, {
+					filename: file.uri.toLocalFile()
+				});
+			} catch (error) {
+				console.error('UglifyJS', error.message);
+				return;
+			}
+		}
+
 		ast.figure_out_scope();
 		ast = ast.transform(compressor);
 
-        if (minify){
-            ast.figure_out_scope();
-            ast.compute_char_frequency();
-            ast.mangle_names();
+		if (minify) {
+			ast.figure_out_scope();
+			ast.compute_char_frequency();
+			ast.mangle_names();
 
-            //ast = pro.ast_squeeze(ast);
-        }
+			//ast = pro.ast_squeeze(ast);
+		}
 
 		file.content = ast.print_to_string({
 			beautify: !minify

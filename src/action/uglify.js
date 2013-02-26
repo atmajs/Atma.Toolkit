@@ -28,9 +28,8 @@ include.js({
             ruqq.arr.each(files, function(file){
                 file.read();
                 resp.Uglify(file, config);
-                file.uri.file = file.uri.getName() + '.min.' + file.uri.extension;
 
-                file.write();
+                new io.File(file.uri.combine('/' + file.uri.getName() + '.min.' + file.uri.extension)).write(file.content);
             });
 
             done();

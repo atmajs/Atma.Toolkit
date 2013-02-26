@@ -30,12 +30,13 @@ include.cfg({
 	io: 'package',
     action: 'action-processor::ActionProcessor'
 }).done(function(resp){
-    module.exports = resp
+    module.exports = resp;
 
     include.cfg({
         path: 'file:///' + process.cwd() + '/'
     });
 
-    global.include = include.instance();
+    global.include = include.instance(module.parent && module.parent.id);
     global.include.location = include.cfg('path');
+    
 });

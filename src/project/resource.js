@@ -104,7 +104,7 @@ include.js({
 
                 for (var key in cache){
                     var resource = cache[key];
-                    if (resource.uri.toLocalFile().toLowerCase() == path.toLowerCase()){
+                    if (resource.uri.toLocalFile().toLowerCase() === path.toLowerCase()){
                         delete cache[key];
                         return;
                     }

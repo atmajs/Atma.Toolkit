@@ -11,19 +11,17 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 	io.File = Class({
 		Construct: function(path, data) {
 
-			if (path instanceof net.URI){
-				path = path.toLocalFile();
-			}
-
-			if (_cache.hasOwnProperty(path)) {
-				return _cache[path];
-			}
-
 			this.uri = new net.URI(path);
 
             if (path && this.uri.isRelative() && io.env){
                 this.uri = io.env.currentDir.combine(this.uri);
             }
+
+            path = this.uri.toLocalFile();
+
+			if (_cache.hasOwnProperty(path)) {
+				return _cache[path];
+			}
 
 
 			if (this.__proto__ == io.File.prototype) {
@@ -96,7 +94,8 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 					_cache = {};
 				} else {
 					if (_cache.hasOwnProperty(path) == false) {
-						console.log('Try to clear not existend cache item', path);
+						console.log('io.File - not in cache -', path);
+                        return;
 					}
 					delete _cache[path];
 				}
