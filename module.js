@@ -1,10 +1,19 @@
 
-require('libjs-class');
-require('./src/libjs/include.node.js');
-require('socket.io');
+
+if (typeof includeLib === 'undefined'){
+    require('libjs-class');
+    require('./src/libjs/include.node.js');
+    require('socket.io');
+}
+
+var dir = __dirname + '/';
+
+if (typeof io === 'object' && io.env){
+    dir = io.env.applicationDir.toLocalDir();
+}
 
 include.cfg({
-	path: 'file:///' + __dirname + '/',
+	path: 'file:///' + dir,
 	lockedToFolder: true,
     sync: true,
 	loader: {
@@ -38,5 +47,5 @@ include.cfg({
 
     global.include = include.instance(module.parent && module.parent.id);
     global.include.location = include.cfg('path');
-    
+
 });
