@@ -93,6 +93,15 @@
         helper.parseHost(this);
 
         helper.parseSearch(this);
+
+        if (this.value){
+            try {
+                this.value = decodeURI(this.value);
+            }catch(error){
+                console.error('uri parse error', this.value, error.toString());
+            }
+        }
+        
         helper.parseFile(this);
 
         this.path = this.value;

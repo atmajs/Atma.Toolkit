@@ -24,15 +24,17 @@
 			return setts;
 		}
 
-		for (var key in config) {
-			var groupe = config[key];
-			if (groupe.action === 'settings') {
-				setts = groupe;
-				delete config[key];
-				return setts;
-			}
+		if (typeof config === 'object'){
+			for (var key in config) {
+				var group = config[key];
+				if (group.action === 'settings') {
+					setts = group;
+					delete config[key];
+					return setts;
+				}
 
-			return resolveSettings(groupe);
+				return resolveSettings(group);
+			}
 		}
 
 		return null;

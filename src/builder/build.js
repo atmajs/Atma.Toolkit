@@ -253,7 +253,7 @@ include.js({
 
 		function resolve(type, includes) {
 			var stack = distinct(build(type, includes));
-			return type == 'css' ? stack.reverse() : stack;
+			return type == '-css' ? stack.reverse() : stack;
 		}
 
 		return {
