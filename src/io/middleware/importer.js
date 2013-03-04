@@ -38,7 +38,7 @@
                 uri = currentUri.combine(path);
             }
 
-            var file = new io.File(path);
+            var file = new io.File(uri);
             if (file.exists() === false){
                 console.error('File Importer: File does not exists', file.uri.toLocalFile());
                 return full;
