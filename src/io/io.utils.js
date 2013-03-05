@@ -74,7 +74,7 @@
 					if (patterns) {
                         var dirCanBeMatched = false;
 						for (var _i = 0, _length = patterns.length; _i < _length; _i++) {
-							var patternRootCount = patterns[_i].rootCount,
+							var patternRootCount = patterns[_i].rootCount - currentDepth,
 								patternRoot = patterns[_i].root;
 							if (!patternRootCount || currentDepth > patternRootCount) {
 								dirCanBeMatched = true;
@@ -85,7 +85,7 @@
 								dirCanBeMatched = true;
 								break;
 							}
-							Log('Glob: Cant be matched %s | %s', dirroot, patternRoot, 90);
+							Log('Glob: Cant be matched %s | %s', dirroot, patternRoot, patternRootCount, 90);
 						}
 
 						if (dirCanBeMatched === false) {
