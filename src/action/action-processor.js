@@ -13,6 +13,7 @@ include.js([ //
 'uglify.js', //
 'jshint.js', //
 'copy.js', //
+'import.js', //
 ]).done(
 
 function(resp) {

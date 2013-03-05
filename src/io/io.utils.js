@@ -42,7 +42,7 @@
 
 			var currentDepth = data.depth,
 				patterns = data.patterns,
-                excludes = data.excludes;
+				excludes = data.excludes;
 
 			data.depth++;
 
@@ -58,22 +58,43 @@
 				x = files[i];
 
 				var stats = fs.lstatSync(combine(dir, x)),
-                    path = combine(root, x),
+					path = combine(root, x),
 					match = true;
 
 				if (stats.isDirectory()) {
-					if (stats.isSymbolicLink()){
+					if (stats.isSymbolicLink()) {
 						continue;
 					}
 					if (data.depth >= data.maxdepth) {
-                        continue;
-                    }
+						continue;
+					}
 
 					var dirroot = combine(root, x);
 
-                    //@TODO if patterns exists chech if this dirroot can be matched by any pattern
+					if (patterns) {
+                        var dirCanBeMatched = false;
+						for (var _i = 0, _length = patterns.length; _i < _length; _i++) {
+							var patternRootCount = patterns[_i].rootCount,
+								patternRoot = patterns[_i].root;
+							if (!patternRootCount || currentDepth > patternRootCount) {
+								dirCanBeMatched = true;
+								break;
+							}
 
-                    results = results.concat(walk(combine(dir, x), dirroot, data));
+							if (patternRoot.indexOf(dirroot) === 0) {
+								dirCanBeMatched = true;
+								break;
+							}
+							Log('Glob: Cant be matched %s | %s', dirroot, patternRoot, 90);
+						}
+
+						if (dirCanBeMatched === false) {
+							continue;
+						}
+					}
+
+                    Log('Glob: Match sub-', dirroot, 90);
+					results = results.concat(walk(combine(dir, x), dirroot, data));
 
 					continue;
 				}
@@ -88,14 +109,14 @@
 					}
 				}
 
-                if (match && excludes){
-                    for (var _i = 0, _length = excludes.length; _i < _length; _i++) {
+				if (match && excludes) {
+					for (var _i = 0, _length = excludes.length; _i < _length; _i++) {
 						if (excludes[_i].test(path)) {
 							match = false;
 							break;
 						}
 					}
-                }
+				}
 
 				if (match) {
 					results.push(path);
@@ -108,7 +129,7 @@
 		};
 
 
-	if (global.io == null){
+	if (global.io == null) {
 		global.io = {};
 	}
 
@@ -121,7 +142,7 @@
 					fsextra.mkdirpSync(folder);
 				}
 
-                Log && Log('io.utils:file.save', path, 99);
+				Log && Log('io.utils:file.save', path, 99);
 
 				try {
 					fs.writeFileSync(path, content);
@@ -166,7 +187,7 @@
 				return fs.existsSync(file);
 			},
 			readSync: function(file, asBuffer) {
-                Log && Log('io.utils:file.read', file, 99);
+				Log && Log('io.utils:file.read', file, 99);
 
 				var content = '';
 				try {
@@ -187,7 +208,7 @@
 					depth: 0,
 					maxdepth: ruqq.arr.max(patterns, 'depth') || Infinity,
 					patterns: patterns,
-                    excludes: excludes
+					excludes: excludes
 				});
 			},
 			ensure: function(dir) {
@@ -195,13 +216,13 @@
 					fsextra.mkdirpSync(dir);
 				}
 			},
-            symlinkSync: function(source, target){
-                try {
-                    fs.symlinkSync(source, target, 'dir');
-                }catch(error){
-                    console.log(color('red{symlink: bold{'+error.toString()+'}}'));
-                }
-            }
+			symlinkSync: function(source, target) {
+				try {
+					fs.symlinkSync(source, target, 'dir');
+				} catch (error) {
+					console.log(color('red{symlink: bold{' + error.toString() + '}}'));
+				}
+			}
 		}
 	};
 

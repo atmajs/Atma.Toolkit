@@ -21,6 +21,10 @@ include.exports = {
                         return;
                     }
 
+                    if (cfg.action == null){
+                        cfg.action = groupName;
+                    }
+
                     out.push(cfg);
                 });
 

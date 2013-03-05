@@ -24,6 +24,7 @@ include.js({
     'jshint', //
     'uglify', //
     'copy', //
+    'import', //
     ],
         program = require('commander'),
         args = program.args,
@@ -54,7 +55,7 @@ include.js({
 
 
     if (file.exists() == false) {
-        console.error('File doesnt exists (404)', file.uri.toLocalFile());
+        console.error('File doesnt exist (404)', file.uri.toLocalFile());
         return;
     }
 

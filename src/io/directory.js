@@ -74,16 +74,32 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 		}
 	});
 
-	function countDepth(pattern) {
+	function parseDirs(pattern) {
 		if (pattern[0] === '/') {
 			pattern = pattern.substring(1);
 		}
 
+        var depth = 0,
+            dirs = pattern.split('/');
+
 		if (~pattern.indexOf('**')) {
-			return Infinity;
+			depth = Infinity;
 		}
-		return pattern.split('/').length;
+		else {
+            depth = dirs.length;
+        }
+        // remove file
+        dirs.pop();
+        for(var i = 0; i < dirs.length; i++){
+            if (dirs[i].indexOf('*') == -1){
+                continue;
+            }
+            dirs.splice(i);
+        }
+
+        return [depth, dirs.length, dirs.join('/').toLowerCase()];
 	}
+
 
 	function parsePatterns(pattern, out) {
 		if (pattern == null) {
@@ -103,16 +119,19 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 			return out;
 		}
 		if (typeof pattern === 'string') {
-			var depth, regexp;
-			if (pattern[0] === '/') {
-				depth = countDepth(pattern = pattern.substring(1));
-			}
 
-			regexp = globToRegex(pattern);
+            if (pattern[0] === '/'){
+                pattern = pattern.substring(1);
+            }
 
-			if (depth) {
-				regexp.depth = depth;
-			}
+			var depth = null,
+                regexp = globToRegex(pattern),
+                triple = parseDirs(pattern);
+
+            regexp.depth = triple[0];
+            regexp.rootCount = triple[1];
+            regexp.root = triple[2];
+
 
 			out.push(regexp);
 			return out;
