@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "source.kit@gmail.com"
   },
-  "version": "0.7.01",
+  "version": "0.7.11",
   "bin": {
     "includejs": "includejs",
     "ijs": "includejs"

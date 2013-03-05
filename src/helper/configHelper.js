@@ -3,6 +3,9 @@ var program = require('commander');
 include.exports = {
 
 	prepairConfig: function prepairConfig(config) {
+
+        interpolate(config, config);
+
 		if (config instanceof Array === false) {
 
             if (typeof config === 'object' && !config.action){
@@ -10,7 +13,12 @@ include.exports = {
                 var groups = getCurrentGroups(config),
                     out = [];
 
-
+                for(var key in config){
+                    // action could be also group name
+                    if (typeof config[key] === 'object' && config[key].action == null){
+                        config[key].action = key;
+                    }
+                }
 
                 ruqq.arr.each(groups, function(groupName){
 
@@ -19,10 +27,6 @@ include.exports = {
                     if (cfg instanceof Array){
                         out = out.concat(cfg);
                         return;
-                    }
-
-                    if (cfg.action == null){
-                        cfg.action = groupName;
                     }
 
                     out.push(cfg);
@@ -36,8 +40,15 @@ include.exports = {
 
 		}
 
+
 		for (var i = 0, x, length = config.length; i < length; i++) {
 			x = config[i];
+
+            if (typeof x !== 'object'){
+                console.error('Config must be an Object', x);
+                return {};
+            }
+
 			if ('file' in x) {
 				parseFile(x);
 				parseType(x);
@@ -46,6 +57,9 @@ include.exports = {
 				parseOverrides(program, x);
 			}
 		}
+
+
+
 		return config;
 	}
 
@@ -171,4 +185,43 @@ function getCurrentGroups(config){
     Log('GroupedConfig - groups/overrides', groups, overrides, 95);
 
     return groups;
+}
+
+
+function interpolate(config, root){
+    if (config instanceof Array){
+        ruqq.arr.each(config, function(config){
+            interpolate(config, root);
+        });
+        return;
+    }
+
+    if (typeof config === 'object'){
+
+        for(var key in config){
+            if (typeof config[key] === 'object'){
+                interpolate(config[key], root);
+                continue;
+            }
+
+            if (typeof config[key] === 'string'){
+
+                var value = config[key].trim();
+
+                if (value.substring(0,2) !== '#['){
+                    continue;
+                }
+
+
+                value = value.substring(2, value.length - 1).trim();
+                value = Object.getProperty(root, value);
+                if (!value){
+                    console.warn('Seems to be interpolated value, but object doesnt exist', config[key]);
+                    continue;
+                }
+
+                config[key] = value;
+            }
+        }
+    }
 }
