@@ -48,7 +48,7 @@
 
             console.log(color(String.format('green{File Import %1 into %2}', uri.file, currentUri.file)));
 
-            return full + io.env.newLine + content;
+            return full.replace('import', 'source') + io.env.newLine + content;
         });
 	}
 
