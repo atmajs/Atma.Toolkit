@@ -1,11 +1,19 @@
 include.routes({
 	middleware: 'middleware/{0}.js'
 }).js({
-	middleware: ['hint', 'uglify', 'cssmin', 'coffee', 'less', 'condcomments', 'importer']
+	middleware: [ //
+	'hint', //
+	'uglify', //
+	'cssmin', //
+	'coffee', //
+	'less', //
+	'condcomments', //
+	'importer', //
+	]
 }).done(function(resp) {
 
 
-    var extensions = Object.getProperty(global, 'Settings.io.extensions') || {
+	var extensions = Object.getProperty(global, 'Settings.io.extensions') || {
 		'js': ['condcomments:read'],
 		'css': ['cssmin:write'],
 		'coffee': ['coffee:read'],
@@ -19,10 +27,10 @@ include.routes({
 	for (var key in extensions) {
 		var handlers = extensions[key];
 
-        if (handlers instanceof Array === false){
-            console.warn('Middleware list for ', key, 'is not an array');
-            continue;
-        }
+		if (handlers instanceof Array === false) {
+			console.warn('Middleware list for ', key, 'is not an array');
+			continue;
+		}
 
 		handlers.forEach(function(x) {
 

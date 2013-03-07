@@ -1,4 +1,6 @@
-(function(){
+include.js({
+    script: 'io/middleware/importer'
+}).done(function(resp){
 
     /**
      *  Config {
@@ -33,11 +35,9 @@
                 done && done(new Error('No files'));
             }
 
-            var js = Settings.io.extensions.js;
+            //var js = Settings.io.extensions.js;
 
-            if (js.indexOf('importer:read') === -1){
-                js.push('importer:read');
-            }
+            io.File.getHookHandler().unregister('read', resp.importer);
 
             ruqq.arr.each(files, function(x, index){
                 var file = new io.File(x);
@@ -46,9 +46,15 @@
                     return;
                 }
 
-                var dist = output instanceof Array ? output[index] : output;
+                var dist = output instanceof Array ? output[index] : output,
+                    code = file.read();
 
-                new io.File(net.URI.combine(dist, file.uri.file)).write(file.read());
+
+                resp.importer(file);
+
+                new io.File(net.URI.combine(dist, file.uri.file)).write(file.content);
+
+                file.content = code;
 
                 console.log('Done - ', file.uri.file);
             });
@@ -57,4 +63,4 @@
         }
     }
 
-}());
+});

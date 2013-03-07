@@ -14,10 +14,6 @@
 					return;
 				}
 
-                ////if (typeof file.content == 'object'){
-                ////    file.content = file.content.toString();
-                ////}
-
 				this.handler(file);
 			}
 		});
@@ -28,6 +24,11 @@
 			_hooks.push(new Hook(regexp, name, handler));
             return this;
 		},
+        unregister: function(name, handler){
+            ruqq.arr.remove(_hooks, function(hook){
+                return hook.name === name && hook.handler === handler;
+            });
+        },
 		trigger: function(funcName, file) {
 			_hooks.forEach(function(x) {
 				x.run(funcName, file);
