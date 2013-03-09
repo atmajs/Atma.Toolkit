@@ -26,9 +26,14 @@ include.js({
 
                 }
                 else{
-                    files = [files];
+                    files = files.split(';');
                 }
             }
+
+            if (typeof output === 'string' && ~output.indexOf(';')){
+                output = output.split(';');
+            }
+
 
             if (files instanceof Array === false){
                 console.error('Specify single/array of file(s) to process in {config}.files');
@@ -49,10 +54,20 @@ include.js({
                 var dist = output instanceof Array ? output[index] : output,
                     code = file.read();
 
+                if (!dist){
+                    console.error('output not defined at ', index, 'for resource', fiel.uri.file);
+                    return;
+                }
+
+                if (/\.[\w]{1,6}/g.test(dist)){
+                    // is file
+                }else{
+                    dist = net.URI.combine(dist, file.uri.file);
+                }
 
                 resp.importer(file);
 
-                new io.File(net.URI.combine(dist, file.uri.file)).write(file.content);
+                new io.File(dist).write(file.content);
 
                 file.content = code;
 
