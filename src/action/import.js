@@ -40,9 +40,9 @@ include.js({
                 done && done(new Error('No files'));
             }
 
-            //var js = Settings.io.extensions.js;
 
-            io.File.getHookHandler().unregister('read', resp.importer);
+            io.File.getHookHandler().register('read', resp.importer);
+            io.File.clearCache();
 
             ruqq.arr.each(files, function(x, index){
                 var file = new io.File(x);

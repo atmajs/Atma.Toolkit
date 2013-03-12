@@ -21,9 +21,16 @@
 
 	io.File.registerHookHandler({
 		register: function(regexp, name, handler) {
-			_hooks.push(new Hook(regexp, name, handler));
+            if (this.contains(name, handler) === false){
+                _hooks.push(new Hook(regexp, name, handler));
+            }
             return this;
 		},
+        contains: function(name, handler){
+            return ruqq.arr.first(_hooks, function(hook){
+                return hook.name === name && hook.handler === handler;
+            }) != null;
+        },
         unregister: function(name, handler){
             ruqq.arr.remove(_hooks, function(hook){
                 return hook.name === name && hook.handler === handler;
