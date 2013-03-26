@@ -94,6 +94,10 @@ include.js({
 				for (var i = 0, resource, length = stack.length; i < length; i++) {
 					resource = stack[i];
 
+                    if (resource.ast == null){
+                        continue;
+                    }
+
 					resp.JS.reduceIncludes(resource);
 
                     var setCurrentInclude = defineCurrentInclude(i, resource);
