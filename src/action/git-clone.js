@@ -63,14 +63,12 @@
     })
 
     var Git = {
-        clone: function(idfr) {
+        clone: function(done) {
             var dir = new io.Directory(io.env.currentDir);
 
             dir.uri = dir.uri.combine('libjs/');
             if (dir.exists()) {
-                console.error('LibJS Directory Already Exists');
-
-                idfr.resolve(1);
+                done('LibJS Directory Already Exists');
                 return;
             }
             dir.ensure();
@@ -99,7 +97,7 @@
                 resolve: function(){
                     new RoutesJob(dir.uri.toLocalDir());
 
-                    idfr.resolve();
+                    done()
                 }
             }).process();
         }
