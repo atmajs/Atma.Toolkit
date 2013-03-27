@@ -1,9 +1,10 @@
-li class="#{ :completed ? 'completed'}"  {
-	visible check='visible?' bind='visible';
-	div.view {
-		input.toggle type="checkbox" checked="#{: completed ? 'true'}";
-		label > bind value='label';
+li.~[:completed ? 'completed' ]  {
+	:visible check='visible?' bind='visible';
+
+    .view {
+		input.toggle type="checkbox" checked="~[: completed ? 'true']";
+		label > '~[bind:label]';
 		button.destroy;
 	}
-	input.edit > bind value='label' attr='value';
-}	
+	input.edit > :bind value='label' attr='value';
+}

@@ -3,14 +3,18 @@ var __eval = function(source, include) {
 	"use strict";
 	
 	var iparams = include && include.route.params;
-	
+
+	/* if (!DEBUG)	
 	try {
-		return eval(source);
+	*/
+		return eval.call(window, source);
+	/* if (!DEBUG)
 	} catch (error) {
 		error.url = include && include.url;
 		//Helper.reportError(error);
 		console.error(error);
 	}
+	*/
 	
 };
 
@@ -55,21 +59,31 @@ var Helper = { /** TODO: improve url handling*/
 			if (cfg.path && url[0] == '/') {
 				url = cfg.path + url.substring(1);
 			}
-			if (url[0] == '/') {
-				if (isWeb === false || cfg.lockedToFolder === true) {
-					return url.substring(1);
-				}
-				return url;
-			}
+
 			switch (url.substring(0, 5)) {
-			case 'file:':
-			case 'http:':
-				return url;
+				case 'file:':
+				case 'http:':
+					return url;
 			}
 
-			if (parent != null && parent.location != null) {
-				return parent.location + url;
+			if (url.substring(0,2) === './'){
+				url = url.substring(2);
 			}
+
+
+			if (url[0] === '/') {
+				if (isWeb === false || cfg.lockedToFolder === true) {
+					url = url.substring(1);
+				}
+			}else if (parent != null && parent.location != null) {
+				url = parent.location + url;
+			}
+
+
+			while(url.indexOf('../') > -1){
+				url = url.replace(/[^\/]+\/\.\.\//,'');
+			}
+
 			return url;
 		}
 	},
@@ -128,6 +142,7 @@ var Helper = { /** TODO: improve url handling*/
 		xhr.open('GET', typeof resource === 'object' ? resource.url : resource, true);
 		xhr.send();
 	};
+
 var RoutesLib = function() {
 
 	var routes = {},
@@ -339,6 +354,16 @@ var Events = (function(document) {
 		}
 	};
 })(document);
+
+/**
+ * STATES:
+ * 0: Resource Created
+ * 1: Loading
+ * 2: Loaded - Evaluating
+ * 3: Evaluated - Childs Loading
+ * 4: Childs Loaded - Completed
+ */
+
 var IncludeDeferred = function() {
 	this.callbacks = [];
 	this.state = 0;
@@ -347,7 +372,7 @@ var IncludeDeferred = function() {
 IncludeDeferred.prototype = { /**	state observer */
 
 	on: function(state, callback) {
-		state <= this.state ? callback(this) : this.callbacks.unshift({
+		state <= this.state ? callback(this) : this.callbacks[this.state < 3 ? 'unshift':'push']({
 			state: state,
 			callback: callback
 		});
@@ -359,29 +384,29 @@ IncludeDeferred.prototype = { /**	state observer */
 
 		if (state > this.state) {
 			this.state = state;
+		}
 
-			if (this.state === 3) {
-				var includes = this.includes;
+		if (this.state === 3) {
+			var includes = this.includes;
 
-				if (includes != null && includes.length) {
-					for (i = 0; i < includes.length; i++) {
-						if (includes[i].resource.state != 4) {
-							return;
-						}
+			if (includes != null && includes.length) {
+				for (i = 0; i < includes.length; i++) {
+					if (includes[i].resource.state != 4) {
+						return;
 					}
 				}
-
-				this.state = 4;
 			}
+
+			this.state = 4;
 		}
 
 		i = 0;
 		length = this.callbacks.length;
-		
+
 		if (length === 0){
 			return;
 		}
-		
+
 		//do not set asset resource to global
 		if (this.type === 'js' && this.state === 4) {
 			currentInclude = global.include;
@@ -390,25 +415,29 @@ IncludeDeferred.prototype = { /**	state observer */
 
 		for (; i < length; i++) {
 			x = this.callbacks[i];
-			if (x.state > this.state) {
+			if (x == null || x.state > this.state) {
 				continue;
 			}
-			
+
 			this.callbacks.splice(i,1);
 			length--;
 			i--;
-			
+
+			/* if (!DEBUG)
 			try {
+			*/
 				x.callback(this);
+			/* if (!DEBUG)
 			} catch(error){
 				console.error(error.toString(), 'file:', this.url);
 			}
-			
+			*/
+
 			if (this.state < 4){
 				break;
 			}
 		}
-		
+
 		if (currentInclude != null){
 			global.include = currentInclude;
 		}
@@ -417,9 +446,12 @@ IncludeDeferred.prototype = { /**	state observer */
 	/** idefer */
 
 	ready: function(callback) {
+		var that = this;
 		return this.on(4, function() {
-			Events.ready(this.resolve.bind(this, callback));
-		}.bind(this));
+			Events.ready(function(){
+				that.resolve(callback);
+			});
+		});
 	},
 	/** assest loaded and window is loaded */
 	loaded: function(callback) {
@@ -429,23 +461,29 @@ IncludeDeferred.prototype = { /**	state observer */
 	},
 	/** assets loaded */
 	done: function(callback) {
-		return this.on(4, this.resolve.bind(this, callback));
+		var that = this;
+		return this.on(4, function(){
+			that.resolve(callback);
+		});
 	},
 	resolve: function(callback) {
-		if (this.includes.length > 0 && this.response == null){
+		var includes = this.includes,
+			length = includes == null ? 0 : includes.length;
+
+		if (length > 0 && this.response == null){
 			this.response = {};
-			
+
 			var resource, route;
-			
-			for(var i = 0, x, length = this.includes.length; i<length; i++){
-				x = this.includes[i];
+
+			for(var i = 0, x; i < length; i++){
+				x = includes[i];
 				resource = x.resource;
 				route = x.route;
-				
+
 				if (!resource.exports){
 					continue;
 				}
-				
+
 				var type = resource.type;
 				switch (type) {
 				case 'js':
@@ -454,21 +492,22 @@ IncludeDeferred.prototype = { /**	state observer */
 
 					var alias = route.alias || Routes.parseAlias(route),
 						obj = type == 'js' ? this.response : (this.response[type] || (this.response[type] = {}));
-					
+
 					if (alias) {
-						obj[alias] = resource.exports;						
+						obj[alias] = resource.exports;
 						break;
 					} else {
 						console.warn('Resource Alias is Not defined', resource);
 					}
 					break;
 				}
-				
-			}	
+
+			}
 		}
 		callback(this.response);
 	}
 };
+
 var Include = (function() {
 
 	function embedPlugin(source) {
@@ -476,6 +515,10 @@ var Include = (function() {
 	}
 
 	function enableModules() {
+		if (typeof Object.defineProperty === 'undefined'){
+			console.warn('Browser do not support Object.defineProperty');
+			return;
+		}
 		Object.defineProperty(global, 'module', {
 			get: function() {
 				return global.include;
@@ -485,7 +528,7 @@ var Include = (function() {
 		Object.defineProperty(global, 'exports', {
 			get: function() {
 				var current = global.include;
-				return (current.exports || (current.export = {}));
+				return (current.exports || (current.exports = {}));
 			},
 			set: function(exports) {
 				global.include.exports = exports;
@@ -505,7 +548,8 @@ var Include = (function() {
 				console.error("Current Resource should be loaded");
 			}
 
-			resource.state = 2;
+			/**@TODO - probably state shoulb be changed to 2 at this place */
+			resource.state = 3;
 			global.include = resource;
 
 		},
@@ -622,8 +666,12 @@ var Include = (function() {
 			return new Resource();
 		},
 
-		getResource: function(url) {
+		getResource: function(url, type) {
 			var id = (url[0] == '/' ? '' : '/') + url;
+
+			if (type != null){
+				return bin[type][id];
+			}
 
 			for (var key in bin) {
 				if (bin[key].hasOwnProperty(id)) {
@@ -664,6 +712,7 @@ var Include = (function() {
 
 	return Include;
 }());
+
 /** @TODO Refactor loadBy* {combine logic} */
 
 var ScriptStack = (function() {
@@ -761,7 +810,7 @@ var ScriptStack = (function() {
 			resource.state = 1;
 			global.include = resource;
 
-			//console.log('evaling', resource.url, stack.length);			
+			//console.log('evaling', resource.url, stack.length);
 			__eval(resource.source, resource);
 
 			for (var i = 0, x, length = stack.length; i < length; i++) {
@@ -806,6 +855,10 @@ var ScriptStack = (function() {
 				return;
 			}
 
+			if (cfg.sync === true) {
+				currentResource = null;
+			}
+
 
 			if (resource.source) {
 				resource.state = 2;
@@ -824,35 +877,53 @@ var ScriptStack = (function() {
 				processByEval();
 			});
 		},
-		/** Move resource in stack close to parent */
+		/* Move resource in stack close to parent */
 		moveToParent: function(resource, parent) {
-			var i, length, x, tasks = 2;
+			var length = stack.length,
+				parentIndex = -1,
+				resourceIndex = -1,
+				x, i;
 
-			for (i = 0, x, length = stack.length; i < length && tasks; i++) {
-				x = stack[i];
-
-				if (x === resource) {
-					stack.splice(i, 1);
-					length--;
-					i--;
-					tasks--;
-				}
-
-				if (x === parent) {
-					stack.splice(i, 0, resource);
-					length++;
-					i++;
-					tasks--;
+			for (i = 0; i < length; i++) {
+				if (stack[i] === resource) {
+					resourceIndex = i;
+					break;
 				}
 			}
 
-			if (parent == null) {
-				stack.unshift(resource);
+			if (resourceIndex === -1) {
+				// this should be not the case, but anyway checked.
+				console.error('Bug - Resource is not in stack', resource);
+				return;
 			}
+
+			for (i= 0; i < length; i++) {
+				if (stack[i] === parent) {
+					parentIndex = i;
+					break;
+				}
+			}
+
+			if (parentIndex === -1) {
+				//// - should be already in stack
+				////if (parent == null) {
+				////	stack.unshift(resource);
+				////}
+				return;
+			}
+
+			if (resourceIndex < parentIndex) {
+				return;
+			}
+
+			stack.splice(resourceIndex, 1);
+			stack.splice(parentIndex, 0, resource);
+
 
 		}
 	};
 })();
+
 var CustomLoader = (function() {
 
 	var _loaders = {};
@@ -866,7 +937,8 @@ var CustomLoader = (function() {
 		}
 
 		var loaderRoute = cfg.loader[extension],
-			path, namespace;
+			path = loaderRoute,
+			namespace = null;
 
 		if (typeof loaderRoute === 'object') {
 			for (var key in loaderRoute) {
@@ -883,7 +955,7 @@ var CustomLoader = (function() {
 		load: function(resource, callback) {
 
 			var loader = createLoader(resource.url);
-			loader.done(function() {				
+			loader.done(function() {
 				XHR(resource, function(resource, response) {
 					callback(resource, loader.exports.process(response, resource));
 				});
@@ -901,6 +973,7 @@ var CustomLoader = (function() {
 		}
 	};
 }());
+
 var LazyModule = {
 	create: function(xpath, code) {
 		var arr = xpath.split('.'),
@@ -1040,12 +1113,10 @@ var Resource = (function(Include, IncludeDeferred, Routes, ScriptStack, CustomLo
 		var resource = bin[type] && bin[type][id];
 		if (resource) {
 
-			if (resource.state === 0 && type == 'js') {
+			if (resource.state < 4 && type == 'js') {
 				ScriptStack.moveToParent(resource, parent);
 			}
 
-			//// @done - @remove - @TODO - [fix] - multiple routes by one resource for multiple parents
-			////resource.route = route;
 			return resource;
 		}
 
@@ -1071,29 +1142,30 @@ var Resource = (function(Include, IncludeDeferred, Routes, ScriptStack, CustomLo
 
 	Resource.prototype = Helper.extend({}, IncludeDeferred, Include, {
 		include: function(type, pckg) {
-			this.state = this.state >= 3 ? 3 : 1;
+			var that = this;
+			this.state = this.state >= 3 ? 3 : 2;
 
 			if (this.includes == null) {
 				this.includes = [];
 			}
 			if (this.childLoaded == null){
-				this.childLoaded = childLoaded.bind(this, this);
+				this.childLoaded = function(child){
+					childLoaded.call(that, that, child);
+				};
 			}
 
 			this.response = null;
 
-			var _childLoaded = childLoaded.bind(this);
-
 			Routes.each(type, pckg, function(namespace, route, xpath) {
 
-				var resource = new Resource(type, route, namespace, xpath, this);
+				var resource = new Resource(type, route, namespace, xpath, that);
 
-				this.includes.push({
+				that.includes.push({
 					resource: resource,
 					route: route
 				});
-				resource.on(4, this.childLoaded);
-			}.bind(this));
+				resource.on(4, that.childLoaded);
+			});
 
 			return this;
 		}

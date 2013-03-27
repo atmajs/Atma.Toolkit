@@ -4,9 +4,8 @@ include.load('todoTask.mask').done(function(response){
         ESCAPE_KEY = 2,
 		taskTemplate = response.load.todoTask;
 
-    mask.registerHandler('todoTask', Class({
-        Base: Compo,
-        Construct: function(model) {
+    mask.registerHandler(':todoTask', Compo({
+        constructor: function(model) {
             this.model = model;
             this.compos = {
                 input: '$: .edit',
@@ -16,6 +15,7 @@ include.load('todoTask.mask').done(function(response){
 				template : taskTemplate
 			};
         },
+
 
         /** we dont override render function, as in {todoApp.js}, so that this view will recieve raw model object */
 
@@ -30,7 +30,7 @@ include.load('todoTask.mask').done(function(response){
             'dblclick: .view': function(e) {
                 if (this.model.completed) return;
                 this.$.addClass('editing');
-                this.compos.input.val(this.model.label).focus();				
+                this.compos.input.val(this.model.label).focus();
             },
             'blur: .edit': function(){
                 this.$.removeClass('editing');
@@ -43,7 +43,7 @@ include.load('todoTask.mask').done(function(response){
         status: function(isCompleted) {
             this.$.toggleClass('completed', (this.model.completed = isCompleted));
             this.compos.checkbox.prop('checked', isCompleted);
-            
+
             return this;
         },
         editSave: function(label) {

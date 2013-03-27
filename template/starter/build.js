@@ -1,51 +1,63 @@
+global.config = {
+	build: {
+		file: "index.dev.html",
+		outputMain: "index.html",
+		outputSources: "index.build",
+		minify: true,
+		/** UglifyJS compressor settings */
+		uglify: {},
+		/** is used in UglifJS:def_globals and in conditional comment derectives */
+		defines: {
+			DEBUG: false
+		},
+		jshint: JSHint()
+	}
+};
 
-global.config = [{
-	file: "index.dev.html",
-	outputMain: "index.html",
-	outputSources: "index.build",
-	action: "build",
-	minify: true,
-	/** UglifyJS compressor settings */
-	uglify: {		
-	},
-	/** is used in UglifJS:def_globals and in conditional comment derectives */
-	defines: {
-		DEBUG: false
-	},
-	jshint: {
+
+function JSHint() {
+
+	return {
 		options: {
-			"curly": true,
-			"eqeqeq": false,
-			"immed": true,
-			"latedef": true,
-			"newcap": false,
-			"noarg": true,
-			"sub": true,
-			"undef": true,
-			"boss": false,
-			"eqnull": true,
-			"node": true,
-			"es5": true,
-			"strict": false,
-			"smarttabs": true,
-			"expr": true,
-			"evil": true
-		},
+			curly: true,
+			eqeqeq: true,
+			forin: true,
+			immed: true,
+			latedef: true,
+			newcap: true,
+			noarg: true,
+			noempty: true,
+			nonew: true,
+			regexp: true,
+			undef: true,
+			unused: true,
+			strict: true,
+			trailing: true,
 
-		"globals": {
-			"window": false,
-			"document": false,
-			"XMLHttpRequest": false,
-			"IncludeRewrites": false,
-			"Class": false,
-			"Compo": false,
-			"CompoUtils": false,
-			"mask": false,
-			"ruqq": false,
-			"include": false,
-			"$": false
+			boss: true,
+			eqnull: true,
+			es5: true,
+			lastsemic: true,
+			browser: true,
+			node: true,
+			onevar: false,
+			evil: true,
+			sub: true,
 		},
+		globals: {
+			define: false,
+			require: false,
+			window: false,
+			document: false,
+			XMLHttpRequest: false,
+			$: false,
 
+			include: false,
+			mask: false,
+			ruqq: false,
+			Compo: false,
+			Class: false
+		},
 		/** files to ingore */
 		ignore: {
 			"iscroll-full.js": 1,
@@ -53,5 +65,5 @@ global.config = [{
 			"prism.lib.js": 1,
 			"jquery.js": 1
 		}
-	}
-}];
+	};
+}

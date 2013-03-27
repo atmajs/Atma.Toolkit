@@ -7,9 +7,11 @@ include.routes({
 	lib: 'compo',
 	script: ['first'],
 	mycoffee: 'coffee',
-	component: ['reloaded'], 
+	component: ['reloaded'],
 }).done(function(resp){
 
 	document.body.appendChild(mask.render(document.getElementById('layout').innerHTML));
-	new Compo('div > reloaded; h1 > "Completed"').render({}).insert(document.body);
+
+    jmask('div > reloaded; h1 > "Completed"').appendTo(document.body);
+    
 });

@@ -2,19 +2,23 @@ window.DEBUG = true;
 
 include.routes(%ROUTES%);
 
-if (window.DEBUG && window.location.hash.indexOf('!watch') > -1){
-	include.embed({
+if (DEBUG){
+	include.plugin({
 		lib: 'include/include.autoreload'
 	});
 }
 
-include.cfg({
-	loader: {
-		'coffee': {
-			lib: 'include/loader/coffee/loader'
-		},
-		'less': {
-			lib: 'include/loader/less/loader'	
+if (window.location.href.indexOf('file:') === 0){
+    // use custom loader only in file protocol, assume server to handle coffeescript and less
+	include.cfg({
+		loader: {
+			'coffee': {
+				lib: 'include/loader/coffee/loader'
+			},
+			'less': {
+				lib: 'include/loader/less/loader'
+			}
 		}
-	}
-});
+	});
+
+}

@@ -1,9 +1,7 @@
 (function(global) {
 
 
-	global.include.js({
-		lib: ['mask', 'mask/plugin.reload::reloadPlugin' ]
-	}).embed('/socket.io/socket.io.js').done(function(resp) {
+	global.include.instance().embed('/socket.io/socket.io.js').done(function(resp) {
 
 		if (!global.io) {
 			return;
@@ -22,15 +20,6 @@
 	function fileChanged(path) {
 		var ext = /\w+$/g.exec(path)[0],
 			resource = include.getResource(path);
-
-		if (resource && resource.reload) {
-			XHR(path, function(path, response) {
-
-				global.include = resource;
-				resource.reload(response);
-			});
-			return;
-		}
 
 		if (resource){
 			if (resource.reload){
@@ -77,6 +66,10 @@
 
 				if (!href) {
 					continue;
+				}
+
+				if (href[0] == '/'){
+					href = href.substring(1);
 				}
 
 				if (~href.indexOf('?')) {

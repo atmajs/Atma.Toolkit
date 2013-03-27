@@ -3,19 +3,19 @@ include //
 .css('#{name}.css') //
 .done(function(resp){
 
-	mask.registerHandler('#{name}', Class({
-		Base: Compo,
-		Construct: function(){
+	mask.registerHandler('#{name}', Compo({
+		constructor: function(){
 			this.attr = {
 				'template': resp.load.Template,
 				'class': '#{name}'
 			};
 		},
-		render: function(model, container, cntx){
-			
-			Compo.render(this, model, container, cntx);
-
-		}
+        onRenderStart: function(model, cntx, container){
+            // ..
+        },
+        onRenderEnd: function(elements, cntx, container){
+            // ..
+        }
 	}));
 
 
