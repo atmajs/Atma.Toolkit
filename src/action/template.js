@@ -23,7 +23,7 @@
                 });
 
                 if (config.sourceDir.exists() == false) {
-					return done && done(new Error('Source Directory Not Found - ' + sourceDir.uri.toString()));
+					return done && done('Scaffolding Not Found - ' + config.sourceDir.uri.toString());
 				}
 
                 var handler = new io.File(config.sourceDir.uri.combine('/.handler/handler.js'));
