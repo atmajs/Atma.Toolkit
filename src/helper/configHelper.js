@@ -14,7 +14,7 @@ include.exports = {
                     out = [];
 
                 for(var key in config){
-                    // action could be also group name
+                    // action could be also a group name
                     if (typeof config[key] === 'object' && config[key].action == null){
                         config[key].action = key;
                     }
