@@ -16,9 +16,8 @@
 
 
 
-	include.exports = function(file) {
-        var code = file.content,
-            defines;
+	include.exports = function(file, defines) {
+        var code = file.content;
 
         if (defines == null){
             return;
@@ -36,38 +35,41 @@
 
 
 
-	var condition = /\/\*[\s]*if/g,
-		commentEnd = /\*\//g,
-		inlineEnd = /\/\*[\s]*if[^\n\r]+\*\//g,
-		endIf = /\/\*[\t ]*endif[\t ]*\*\//g;
+	var reg_commentEnd = /\*\//g,
+		reg_inlineEnd = /\/\*[ \t]*if[^\n\r]+\*\//g,
+		reg_endIf = /(\/\*[\t ]*endif[\t ]*\*\/)|([ \t]*\/\/[ \t]*endif[ \t]*$)/gm,
+		reg_expression = /^[ \t]*((\/\/)|(\/\*))[ \t]*if[ \t]*(([^\s]+$)|(\([^)\n\r]+\)))/gm;
 
 	function process(code, index, defines) {
 
-		condition.lastIndex = index || 0;
-		var match = condition.exec(code);
+		reg_expression.lastIndex = index || 0;
+
+
+		var match = reg_expression.exec(code);
 
 		if (match == null) {
 			return code;
 		}
 
-		inlineEnd.lastIndex = match.index;
 
-		var derectiveEnd = code.indexOf(')', match.index) + 1,
-			derective = code.substring(code.indexOf('(', match.index), derectiveEnd),
+		var expression = match[4],
+			expressionEnd = match.index + match[0].length,
 			doAction = null;
 
-
-
 		try {
-			doAction = !! (eval(stringifyDefines(defines) + ';' + derective));
+			doAction = !! (eval(stringifyDefines(defines) + ';' + expression));
 		} catch (error) {
 			console.warn('Conditional derective: ', error.toString());
 		}
 
-		var inlineEndMatch = inlineEnd.exec(code),
-			area = inlineEndMatch && inlineEndMatch.index == match.index ? 'uncommented' : 'commented',
+		console.warn('>', expression, doAction);
+
+		reg_inlineEnd.lastIndex = match.index;
+
+		var reg_inlineEndMatch = reg_inlineEnd.exec(code),
+			area = match[1] === '//' || (reg_inlineEndMatch && reg_inlineEndMatch.index == match.index) ? 'uncommented' : 'commented',
 			out = {
-				index: derectiveEnd,
+				index: expressionEnd,
 				derectiveStart: match.index
 			};
 
@@ -83,9 +85,9 @@
 	}
 
 	function uncomment(code, from) {
-		commentEnd.lastIndex = from.index;
+		reg_commentEnd.lastIndex = from.index;
 
-		var match = commentEnd.exec(code),
+		var match = reg_commentEnd.exec(code),
 			end = match.index + match[0].length,
 			value = code.substring(0, from.derectiveStart) + code.substring(from.index, match.index) + code.substring(end);
 
@@ -96,8 +98,8 @@
 	}
 
 	function comment(code, from) {
-		endIf.lastIndex = from.index;
-		var match = endIf.exec(code);
+		reg_endIf.lastIndex = from.index;
+		var match = reg_endIf.exec(code);
 
 		var value = code.substring(0, from.derectiveStart) + code.substring(match.index + match[0].length);
 
