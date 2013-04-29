@@ -65,7 +65,7 @@ include.js({
                     dist = net.URI.combine(dist, file.uri.file);
                 }
 
-                resp.importer(file);
+                resp.importer(file, config.defines);
 
                 new io.File(dist).write(file.content);
 

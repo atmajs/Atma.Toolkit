@@ -62,7 +62,6 @@
 			console.warn('Conditional derective: ', error.toString());
 		}
 
-		console.warn('>', expression, doAction);
 
 		reg_inlineEnd.lastIndex = match.index;
 
