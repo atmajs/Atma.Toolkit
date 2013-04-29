@@ -1,0 +1,28 @@
+:document {
+	head {
+		title > 'Title'
+		meta http-equiv="Content-Type" content="text/html;charset=utf-8";
+
+		link href="style/base.css";
+
+
+		script src=".reference/libjs/include/lib/include.js";
+		script src="include.routes.js";
+		script src="script/main.js";
+	}
+
+	body {
+
+		section#todoapp{
+			// app controller
+			:todoApp;
+		}
+		footer#info {
+			p { 'Double-click to edit a todo' }
+			p { 'Template by ' a href="http://github.com/sindresorhus" > 'Sindre Sorhus' }
+			p { 'Created by ' a href="http://libjs.it" > 'tenbits' }
+			p { 'Part of ' a href="http://todomvc.com" > 'TodoMVC' }
+		}
+
+	}
+}

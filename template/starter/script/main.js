@@ -1,6 +1,6 @@
 include.js({
 	ruqq: ['dom/jquery', 'arr', 'routes'],
-	lib: ['mask', 'compo']
+	lib: ['mask']
 }).ready(function(){
 
     var App = Compo({

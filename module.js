@@ -6,7 +6,7 @@ if (typeof includeLib === 'undefined'){
     require('socket.io');
 }
 
-var dir = __dirname + '/';
+var dir = __dirname.replace(/\\/g, '/') + '/';
 
 if (typeof io === 'object' && io.env){
     dir = io.env.applicationDir.toLocalDir();
@@ -42,7 +42,7 @@ include.cfg({
     module.exports = resp;
 
     include.cfg({
-        path: 'file:///' + process.cwd() + '/'
+        path: 'file:///' + process.cwd().replace(/\\/g, '/') + '/'
     });
 
     global.include = include.instance(module.parent && module.parent.id);

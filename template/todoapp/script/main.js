@@ -9,7 +9,7 @@ include
 })
 .js({
 	ruqq: ['arr', 'utils', 'routes', 'dom/jquery'],
-	lib: ['mask', 'compo', 'mask.binding'],
+	lib: ['mask'],
 	script: 'model',
 	appcompo: 'todoApp',
 }).ready(function() {
@@ -21,5 +21,5 @@ include
     });
 
 
-    Compo.initialize(App, tasksDB, document.body);
+    Compo.initialize(App, tasksDB, {}, document.body);
 });
