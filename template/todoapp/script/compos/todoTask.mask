@@ -1,10 +1,24 @@
-li.~[:completed ? 'completed' ]  {
-	:visible check='visible?' bind='visible';
 
-    .view {
-		input.toggle type="checkbox" checked="~[: completed ? 'true']";
-		label > '~[bind:label]';
-		button.destroy;
+// actually, we bind here to 'completed' property, recalculate visibility, and if visible - show
+%% visible = 'updateVisible(completed) && visible' {
+
+	li.~[bind:completed ? 'completed']  x-signal='dblclick: edit' {
+
+		.view {
+			input.toggle type="checkbox" {
+				:dualbind
+					log // just an example - logs when dom/object changes
+					x-signal='dom: taskState'
+					property="element.checked"
+					expression = "completed ? 'checked' : '' ";
+			}
+
+			label > '~[bind:label]';
+			button.destroy x-signal='click:taskRemove';
+		}
+		input.edit
+			x-signal='blur:inputBlur; keydown:inputChar'
+			value='~[bind:label]';
+
 	}
-	input.edit > :bind value='label' attr='value';
 }

@@ -3,13 +3,25 @@ include //
 .css('#{name}.css') //
 .done(function(resp){
 
-	mask.registerHandler('#{name}', Compo({
-		constructor: function(){
-			this.attr = {
-				'template': resp.load.Template,
-				'class': '#{name}'
-			};
-		},
+	mask.registerHandler(':#{name}', Compo({
+		template: resp.load.Template,
+
+		//compos: {
+		//
+		//},
+		//events: {
+		//
+		//},
+		//slots: {
+		//
+		//},
+		//pipes: {
+		//
+		//},
+		//constructor: function(){
+		//
+		//},
+
         onRenderStart: function(model, cntx, container){
             // ..
         },

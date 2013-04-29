@@ -1,30 +1,46 @@
 header#header{
     h1 > 'todos'
-    input#new-todo placeholder="What needs to be done?" autofocus;
+    input#new-todo placeholder="What needs to be done?" autofocus x-signal='keypress: inputChar';
 }
 
 section#main {
-    input#toggle-all type="checkbox" {
-        :bind value='status.allCompleted' prop='checked';
-        :visible check='status.count>0?' bind='status.count';
-    }
+
+    %% log='status.todoCount == 0 ? "checked" : ""';
+    %% log='status.todoCount';
+
+    input#toggle-all
+        type="checkbox"
+        checked='~[bind: status.todoCount == 0 ? "checked" : "" ]'
+        x-signal='click: toggleAll';
 
     label for="toggle-all" > 'Mark all as complete'
-    ul#todo-list > %.tasksList each='collection.tasks' > :todoTask;
+    ul#todo-list {
+        // binded list
+        %% each='collection.tasks' > :todoTask;
+    }
 }
 
-footer#footer > :visible check="status.count>0" bind='status.count' {
+%% visible='status.count > 0' {
 
-    span#todo-count > :bind value='status.todos';
+    footer#footer {
 
-    ul#filters > % each='filters' > li {
-        a.~[bind:selected] href="#/~[action]" {
-            
-            '~[title]'
+        span#todo-count {
+            strong > '~[bind: status.todoCount]'
+            span > ' item~[bind: status.todoCount != 1 ? "s" : ""] left'
         }
-    }
 
-    button#clear-completed > :visible check='status.completed>0?' bind='status.completed' {
-        'Clear completed (~[bind:status.completed])'
+        ul#filters > % each='filters' > li {
+            a.~[bind:selected] href="#~[action]" {
+
+                '~[title]'
+            }
+        }
+
+
+        %% visible='status.completedCount > 0' {
+            button#clear-completed x-signal='click:removeCompleted' {
+                'Clear completed (~[bind:status.completedCount])'
+            }
+        }
     }
 }
