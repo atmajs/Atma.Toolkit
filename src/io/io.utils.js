@@ -218,7 +218,7 @@
 			},
 			symlinkSync: function(source, target) {
 				try {
-					fs.symlinkSync(source, target, 'dir');
+					fs.symlinkSync(source, target, 'junction');
 				} catch (error) {
 					console.log(color('red{symlink: bold{' + error.toString() + '}}'));
 				}
