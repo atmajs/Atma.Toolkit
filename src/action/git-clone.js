@@ -85,9 +85,9 @@
             }, {
                 path: 'git://github.com/tenbits/RuqqJS.git',
                 name: 'ruqq'
-            }, {
-                path: 'git://github.com/tenbits/CompoJS.git',
-                name: 'compo'
+            },{
+                path: 'git://github.com/tenbits/mask-animation.git',
+                name: 'mask.animation'
             }, {
                 path: 'git://github.com/tenbits/Compos.git',
                 name: 'compos'
