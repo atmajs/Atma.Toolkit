@@ -151,9 +151,11 @@ include.exports = {
 /*
     Any require(module) could also be resolved from global npm directory
 
-    Example, you have installed jQuery globaly - > npm install jquery -g
-    and you can use it from the script as if it was install in a directory, where
+    Example, you have installed jQuery globally - > npm install jquery -g
+    and you can use it from the script as if it was installed in a directory, where
     scriptPath.js is located.
+
+    var jquery = require('jquery');
     This is perfect for a cli scripting.
 
     Also you can use IncludeJS API here - as io.File:
@@ -252,6 +254,3 @@ Sample:
 	}
 }
 ```
-
-
-
