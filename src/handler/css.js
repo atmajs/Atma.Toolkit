@@ -15,7 +15,7 @@ include.js({
             var file = new io.File(resource.uri);
             
             if (file.copyImagesTo == null){
-                console.error('Error: No copyImagesTo', resource.uri.toLocalFile());
+                console.error('Error: Not implemented copyImagesTo', resource.uri.toLocalFile());
             }
             
             resource.content = file.copyImagesTo(outputDirectoryUri).content;

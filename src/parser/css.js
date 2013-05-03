@@ -3,20 +3,24 @@ include.exports = {
 
 		var regexp = new RegExp(/url[\s]*\(('|")?([^)'"]+)('|")?\)/gi),
 		    imgbin = [],
-		    match = regexp.exec(content);
+		    match = regexp.exec(content),
+			href;
 
-		while (match) {
-			if (!match[2]) {
+		while (match && match.length > 1 && match[2]) {
+			href = match[2].trim();
+			
+			if (!href) {
 				console.error('NOT MATCHED', match);
 			}
-			console.log('CSS match', match[2]);
+			console.log('CSS match', href);
 
-			var imguri = new net.URI(match[2]);
+			var imguri = new net.URI(href),
+				base = href[0] === '/' ? baseuri : uri;
 
 			imgbin.push({
 				mimeType: 'image/png',
-				href: match[2],
-				uri: imguri.isRelative() ? uri.combine(imguri) : imguri,
+				href: href,
+				uri: imguri.isRelative() ? base.combine(imguri) : imguri,
 				baseuri: uri
 			});
 
