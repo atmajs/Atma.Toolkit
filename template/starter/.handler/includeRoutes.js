@@ -1,45 +1,29 @@
-(function() {
+include.js({
+	helper: ['stdout', 'globalProjects::Projects']
+}).done(function(resp) {
 
     var fs = require('fs'),
-        color;
+        color = resp.stdout.color;
 
-    include.js({
-		helper: 'stdout'
-	}).done(function(resp) {
-		color = resp.stdout.color;
-	});
-
+	
     io.File.getFactory().registerHandler(/include\.routes\.js$/g, Class({
         Base: io.File,
         copyTo: function(uri){
             var source = this.read(),
-                globals = JSON.parse(new io.File(io.env.applicationDir.combine('globals.txt')).read()),
-                referenceDir = uri.combine('.reference/'),
-                projects = {};
+                globals = resp.Projects(),
+                referenceDir = uri.combine('.reference/');
 
-            for(var key in globals.defaultRoutes){
-                var path = globals.defaultRoutes[key];
+			if (!globals || !globals.projects) {
+				console.warn('globals.txt errored - include.routes wont be copied');
+				return;
+			}
+				
+			var projects = globals.projects,
+				key;
 
-                var projectName = /^\{[\w]+\}/.exec(path);
-                if (!projectName || !(projectName = projectName[0])) continue;
-
-                projectName = projectName.replace(/[\{\}]/g,'');
-
-                globals.defaultRoutes[key] = path.replace('{' + projectName + '}', '/.reference/' + projectName);
-
-                if (projects[projectName] != null)  continue;
-
-
-                var item = globals.projects[projectName];
-                if (!(item && item.path)) {
-                    throw new Error('Unknown Project - ' + projectName);
-                }
-
-                projects[projectName]  = new net.URI(item.path);
-            }
-
-            for(var key in projects){
-                var folder = referenceDir.toLocalDir();
+            for(key in projects){
+                
+				var folder = referenceDir.toLocalDir();
                 if (fs.existsSync(folder) == false) {
                     fs.mkdirSync(folder);
                 }
@@ -50,10 +34,10 @@
                     continue;
                 }
 
-                io.utils.dir.symlinkSync(projects[key].toLocalDir(), target);
+                io.utils.dir.symlinkSync(new net.URI(projects[key].path).toLocalDir(), target);
             }
 
             new io.File(uri).write(source.replace('%ROUTES%', JSON.stringify(globals.defaultRoutes, null, 5)));
         }
     }));
-}());
+});
