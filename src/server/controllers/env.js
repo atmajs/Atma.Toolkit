@@ -7,7 +7,9 @@ include
 .done(function(resp) {
 
 	var File = io.File,
-		mask = resp.Mask;
+		mask = resp.Mask,
+		resource = include;
+		
 	
 	
 	include.exports = {
@@ -24,7 +26,7 @@ include
 				if (Env == null || Env.process == null) {
 					var msg = 'Environment Handler should expose process function';
 					console.error(msg);
-					response.writeHeader(200, {
+					response.writeHeader(500, {
 						'Content-Type': 'text/plain'
 					});
 					response.write(msg);
@@ -78,7 +80,7 @@ include
 			src = io.env.applicationDir.combine(src).toString();
 		}
 		
-		include.js(src + '::Env').done(function(resp){
+		resource.js(src + '::Env').done(function(resp){
 			console.warn(Object.keys(resp));
 			callback(resp.Env);
 		});

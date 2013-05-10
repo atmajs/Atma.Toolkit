@@ -39,13 +39,19 @@ var __eval = function(source, include) {
 
 var bin = {},
 	isWeb = !! (global.location && global.location.protocol && /^https?:/.test(global.location.protocol)),
-	reg_subFolder = /[^\/]+\/\.\.\//,
+	reg_subFolder = /([^\/]+\/)?\.\.\//,
 	cfg = {
+		path: null,
+		loader: null,
+		version: null,
+		lockedToFolder: null,
+		sync: null,
 		eval: document == null
 	},	
 	handler = {},
 	hasOwnProp = {}.hasOwnProperty,
-	//-currentParent = null,
+	__array_slice = Array.prototype.slice,
+	
 	XMLHttpRequest = global.XMLHttpRequest;
 
 	 
@@ -60,8 +66,7 @@ var Helper = { /** TODO: improve url handling*/
 },
 
 	XHR = function(resource, callback) {
-		var xhr = new XMLHttpRequest(),
-			s = Date.now();
+		var xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 			xhr.readyState === 4 && callback && callback(resource, xhr.responseText);
 		};
@@ -85,6 +90,9 @@ function fn_doNothing(fn) {
 }
 // source ../src/utils/object.js
 function obj_inherit(target /* source, ..*/ ) {
+	if (typeof target === 'function') {
+		target = target.prototype;
+	}
 	var i = 1,
 		imax = arguments.length,
 		source, key;
@@ -98,8 +106,6 @@ function obj_inherit(target /* source, ..*/ ) {
 	}
 	return target;
 }
-
-
 // source ../src/utils/array.js
 function arr_invoke(arr, args, ctx) {
 
@@ -107,9 +113,14 @@ function arr_invoke(arr, args, ctx) {
 		return;
 	}
 
-	for (var i = 0, x, length = arr.length; i < length; i++) {
-		if (typeof arr[i] === 'function') {
-			args != null ? x.apply(ctx, args) : x();
+	for (var i = 0, length = arr.length; i < length; i++) {
+		if (typeof arr[i] !== 'function') {
+			continue;
+		}
+		if (args == null) {
+			arr[i].call(ctx);
+		}else{
+			arr[i].apply(ctx, args);
 		}
 	}
 
@@ -140,8 +151,11 @@ function path_getDir(url) {
 
 // @TODO - implement url resolving of a top script
 function path_resolveCurrent() {
+	if (document == null) {
+		return '';
+	}
 	var scripts = document.getElementsByTagName('script');
-	return scripts[scripts.length - 1].getAttribute('src');
+	return scripts[scripts.length - 1].getAttribute('src') || '';
 }
 
 function path_resolveUrl(url, parent) {
@@ -356,8 +370,7 @@ var Events = (function(document) {
 			load: fn_doNothing
 		};
 	}
-	var readycollection = [],
-		timer = Date.now();
+	var readycollection = [];
 
 	function onReady() {
 		Events.ready = fn_doNothing;
@@ -372,7 +385,7 @@ var Events = (function(document) {
 
 	/** TODO: clean this */
 
-	if (document.hasOwnProperty('onreadystatechange')) {
+	if ('onreadystatechange' in document) {
 		document.onreadystatechange = function() {
 			if (/complete|interactive/g.test(document.readyState) === false) {
 				return;
@@ -578,9 +591,34 @@ var Include = (function() {
 			}
 		});
 	}
+	
+	function includePackage(resource, type, mix){
+		var pckg = mix.length === 1 ? mix[0] : __array_slice.call(mix);
+		
+		if (resource instanceof Resource) {
+			return resource.include(type, pckg);
+		}
+		return new Resource('js').include(type, pckg);
+	}
+	
+	function createIncluder(type) {
+		return function(){
+			return includePackage(this, type, arguments);
+		};
+	}
 
-	var Include = function() {};
-	Include.prototype = {
+	function Include() {}
+
+	
+	var fns = ['js', 'css', 'load', 'ajax', 'embed', 'lazy'],
+		i = 0,
+		imax = fns.length;
+	for (; i < imax; i++){
+		Include.prototype[fns[i]] = createIncluder(fns[i]);
+	}
+	
+	
+	obj_inherit(Include, {
 		setCurrent: function(data) {
 
 			var resource = new Resource('js', {
@@ -596,36 +634,7 @@ var Include = (function() {
 			global.include = resource;
 
 		},
-		incl: function(type, pckg) {
-
-			if (this instanceof Resource) {
-				return this.include(type, pckg);
-			}
-			var r = new Resource();
-
-			r.type = 'js';
-
-			return r.include(type, pckg);
-		},
-		js: function(pckg) {
-			return this.incl('js', pckg);
-		},
-		css: function(pckg) {
-			return this.incl('css', pckg);
-		},
-		load: function(pckg) {
-			return this.incl('load', pckg);
-		},
-		ajax: function(pckg) {
-			return this.incl('ajax', pckg);
-		},
-		embed: function(pckg) {
-			return this.incl('embed', pckg);
-		},
-		lazy: function(pckg) {
-			return this.incl('lazy', pckg);
-		},
-
+		
 		cfg: function(arg) {
 			switch (typeof arg) {
 			case 'object':
@@ -650,12 +659,18 @@ var Include = (function() {
 			}
 			return this;
 		},
-		routes: function(arg) {
-			if (arg == null) {
+		routes: function(mix) {
+			if (mix == null) {
 				return Routes.getRoutes();
 			}
-			for (var key in arg) {
-				Routes.register(key, arg[key]);
+			
+			if (arguments.length === 2) {
+				Routes.register(mix, arguments[1]);
+				return this;
+			}
+			
+			for (var key in mix) {
+				Routes.register(key, mix[key]);
 			}
 			return this;
 		},
@@ -754,7 +769,7 @@ var Include = (function() {
 			}
 			return this;
 		}
-	};
+	});
 
 	return Include;
 }());
@@ -940,7 +955,7 @@ var ScriptStack = (function() {
 
 			if (resourceIndex === -1) {
 				// this should be not the case, but anyway checked.
-				console.error('Bug - Resource is not in stack', resource);
+				console.warn('Resource is not in stack', resource);
 				return;
 			}
 
@@ -1157,6 +1172,7 @@ var Resource = (function(Include, IncludeDeferred, Routes, ScriptStack, CustomLo
 
 		if (url == null) {
 			this.state = 3;
+			this.location = path_getDir(path_resolveCurrent());
 			return this;
 		}
 
@@ -1175,9 +1191,7 @@ var Resource = (function(Include, IncludeDeferred, Routes, ScriptStack, CustomLo
 
 	};
 
-	Resource.prototype = obj_inherit({
-		constructor: Resource
-	}, IncludeDeferred, Include, {
+	Resource.prototype = obj_inherit(Resource, IncludeDeferred, Include, {
 		childLoaded: function(child) {
 			var resource = this,
 				includes = resource.includes;
@@ -1217,17 +1231,14 @@ var Resource = (function(Include, IncludeDeferred, Routes, ScriptStack, CustomLo
 		},
 		include: function(type, pckg) {
 			var that = this;
-			//this.state = this.state >= 3 ? 3 : 2;
-			//
-			//if (this.includes == null) {
-			//	this.includes = [];
-			//}
-			//
-			//
-			//this.response = null;
-
 			Routes.each(type, pckg, function(namespace, route, xpath) {
 
+				// if DEBUG
+				if (that.route != null && that.route.path === route.path) {
+					console.error(route.path, 'loads itself');
+				}
+				// endif
+			
 				that.create(type, route, namespace, xpath);
 
 			});
