@@ -1,13 +1,10 @@
-include.js({
+include
+.js('static-reference.js::RefPath')
+.js({
 	base: 'EventEmitter::Emitter'
 }).done(function(resp) {
 
-	var sys = require("sys"),
-		my_http = require("http"),
-		pathUtil = require("path"),
-		url = require("url"),
-		fs = require("fs"),
-		File = io.File;
+	var File = io.File;
 
 	var path = global.config.file || net.URI.combine(process.cwd(), 'temp.del'),	
 		uri = new net.URI(path),
@@ -24,11 +21,15 @@ include.js({
             if (!uri.file){
                 uri = uri.combine('index.html');
             }
-            
+			
             var fullPath = net.URI.combine(folder, uri.toLocalFile()),
                 file = new File(fullPath);
             
-			if (file.exists()) {
+			if (file.exists() === false) {
+				file = new File(resp.RefPath(request.url));
+			}
+			
+			if (file.exists() === true) {
 				var mimeType = MimeTypes[file.uri.extension] || 'text/plain',
 					content = file.read('binary');
 
@@ -45,7 +46,7 @@ include.js({
 				response.writeHeader(404, {
 					"Content-Type": "text/plain"
 				});
-				response.write("404 Not Found");
+				response.write("404 Not Found - " + file.uri.toLocalFile());
 			}
 			response.end();
 		},

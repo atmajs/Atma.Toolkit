@@ -21,43 +21,21 @@ include.exports = {
             return;
         }
 
-        var url = net.URI.combine('file:///', process.cwd(), script);
-
-        ////////include.routes({
-        ////////    app: net.URI.combine('file:///', process.cwd(), '{0}')
-        ////////});
+        var url = net.URI.combine('file:///', process.cwd().replace(/\\/g, '/'), script);
 
 
-        ////////var _path = /[^;]+[\\\/]npm[\\\/][^;]*/g.exec(process.env.path);
-        ////////
-        ////////globalPath = _path && _path[0].replace(/\\/g, '/');
-        ////////globalPath = net.URI.combine(globalPath, 'node_modules');
-        ////////
-        ////////
-        ////////var nodeModulesPath = net.URI.combine(process.cwd(), 'node_modules'),
-        ////////    paths = module.paths;
-        ////////
-        ////////paths.push(nodeModulesPath);
-        ////////
-        ////////console.log(nodeModulesPath);
-        ////////
-        ////////if (globalPath) {
-        ////////    paths.push(globalPath);
-        ////////}
-
-        include.instance(url).js(url + '::Script'/*{
-            app: script + '::Script'
-        }*/).done(function(resp) {
+        include
+            .instance(url)
+            .js(url + '::Script')
+            .done(function(resp) {
 
             if (resp.Script && resp.Script.process) {
                 resp.Script.process(config, done);
             } else {
-                console.error("Custom Script should exports 'process' function: include.exports = { process: function(config, done){ ...} }");
+                console.warn("Hint: To allow multiple custom scripts to be called one after another export 'process' function:");
+                console.warn("include.exports = { process: function(config, done){ ... } }");
             }
 
-            ////////ruqq.arr.remove(paths, function(x) {
-            ////////    return x === nodeModulesPath || x === globalPath;
-            ////////});
         });
     }
 }

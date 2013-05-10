@@ -1,37 +1,43 @@
+(function() {
 
-(function(){
+    function replacement(value) {
+        return START + value + '$1' + END;
+    }
+
+    var START = '\u001b[',
+        END = '\u001b[0m',
+        
+        colors = {
+            red: '31m',
+            green: '32m',
+            yellow: '33m',
+            blue: '34m',
+    
+            bold: '1m',
+            italic: '3m',
+            underline: '4m',
+            inverse: '7m'
+        };
+
+
 
     include.exports = {
-        color: (function(){
+        colors: colors,
+        colorize: function(color, str){
+            return START + colors[color] + str + END;
+        },
+        color: function(str) {
 
-            return function(str){
-
-                function format(value){
-                    return '\u001b['+value+'m$1\u001b[0m'
-                }
-
-                var colors = {
-                    red: format(31),
-                    green: format(32),
-                    yellow: format(33),
-                    blue: format(34),
-
-                    bold: format(1),
-                    italic: format(3),
-                    underline: format(4),
-                    inverse: format(7)
-                }
-
-                for(var key in colors){
-                    str = str.replace(new RegExp(key + '\\{([^\\}]+)\\}','g'), colors[key]);
-                }
-
-                return str;
+            for (var key in colors) {
+                str = str.replace(new RegExp(key + '\\{([^\\}]+)\\}', 'g'), replacement(colors[key]));
             }
-        }())
+
+            return str;
+        }
+
     };
 
     global.color = include.exports.color;
 
 
-}());
+}());    

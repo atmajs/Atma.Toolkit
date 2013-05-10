@@ -15,6 +15,7 @@
 		}
 	}).routes({
 		ruqq: '/src/libjs/{0}.js',
+		libjs: '/src/libjs/{0}.js',
 		handler: '/src/handler/{0}.js',
 		parser: '/src/parser/{0}.js',
 		action: '/src/action/{0}.js',
@@ -31,6 +32,7 @@
 		'sys', //
 		'helpers', //
 		'helper/stdout', //
+		'helper/extensions', //
 		],
 		io: 'package',
 		//

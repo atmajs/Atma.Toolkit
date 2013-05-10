@@ -1,38 +1,37 @@
 (function() {
 
-    var resource = include;
+	var resource = include;
 
-	include.routes({
-		controller: 'controllers/{0}.js'
-	}).js(['routes.js::Routes', 'websocket.js::WebSocket']).done(function(resp) {
-
-
-		include.exports = {
-			start: function(config) {
-				var sys = require("sys"),
-					http = require("http"),
-					port = config.port || 5777;
-
-
-				var server = http.createServer(function(request, response) {
-
-					var controller = resp.Routes.resolve(request.url) || 'static';
-
-					resource.js({
-						controller: controller + '::Controller'
-					}).done(function(resp) {
-						resp.Controller.request(request, response);
+	include
+		.js(['routes.js::Routes', 'websocket.js::WebSocket'])
+		.done(function(resp) {
+			
+			include.exports = {
+				start: function(config) {
+					var http = require("http"),
+						port = config.port || 5777;
+	
+	
+					var server = http.createServer(function(request, response) {
+	
+						resp.Routes.resolve(request.url, function(error, Controller){
+							
+							Controller.request(request, response);
+							
+						});
+						
 					});
-				});
-
-				resp.WebSocket.listen(server);
-				server.listen(port);
-				sys.puts(String.format('Server Running on %1', port));
-
+	
+					resp.WebSocket.listen(server);
+					
+					server.listen(port);
+					
+					console.log('Server Running on bold{green{%1}}'.format(port).colorize());
+	
+				}
 			}
-		}
-
-	})
+	
+		});
 
 
 }());
