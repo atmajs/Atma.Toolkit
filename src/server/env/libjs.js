@@ -1,6 +1,6 @@
 include
 .js({
-	helper: 'globalProjects::Projects'
+	helper: 'globals::Projects'
 })
 .done(function(resp) {
 

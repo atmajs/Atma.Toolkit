@@ -1,17 +1,19 @@
-include.exports = (function(){
+/**
+ * we use *.txt to allow open it in
+ * environments editor via "> ijs globals"
+ * */
+
+include.js('/globals.txt').done(function(resp){
+
+	var __globals = process(resp.globals);
 	
-	var _globals;
+	include.exports = function(){
+		return __globals;
+	};
 	
-	function resolve() {
-		var file = new io.File(io.env.applicationDir.combine('globals.txt')),
-			globals, key, path, projectName;
-	
-		try {
-			globals = JSON.parse(file.read());
-		} catch (e) {
-			console.error('globals.txt - parse error -', file.uri.toLocalFile(), e);
-			return null;
-		}
+
+	function process(globals) {
+		var key, path, projectName;
 	
 		var globals_routes = globals.defaultRoutes,
 			globals_projects = globals.projects;
@@ -36,10 +38,5 @@ include.exports = (function(){
 	
 		return globals;
 	}
-	
-	
-	return function(){
-		return _globals || (_globals = resolve()) || {};
-	};
-	
-}());
+
+});

@@ -1,7 +1,7 @@
 include
 .js({
 	libjs: 'mask.node::Mask',
-	helper: 'globalProjects::Projects'
+	helper: 'globals::Projects'
 })
 .load('./template/env.mask')
 .done(function(resp) {
