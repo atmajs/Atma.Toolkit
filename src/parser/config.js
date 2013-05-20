@@ -4,28 +4,12 @@
 
 include.js({
     script: 'io/file',
-    helper: 'configHelper'
+    helper: ['configHelper', 'globals']
 }).done(function(resp) {
 
 
-    var actions = [ //
-    'template', //
-    'reference', //
-    'globals', //
-    'git-clone', //
-    'server', //
-    'shell', //
-    'project-import', //
-    'project-reference', //
-    'custom', //
-    'concat', //
-    'npm', //
-    'watch', //
-    'jshint', //
-    'uglify', //
-    'copy', //
-    'import', //
-    ],
+
+    var actions =  resp.globals.actions,
         program = require('commander'),
         args = program.args,
         config;
@@ -40,7 +24,7 @@ include.js({
     var entry = args[0].trim();
 
 
-    if (actions.indexOf(entry) > -1) {
+    if (actions[entry] != null) {
         var cfg = resp.configHelper.prepairConfig({
             action: entry
         });

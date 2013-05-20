@@ -45,7 +45,7 @@
                 libjsDir = libjsDir + '/';
             }
 
-            var file = new io.File(new net.URI(io.env.applicationDir).combine('globals.txt'));
+            var file = new io.File(new net.URI(io.env.applicationDir).combine('globals/projects.txt'));
             var globals = {
                 projects: {
                     libjs: {
@@ -58,7 +58,14 @@
                     compo: "{libjs}/compos/{0}/lib/{1}.js"
                 }
             }
-            file.write(JSON.stringify(globals, null, 4));
+            
+            try {
+                file.write(JSON.stringify(globals, null, 4));   
+            } catch(e) {
+                console.error('Access failed to projects.txt - please run "ijs globals" and specify correct \
+                              just installed libjs path.', libjsDir);
+            }
+            
         }
     })
 

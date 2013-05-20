@@ -1,5 +1,5 @@
 include.js({
-	helper: ['stdout', 'globalProjects::Projects']
+	helper: ['stdout', 'globals::Projects']
 }).done(function(resp) {
 
     var fs = require('fs'),

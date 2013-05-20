@@ -1,24 +1,8 @@
-include.js([ //
-'template.js', //
-'reference.js', //
-'globals.js', //
-'git-clone.js', //
-'server.js', //
-'shell.js', //
-'solution.js', //
-'custom.js', //
-'npm.js', //
-'concat.js', //
-'watch.js', //
-'uglify.js', //
-'jshint.js', //
-'copy.js', //
-'import.js', //
-]).done(
+include.js('/src/helper/globals.js').done(function(resp) {
 
-function(resp) {
-
-    var _config, _done, _index;
+    var _actions = resp.globals.actions,
+        _resource = include,
+        _config, _done, _index;
 
 
     include.exports = Class({
@@ -54,30 +38,30 @@ function(resp) {
          */
         global.config = current;
 
-        var handler;
-
-        switch (current.action) {
-        case 'build':
-        case 'project-import':
-        case 'project-reference':
-            handler = resp.solution;
-            break;
-        case 'git-clone':
-        case 'libjs-clone':
-            handler = resp['git-clone'];
-            break;
-        default:
-            handler = resp[current.action];
-            break;
-        }
-
-        if (handler == null) {
+        var handler, handlerPath = _actions[current.action];
+        
+        if (!handlerPath) {
             console.warn('Error: Unknown Handler', current.action);
             process();
             return;
         }
-
-        handler.process(current, process);
+        
+        _resource.js(handlerPath + '::Handler').done(function(resp){
+            if (resp.Handler == null){
+                console.error('Handler could not be loaded', handlerPath);
+                process();
+                return;
+            }
+            if (typeof resp.Handler.process !== 'function') {
+                console.error('Action Handler exports no process function - \
+                              use include.exports = {process: function(config, onComplete){}}');
+                
+                process();
+                return;
+            }
+            
+            resp.Handler.process(current, process);
+        });
     }
 
 });

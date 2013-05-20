@@ -1,7 +1,7 @@
 include
 .js({
 	libjs: 'mask.node::Mask',
-	helper: 'globals::Projects'
+	helper: 'globals'
 })
 .load('./template/env.mask')
 .done(function(resp) {
@@ -60,7 +60,7 @@ include
 
 
 	function env_resolveFromRequest(path, callback) {
-		var environments = resp.Projects().environments,
+		var environments = resp.globals.environments,
 			match = /\?debug=(\w+)/.exec(path),
 			env = match && match[1];
 		

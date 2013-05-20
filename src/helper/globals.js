@@ -3,13 +3,19 @@
  * environments editor via "> ijs globals"
  * */
 
-include.js('/globals.txt').done(function(resp){
+include
+.js('/globals/actions.js', '/globals/environments.js')
+.load('/globals/projects.txt')
 
-	var __globals = process(resp.globals);
+.done(function(resp){
+
+	var __globals = {};
 	
-	include.exports = function(){
-		return __globals;
-	};
+	Object.extend(__globals, resp.actions);
+	Object.extend(__globals, resp.environments);
+	Object.extend(__globals, JSON.parse(resp.load.projects));
+	
+	include.exports = __globals;
 	
 
 	function process(globals) {
@@ -31,7 +37,7 @@ include.js('/globals.txt').done(function(resp){
 			globals_routes[key] = path.replace('{' + projectName + '}', '/.reference/' + projectName);
 	
 			if (globals_projects[projectName] == null) {
-				console.error('globals.txt - unknown project in default routes - ', projectName);
+				console.error('projects.txt - unknown project in default routes - ', projectName);
 			}
 	
 		}

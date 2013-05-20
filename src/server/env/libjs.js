@@ -1,6 +1,6 @@
 include
 .js({
-	helper: 'globals::Projects'
+	helper: 'globals'
 })
 .done(function(resp) {
 
@@ -14,7 +14,7 @@ include
 			add_source(scripts, '/.reference/libjs/ruqq/lib/dom/jquery.js');
 			add_source(scripts, '/.reference/libjs/mask/lib/mask.js');
 			
-			var routes = resp.Projects() && resp.Projects().defaultRoutes;
+			var routes = resp.globals.defaultRoutes;
 			if (routes) {
 				
 				add_script(scripts, 'include.routes(' + JSON.stringify(routes, null, 4) + ')');

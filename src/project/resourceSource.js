@@ -3,20 +3,20 @@ include.js({
 }).done(function(resp) {
 
     include.exports = {
-        action: function(type, idfr) {
+        action: function(type, done) {
             switch (type) {
             case 'project-import':
                 importResources() && rewriteRoutes('reference','import');
                 break;
             case 'project-reference':
-                referenceResources() && rewriteRoutes('import','reference');
+                rewriteRoutes('import','reference');
                 break;
             default:
                 console.error('Unknown Resource Type');
                 break;
             }
             
-            idfr.resolve && idfr.resolve();
+            done && done();
         }
     }
 
@@ -33,55 +33,55 @@ include.js({
         new io.File(global.solution.resource.uri).write(global.solution.resource.content);
     }
     
-    var referenceResources = (function(){
+    // var referenceResources = (function(){
         
-        return function(){
-            var globals = JSON.parse(new io.File(io.env.applicationDir.combine('globals.txt')).read()),
-                referenceDir = io.env.applicationDir.combine('.reference/');
+    //     return function(){
+    //         var globals = JSON.parse(new io.File(io.env.applicationDir.combine('globals.txt')).read()),
+    //             referenceDir = io.env.applicationDir.combine('.reference/');
             
-            var routes = new io.File(io.env.currentDir.combine('include.routes.js')),
-                includeRoutes;
-            if (routes.exists() == false){
-                console.error('"%s" does not exists', file.uri.toString());
-                return 0;
-            }
+    //         var routes = new io.File(io.env.currentDir.combine('include.routes.js')),
+    //             includeRoutes;
+    //         if (routes.exists() == false){
+    //             console.error('"%s" does not exists', file.uri.toString());
+    //             return 0;
+    //         }
 
 
             
-            var include = {
-                routes: function(cfg){
-                    includeRoutes = cfg;
-                }
-            }          
-            try{  
-                eval(routes.read());
-            }catch(e){};
+    //         var include = {
+    //             routes: function(cfg){
+    //                 includeRoutes = cfg;
+    //             }
+    //         }          
+    //         try{  
+    //             eval(routes.read());
+    //         }catch(e){};
 
-            if (!includeRoutes){
-                console.error('Routes couldnt be parsed');
-                return 0;
-            }
+    //         if (!includeRoutes){
+    //             console.error('Routes couldnt be parsed');
+    //             return 0;
+    //         }
 
-            routes = includeRoutes;
+    //         routes = includeRoutes;
             
             
-            for(var key in routes){
-                if (routes[key].indexOf('.import') == -1) continue;
+    //         for(var key in routes){
+    //             if (routes[key].indexOf('.import') == -1) continue;
                 
-                var projectName = routes[key].replace(/^.*\.import\/([^\/]+).+/g,'$1');
+    //             var projectName = routes[key].replace(/^.*\.import\/([^\/]+).+/g,'$1');
                 
-                if (!projectName || projectName in globals.projects == false){
-                    console.error('Project "%s" not defined in globals', projectName);
-                    return 0;
-                }                
-                var reference = new net.URI(globals.projects[projectName].path);
+    //             if (!projectName || projectName in globals.projects == false){
+    //                 console.error('Project "%s" not defined in globals', projectName);
+    //                 return 0;
+    //             }                
+    //             var reference = new net.URI(globals.projects[projectName].path);
                 
-                resp.refHelper.create(new net.URI(global.solution.uri.toDir()), projectName, reference)
-            }
+    //             resp.refHelper.create(new net.URI(global.solution.uri.toDir()), projectName, reference)
+    //         }
             
-            return 1;
-        }
-    })();
+    //         return 1;
+    //     }
+    // })();
 
     var importResources = (function() {
         function processCopy(parent, processed) {

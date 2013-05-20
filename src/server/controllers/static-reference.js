@@ -1,7 +1,7 @@
 include
 
 .js({
-	helper: 'globals::Projects'
+	helper: 'globals'
 })
 
 .done(function(resp){
@@ -16,19 +16,19 @@ include
 		var regexp = /\.reference\/([^\/]+)/,
 			match = regexp.exec(path),
 			project = match && match[1],
-			_projects = resp.Projects().projects;
+			projects = resp.globals.projects;
 			
 		
-		if (_projects == null){
+		if (projects == null){
 			return path;
 		}
 		
 		
-		var projectPath = _projects[project] && _projects[project].path,
+		var projectPath = projects[project] && projects[project].path,
 			str = '.reference/' + project;
 			
 		if (projectPath == null) {
-			console.error('globals.txt - project 404 - ', project);
+			console.error('No project in {ijs}/globals/projects.txt - ', project);
 			return path;
 		}
 		
