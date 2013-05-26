@@ -8,7 +8,7 @@
 	require('socket.io');
 
 	include.cfg({
-		path: 'file:///' + __dirname + '/',
+		path: 'file:///' + __dirname.replace(/\\/g, '/') + '/',
 		lockedToFolder: true,
 		loader: {
 			coffee: '/src/libjs/loader/coffee/loader.js'
@@ -35,6 +35,7 @@
 		'helper/extensions', //
 		],
 		io: 'package',
+		
 		//
 		action: 'action-processor::Action'
 	}).done(function(resp) {

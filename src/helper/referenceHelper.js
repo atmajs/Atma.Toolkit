@@ -1,5 +1,3 @@
-var fs = require('fs');
-
 include.exports = {
 	create: function(solutionDir, name, referenceSource) {
 		var dir = new io.Directory(referenceSource);
@@ -19,8 +17,8 @@ include.exports = {
 
 		new io.Directory(solutionDir.combine('.reference/')).ensure();
 
-
-		fs.symlinkSync(dir.uri.toLocalDir(), targetDir.uri.toLocalDir(), 'dir');
+		
+		io.utils.dir.symlinkSync(dir.uri.toLocalDir(), targetDir.uri.toLocalDir());
 		return null;
 	}
 }

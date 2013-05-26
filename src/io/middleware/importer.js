@@ -19,7 +19,7 @@
 
 	};
 
-	var importStatement = /^[\t ]*\/\/[ ]+import[ ]+?(([^\n\r'" ]+)|('|"([^'"]+)))/gm;
+	var importStatement = /^[\t ]*\/\/[ ]*import[ ]+(([^\n\r'" ]+)|('|"([^'"]+)))/gm;
 
 	function process(currentUri, code) {
 

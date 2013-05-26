@@ -14,6 +14,19 @@
             (this.listeners[event] || (this.listeners[event] = [])).push(callback);
             return this;
         },
+		
+		pipe: function(event){
+			var that = this,
+				slice = Array.prototype.slice, 
+				args;
+			return function(){
+				Log('EventEmitter:pipe', event, 95);
+				
+				args = slice.call(arguments);
+				args.unshift(event);
+				that.trigger.apply(that, args);
+			};
+		},
         
         trigger: function() {
             var args = Array.prototype.slice.call(arguments),

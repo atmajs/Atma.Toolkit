@@ -7,7 +7,9 @@ function defaultActions() {
 	var actions = [
 		'concat', 
 		'copy',   
+		
 		'custom',
+		
 		'git-clone',
 		'globals',
 		'import',

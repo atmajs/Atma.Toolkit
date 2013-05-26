@@ -1,3 +1,6 @@
+/**
+ * Dirty Alpha
+ */
 
 (function(global) {
     'use strict';

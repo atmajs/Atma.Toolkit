@@ -7,12 +7,13 @@ include.js({
     helper: ['configHelper', 'globals']
 }).done(function(resp) {
 
-
-
+    
     var actions =  resp.globals.actions,
         program = require('commander'),
         args = program.args,
         config;
+    
+    
 
     global.program = program;
 

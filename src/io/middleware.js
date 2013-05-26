@@ -9,7 +9,9 @@ include.routes({
 	'less', //
 	'condcomments', //
 	'importer', //
-	]
+	],
+	
+	parser: 'config'
 }).done(function(resp) {
 
 

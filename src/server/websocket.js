@@ -1,9 +1,14 @@
-include.js('socketConnection.js::SocketConnection').done(function(resp) {
+include.js('SocketConnection.js').done(function(resp) {
 
     
-	//-var connections = [];
+	var SocketListeners = {
+		'/browser' : resp.SocketConnection
+	};
     
 	include.exports = {
+		register: function(namespace, Handler){
+			SocketListeners[namespace] = Handler;
+		},
 		listen: function(httpServer) {
 			
 			console.log('WebSocket server started');
@@ -14,13 +19,15 @@ include.js('socketConnection.js::SocketConnection').done(function(resp) {
 				'log level': 2
 			});
         
-			
-            
-            io.sockets.on('connection', function(socket) {
-				
-				new resp.SocketConnection(socket);
-				
-			});            
+			function listen(namespace, Handler) {
+				return function(socket){
+					new Handler(socket, io);
+				};
+			}
+		
+			for (var key in SocketListeners) {
+				io.of(key).on('connection', listen(key, SocketListeners[key]));
+			}
 		}
 	}
     

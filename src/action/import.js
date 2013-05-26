@@ -41,7 +41,7 @@ include.js({
             }
 
 
-            io.File.getHookHandler().register('read', resp.importer);
+            io.File.getHookHandler().register(/./, 'read', resp.importer);
             io.File.clearCache();
 
             ruqq.arr.each(files, function(x, index){

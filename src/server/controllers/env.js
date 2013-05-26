@@ -42,6 +42,9 @@ include
 				var scripts = Env.process(request.url),
 					req = new net.URI(request.url);
 				
+				
+				console.log('path', req.toLocalFile());
+				
 				scripts.push({
 					path: req.toLocalFile()
 				});

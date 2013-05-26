@@ -17,7 +17,7 @@ include.exports = {
         }
 
         if (new io.File(script).exists() === false) {
-            done(String.format('Custom script not exists: %1', script));
+            done('Custom script not exists: %1'.format(script));
             return;
         }
 

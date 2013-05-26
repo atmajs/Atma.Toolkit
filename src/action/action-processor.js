@@ -13,17 +13,22 @@ include.js('/src/helper/globals.js').done(function(resp) {
             _config = globalConfig;
             _done = done;
             _index = -1;
-            process();
+            next();
         }
     });
 
-    function process(error) {
+    function next(error) {
         if (error) {
             console.error(error.toString());
         }
 
         if (++_index > _config.length - 1){
             if (current == null) {
+                if (error) {
+                    process.exit(1);
+                    return;
+                }
+                
                 console.log('/* Done */');
                 _done && _done();
                 return;
@@ -42,25 +47,25 @@ include.js('/src/helper/globals.js').done(function(resp) {
         
         if (!handlerPath) {
             console.warn('Error: Unknown Handler', current.action);
-            process();
+            next();
             return;
         }
         
         _resource.js(handlerPath + '::Handler').done(function(resp){
             if (resp.Handler == null){
                 console.error('Handler could not be loaded', handlerPath);
-                process();
+                next();
                 return;
             }
             if (typeof resp.Handler.process !== 'function') {
                 console.error('Action Handler exports no process function - \
                               use include.exports = {process: function(config, onComplete){}}');
                 
-                process();
+                next();
                 return;
             }
             
-            resp.Handler.process(current, process);
+            resp.Handler.process(current, next);
         });
     }
 

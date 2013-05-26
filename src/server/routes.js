@@ -1,5 +1,4 @@
-
-(function(global){
+(function(resp){
 
 	var resource = include.routes({
 		controller: 'controllers/{0}.js'
@@ -14,8 +13,9 @@
 	var routes = [{
 			match: /\?debug/,
 			controller: 'env'
-		}],
-		Routes = Class({
+		}];
+	
+	var Routes = Class({
 		
 		register: function(route){
 			routes.push(route);
@@ -57,4 +57,4 @@
 
 	include.exports = new Routes();
 
-}(global));
+}());
