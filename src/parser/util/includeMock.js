@@ -8,6 +8,10 @@
 			ruqq.arr.each(['js', 'css', 'load', 'lazy'], function(x) {
 				this[x] = function(pckg) {
 
+					if (typeof pckg === 'string' && arguments.length > 1) {
+						pckg = Array.prototype.slice.call(arguments);
+					}
+				
 					Routes.each(x, pckg, function(namespace, route) {
 						this.includes.push({
 							type: x,
