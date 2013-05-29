@@ -1,12 +1,12 @@
 {
   "name": "includejs",
-  "description": "IncludeJS Resource Builder Tool",
+  "description": "IncludeJS DEV Tool",
   "preferGlobal": true,
   "author": {
     "name": "Alexander Kit",
     "email": "source.kit@gmail.com"
   },
-  "version": "0.8.1",
+  "version": "0.9.1",
   "bin": {
     "includejs": "includejs",
     "ijs": "includejs"
