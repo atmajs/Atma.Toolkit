@@ -203,10 +203,8 @@ include.js({
 				new io.File(solution.uris.outputDirectory.combine('style.css')).write(solution.output.css);
 			}
 
-            console.log( //
-            color( //
-            String.format( //
-            'bold{green{Files: [JS: #{js.length}] [CSS: #{css.length}] [LOAD: #{load.length}] [LAZY: #{lazy.length}]}}', _filesCount)));
+			var msg = 'bold{green{Files: [JS: #{js}] [CSS: #{css}] [LOAD: #{load}] [LAZY: #{lazy}]}}';
+            console.log(msg.format(_filesCount).colorize());
 
 			resp.HtmlBuilder.build(solution, solution.output);
 
