@@ -725,7 +725,11 @@
 			 *	as sometimes it is necessary to call include. on new empty context
 			 */
 			instance: function() {
-				return new Resource();
+				var resource;
+				resource = new Resource();
+				resource.state = 4;
+				
+				return resource;
 			},
 	
 			getResource: function(url, type) {
@@ -1354,6 +1358,8 @@
 	
 		Resource.prototype.inject = function(pckg) {
 			var current = include;
+			
+			include.state = include.state >= 3 ? 3 : 2;
 			include
 				.create()
 				.load(pckg)
@@ -1413,7 +1419,9 @@
 				require = next.require.bind(next);
 			}
 	
-			return new Resource();
+			var res = new Resource();
+			res.state = 4;
+			return res;
 		};
 	
 	

@@ -12,6 +12,9 @@
             green: '32m',
             yellow: '33m',
             blue: '34m',
+            magenta: '35m',
+            cyan: '36m',
+            
     
             bold: '1m',
             italic: '3m',

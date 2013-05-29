@@ -45,8 +45,8 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 				var relative = x.uri.toRelativeString(this.uri),
 					file = new io.File(this.uri.combine(relative));
 
-				if (options && options.indexOf('-v') == -1 && file.exists()) {
-					program.prompt(String.format('File already exists: #{file}. Replace(y/n)? ', {
+				if (options && options.indexOf('-v') === -1 && file.exists()) {
+					program.prompt('File already exists: #{file}. Replace(y/n)? '.format({
 						file: file.uri.toLocalFile()
 					}), this.copy.bind(this, targetUri, options, i, idfr));
 
