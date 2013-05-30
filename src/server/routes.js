@@ -27,7 +27,15 @@
 			for (var i = 0, imax = routes.length; i < imax; i++){
 				x = routes[i];
 				
-				if (x.match && x.match.test && x.match.test(path)) {
+				if (!x.match)
+					continue;
+				
+				if (typeof x.match === 'function' && x.match(path)) {
+					controller = x.controller;
+					break;
+				}
+				
+				if (x.match.test && x.match.test(path)) {
 					controller = x.controller;
 					break;
 				}

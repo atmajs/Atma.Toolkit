@@ -117,7 +117,7 @@ include.js([ //
 				return true;
 			}
 
-			if (x[0] == _functionName && x[1] == alias) {
+			if (x[0] === _functionName && x[1] === alias) {
 				return true;
 			}
 

@@ -1,5 +1,5 @@
 include
-.js('static-reference.js::RefPath')
+.js('static-reference.js::RefPath', '../proxy.js')
 .js({
 	base: 'EventEmitter::Emitter'
 }).done(function(resp) {
@@ -43,6 +43,11 @@ include
 				io.File.watcher.watch(file, this.fileChanged.bind(this));
 
 			} else {
+				
+				if (resp.proxy.pipe(request, response)) 
+					return;
+				
+				
 				response.writeHeader(404, {
 					"Content-Type": "text/plain"
 				});

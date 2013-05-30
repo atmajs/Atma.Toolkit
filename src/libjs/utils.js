@@ -205,6 +205,11 @@
 		return format;
 	};
 
+	RegExp.fromString = function(str, flags) {
+		
+ 	    return new RegExp(str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&"), flags);
+	};
+
 
 	// obsolete - is it indeed useful ? === (create delegate)
 	Function.invoke = function() {

@@ -3,7 +3,7 @@
 	var resource = include;
 
 	include
-		.js('routes.js::Routes', 'websocket.js::WebSocket')
+		.js('routes.js::Routes', 'websocket.js::WebSocket', 'proxy.js')
 		.js({
 			helper: 'globals'
 		})
@@ -17,6 +17,10 @@
 				start: function(config) {
 					var http = require("http"),
 						port = config.port || 5777;
+						
+					if (config.proxy) {
+						resp.proxy.set(config.proxy);
+					}
 	
 	
 					var server = http.createServer(function(request, response) {
