@@ -106,14 +106,15 @@ function parseOverrides(program, config) {
                 key = key.substring(1);
             }else{
                 value = i < length - 1 ? array[i + 1] : null;
-                if (value) {
+                if (value && value[0] !== '-') {
                     var c = value[0];
 
-                    if (c == '"' || c == "'") {
+                    if (c === '"' || c === "'") {
                         value = value.substring(1, value.length - 1);
                     }
 
                     config[key] = value;
+					i++
                     continue;
                 }
             }
