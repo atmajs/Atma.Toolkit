@@ -28,6 +28,10 @@ include.js('SocketConnection.js').done(function(resp) {
 			for (var key in SocketListeners) {
 				io.of(key).on('connection', listen(key, SocketListeners[key]));
 			}
+		},
+		
+		getConnectionHandler: function(namespace){
+			return SocketListeners[namespace];
 		}
 	}
     

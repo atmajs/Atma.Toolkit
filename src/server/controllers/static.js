@@ -14,7 +14,11 @@ include
 
 	include.exports = new new Class({
 		Base: resp.Emitter,
-		request: function(request, response) {
+		request: function(request, response, base) {
+			
+			if (typeof base !== 'string') {
+				base = folder;
+			}
 			
             var uri = new net.URI(request.url);
             
@@ -22,7 +26,7 @@ include
                 uri = uri.combine('index.html');
             }
 			
-            var fullPath = net.URI.combine(folder, uri.toLocalFile()),
+            var fullPath = net.URI.combine(base, uri.toLocalFile()),
                 file = new File(fullPath);
             
 			if (file.exists() === false) {
@@ -37,23 +41,23 @@ include
 					'Content-Type': mimeType
 				});
 
-				response.write(content);
+				response.end(content);
 
 
 				io.File.watcher.watch(file, this.fileChanged.bind(this));
 
-			} else {
-				
-				if (resp.proxy.pipe(request, response)) 
-					return;
-				
-				
-				response.writeHeader(404, {
-					"Content-Type": "text/plain"
-				});
-				response.write("404 Not Found - " + file.uri.toLocalFile());
+				return;
 			}
-			response.end();
+				
+			if (resp.proxy.pipe(request, response)) 
+				return;
+			
+			
+			response.writeHeader(404, {
+				"Content-Type": "text/plain"
+			});
+			response.end("404 Not Found - " + file.uri.toLocalFile());
+		
 		},
 
 		fileChanged: function(path) {

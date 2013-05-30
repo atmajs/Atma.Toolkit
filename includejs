@@ -22,7 +22,8 @@
 		script: '/src/{0}.js',
 		helper: '/src/helper/{0}.js',
 		base: '/src/base/{0}.js',
-		io: '/src/io/{0}.js'
+		io: '/src/io/{0}.js',
+		server: '/src/server/{0}.js'
 	}).js({
 		_: '/src/helper/logger.js',
 		ruqq: ['net/uri', 'utils', 'arr'],
