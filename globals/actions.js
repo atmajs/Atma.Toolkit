@@ -9,8 +9,9 @@ function defaultActions() {
 		'copy',   
 		
 		'custom',
+		'template',
 		
-		'git-clone',
+		'libjs-clone',
 		'globals',
 		'import',
 		
@@ -42,7 +43,7 @@ function defaultActions() {
 	var solution = '/src/action/solution.js';
 	paths['project-import'] = paths['project-reference'] = paths['build'] = solution;
 	
-	paths['libjs-clone'] = paths['git-clone'];
+	paths['git-clone'] = paths['libjs-clone'];
 	
 	return paths;
 }

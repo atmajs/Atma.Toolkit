@@ -1,5 +1,5 @@
 include.js({
-	helper: ['stdout', 'globals::Projects']
+	helper: ['stdout', 'globals']
 }).done(function(resp) {
 
     var fs = require('fs'),
@@ -10,7 +10,7 @@ include.js({
         Base: io.File,
         copyTo: function(uri){
             var source = this.read(),
-                globals = resp.Projects(),
+                globals = resp.globals,
                 referenceDir = uri.combine('.reference/');
 
 			if (!globals || !globals.projects) {
