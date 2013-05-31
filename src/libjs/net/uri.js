@@ -1,6 +1,3 @@
-/**
- * Dirty Alpha
- */
 
 (function(global) {
     'use strict';
@@ -14,15 +11,15 @@
             var str = '';
             for (var i = 0; i < args.length; i++) {
                 if (!args[i]) {
-					continue;
-				}
+                    continue;
+                }
                 if (!str) {
                     str = args[i];
                     continue;
                 }
                 if (str[str.length - 1] != '/') {
-					str += '/';
-				}
+                    str += '/';
+                }
                 str += args[i][0] == '/' ? args[i].substring(1) : args[i];
             }
             return str;
@@ -31,8 +28,13 @@
             var value = /^([a-zA-Z]+):\/(\/)?/.exec(o.value); // @ 'c:/file.txt'| 'protocol://host.com'
 
             if (value == null) {
-				return;
-			}
+                
+                if (o.value.charAt(0) === '/') {
+                    o.protocol = 'file'; // @*nix /home/..
+                }
+                
+                return;
+            }
             if (value[2] == null){
                 o.protocol = 'file';
                 return;
@@ -42,8 +44,8 @@
         },
         parseHost: function(o){
             if (o.protocol == null) {
-				return;
-			}
+                return;
+            }
             var i = o.value.indexOf('/', 2);
             if (~i){
                 o.host = o.value.substring(0, i);
@@ -52,9 +54,9 @@
             }
             o.value = o.value.replace(o.host,'');
 
-            if (o.protocol === 'file' && o.host[0] == '/'){
-                o.host = o.host.substring(1);
-            }
+            ////if (o.protocol === 'file' && o.host[0] == '/'){
+            ////    o.host = o.host.substring(1);
+            ////}
         },
         parseSearch: function(o){
             var i = o.value.indexOf('?');
@@ -83,11 +85,11 @@
 
     var URI = function(uri) {
         if (uri == null) {
-			return this;
-		}
+            return this;
+        }
         if (typeof uri === 'object' && typeof uri.combine === 'function') {
-			return uri.combine('');
-		}
+            return uri.combine('');
+        }
 
         uri = uri.replace(/\\/g,'/').replace(/^\.\//,'');
 
@@ -96,16 +98,10 @@
         helper.parseHost(this);
 
         helper.parseSearch(this);
-
-        if (this.value){
-            try {
-                this.value = decodeURI(this.value);
-            }catch(error){}
-        }
-
         helper.parseFile(this);
 
-        this.path = this.value;
+        // normilize path - "/some/path"
+        this.path = this.value.replace(/\/*$/, '');
         return this;
     }
     URI.combine = helper.combinePathes;
@@ -127,8 +123,8 @@
          */
         combine: function(path) {
             if (typeof path === 'object' && typeof path.combine === 'function') {
-				path = path.toString();
-			}
+                path = path.toString();
+            }
 
             var uri = new URI();
             for (var key in this) {
@@ -138,8 +134,8 @@
             }
 
             if (!path) {
-				return uri;
-			}
+                return uri;
+            }
 
             if (this.protocol == 'file' && path[0] == '/') {
                 path = path.substring(1);
@@ -168,8 +164,8 @@
         toString: function() {
             var str = this.host ? this.protocol + '://' : '';
             if (this.protocol === 'file') {
-				str += '/';
-			}
+                str += '/';
+            }
 
             return str + helper.combinePathes(this.host, this.path, this.file) + (this.search || '');
         },
@@ -181,11 +177,11 @@
          */
         toRelativeString: function(uri) {
             if (typeof uri === 'string') {
-				uri = new URI(uri);
-			}
+                uri = new URI(uri);
+            }
             if (uri.protocol != this.protocol || uri.host != this.host) {
-				return this.toString();
-			}
+                return this.toString();
+            }
 
             if (this.path.indexOf(uri.path) == 0) { /** host folder */
                 var p = this.path ? this.path.replace(uri.path, '') : '';
@@ -203,8 +199,8 @@
                 length = Math.min(current.length, relative.length);
             for (; i < length; i++) {
                 if (current[i] == relative[i]) {
-					continue;
-				}
+                    continue;
+                }
                 break;
             }
             if (i > 0) {
@@ -234,11 +230,11 @@
         },
         toLocalDir: function() {
             if (this.protocol !== 'file') {
-				return this.toDir();
-			}
+                return this.toDir();
+            }
             return helper.combinePathes(this.host, this.path, '/');
         },
-		toDir: function(){
+        toDir: function(){
             var str = this.toString();
 
             return this.file ? str.substring(0, str.lastIndexOf('/') + 1) : str;
@@ -246,7 +242,7 @@
         isRelative: function() {
             return !this.host;
         },
-		getName: function(){
+        getName: function(){
             return this.file.replace('.' + this.extension,'');
         }
     }
@@ -254,11 +250,11 @@
     URI.combinePathes = helper.combinePathes;
 
 
-	if (global.net == null) {
-		global.net = {};
-	}
+    if (global.net == null) {
+        global.net = {};
+    }
 
-	global.net.URI = URI;
+    global.net.URI = URI;
 
 
 })(typeof window === 'undefined' ? global : window);

@@ -1395,7 +1395,13 @@
 	
 				if (!globalPath) {
 					var delimiter = process.platform === 'win32' ? ';' : ':',
-						parts = process.env.path.split(delimiter),
+						PATH = process.env.PATH || process.env.path;
+	
+					if (!PATH){
+						console.error('PATH not defined in env', process.env);
+					}
+	
+					var parts = PATH.split(delimiter),
 						globalPath = ruqq.arr.first(parts, function(x){
 							return /([\\\/]npm[\\\/])|([\\\/]npm$)/gi.test(x);
 						});
