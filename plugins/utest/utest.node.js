@@ -5,6 +5,9 @@
 	var _tests = [],
 		_index = -1,
 		_listeners = {},
+		_options = {
+			timeout: 1500
+		},
 		_testsDone;
 		
 	
@@ -29,12 +32,33 @@
 		};
 	}
 	
-	function runCase(fn, done, teardown) {
+	function async(callback, name) {
+		var isTimeouted = false,
+			fn = function(){
+				clearTimeout(timeout);
+				!isTimeouted && callback();
+			};
+		
+		var timeout = setTimeout(function(){
+			console.error('Async Suite Timeout - ', name);
+			
+			isTimeouted = true;
+			assert.timeouts.push(name);
+			callback();
+		}, _options.timeout);
+		
+		return fn;
+	}
+	
+	
+	function runCase(fn, done, teardown, key) {
 		try {
 				
 			if (typeof fn === 'function') {
 				if (case_isAsync(fn)) {
-					fn(teardownDelegate(teardown, done));
+					fn( //
+					async( //
+					teardownDelegate(teardown, done), key));
 					return;
 				}
 				
@@ -43,7 +67,9 @@
 			teardownDelegate(teardown, done)();	
 		
 		} catch(error){
+			console.error(error.stack || error);
 			
+			this.errors++;
 			done();
 			
 		}
@@ -70,7 +96,14 @@
 		},
 		
 		run: function(callback){
+			
 			this.processed = [];
+			this.errors = 0;
+			//this.snapshot = {
+			//	total: assert.total,
+			//	failed: assert.failed
+			//};
+			
 			this.onComplete = callback;
 			
 			runCase(this.suite.before, this.nextCase);
@@ -91,7 +124,8 @@
 				}
 				
 				this.processed.push(key);
-				runCase(this.suite[key], this.nextCase, this.suite.teardown);
+				
+				runCase(this.suite[key], this.nextCase, this.suite.teardown, key);
 				
 				return;
 			}
@@ -99,12 +133,16 @@
 			var that = this;
 			runCase(this.suite.after, function(){
 				UTest.trigger('complete', that);
-				
 				that.onComplete();
 			});
 		},
 		
 		Static: {
+			stats: function(){
+				return {
+					suites: _tests.length
+				};
+			},
 			clear: function(){
 				_tests = [];
 				_listeners = {};
@@ -142,6 +180,11 @@
 			},
 			isBusy: function(){
 				return _index < _tests.length;
+			},
+			cfg: function(options){
+				for (var key in options) {
+					_options[key] = options[key];
+				}
 			}
 		}
 	});
@@ -149,12 +192,12 @@
 	global.UTest = UTest;
 	
 	
-}(typeof window === 'undefined' ? global : window));
+}(this));
 
 
 
 // source ../src/assert/assert.node.js
-(function(){
+(function(global){
 	
 	// source assert.js
 	// http://wiki.commonjs.org/wiki/Unit_Testing/1.0
@@ -541,61 +584,132 @@
 	
 	})(this);
 	
+	// source assert.wrapper.js
 	
-	var total = 0,
-		failed = 0,
-		util = require('util');
 	
-	Object.defineProperty(assert, 'total', {
-		get: function(){
-			return total;
+	global.assert = wrapAssertFns(wrapAssert(global.assert));
+	
+	obj_extend(assert, {
+		total: 0,
+		failed: 0,
+		callbacks: 0,
+		timeouts: [],
+		
+		reset: function(){
+			
+			this.callbacks = 0;
+			this.failed = 0;
+			this.total = 0;
+			
+			this.timeouts = [];
 		},
-		set: function(x){
-			total = x;
+		
+		callback: function(callback){
+			this.callbacks++;
+			
+			var that = this;
+			return function(){
+				that.callbacks--;
+				
+				return callback.apply(this, arguments);
+			};
 		}
 	});
-	Object.defineProperty(assert, 'failed', {
-		get: function(){
-			return failed;
-		},
-		set: function(x){
-			failed = x;
+	
+	function obj_extend(target, source) {
+		for (var key in source) {
+			target[key] = source[key];
 		}
-	});
-
-
-	for (var key in assert) {
-		if (typeof assert[key] !== 'function') {
-			continue;
-		}
-		
-		if (key[0].toLowerCase() !== key[0]){
-			// Class Function Definition
-			continue;
-		}
-		
-		assert[key] = wrapp(assert, key);
+		return target;
 	}
 	
+	function wrapAssert(original) {
+		var fn;
+		fn = wrapFn(original);
+		fn.prototype = original.prototype;
+		
+		return obj_extend(fn, original);
+	}
 	
-	function wrapp(assert, key) {
-		var original = assert[key];
+	function wrapAssertFns(assert) {
+			
+		for (var key in assert) {
+			if (typeof assert[key] !== 'function') {
+				continue;
+			}
+		
+			if (key[0].toLowerCase() !== key[0]) {
+				// Class Function Definition
+				continue;
+			}
+		
+			assert[key] = wrapFn(assert, key);
+		}
+		return assert;
+	}
+	
+	function wrapFn(assert, key) {
+		var original = key == null ? assert : assert[key];
 		
 		return function(){
-			total++;
-			
+			assert.total++;
 			try {
 				original.apply(this, arguments);
 			} catch(e) {
-				failed++;
-				console.error('Actual: %1 \nExpected: %2 \nStack: %3'.format(e.actual, e.expected, e.stack));
+				assert.failed++;
+				
+				assert.onfailure && assert.onfailure({
+					actual: e.actual,
+					expected: e.expected,
+					stack: e.stack,
+					message: e.message
+				});
 				return;
 			}
 			
-			util.print(' |'.green.bold);
+			assert.onsuccess && assert.onsuccess();
 		};
 	}
-}());
+	
+	
+	var util = require('util');
+	
+	
+	assert.resolveData = function(stackData, base){
+		
+		
+		var data = Object.extend({}, stackData),
+			stack = stackData.stack.split('\n').splice(2, 6),
+			rgx_http = /http:\/\/([^\/]+)\//,
+			rgx_local = RegExp.fromString(base.replace('file:///','')),
+			rgx_file = /\(([^\(]+)\)[\t ]*$/;
+		
+		
+		stack = ruqq.arr.map(stack, function(x){
+			return x
+					.replace(rgx_http, '')
+					.replace(rgx_local, '')
+					.replace('at ', '');
+		});
+		
+		
+		var file = rgx_file.exec(stack[0]);
+		if (file) {
+			var parts = file[1].split(':');
+			
+			data.file = parts[0];
+			data.line = parts[1] << 0;
+			data.col = parts[2] << 0;
+		}
+		
+		
+		
+		data.stack = stack.join('\n');
+		
+		return data;
+	}
+	
+}(this));
 // source ../src/node/action.js
 (function() {
 	
@@ -604,7 +718,9 @@
 	include.exports = {
 		process: function(config, done) {
 
-			config = prepairConfig(config);
+			cfg_prepair(config);
+			cfg_loadConfig(config);
+			
 			
 			if (!(config.scripts && config.scripts.length)) {
 				done('No scripts to test');
@@ -622,7 +738,7 @@
 
 	
 	// source utils.js
-	function prepairConfig(config) {
+	function cfg_prepair(config) {
 			
 		var base = config.base;
 		if (base) {
@@ -633,20 +749,110 @@
 		}else{
 			base = io.env.currentDir;
 		}
+		
 		config.base = net.URI.combine(base.toDir(), '/');
+		config.scripts = [];
 		
+		
+		var script = config.script || (config.args && config.args[0]);
+		if (script) {
+			if (/\.[\w]+$/.test(script) === false) {
+				script += '.test';
+			}
 			
-		if (config.args && !config.script) {
-			config.script = config.args[0];
+			var uri = new net.URI(base).combine(script),
+				file = new io.File(uri);
+			if (file.exists() == false) {
+				
+				if (/\/?test.?\//.test(script) === false) {
+					script = net.URI.combine('test/', script);
+					file.uri = new net.URI(base).combine(script);
+					
+					if (file.exists() == false) {
+						script = null;
+					} 
+				}
+				
+			}
+			
+			if (script == null) {
+				console.warn('Defined script not exists - ', config.script || config.args[0]);
+			}else {
+				config.scripts.push(script);
+			}
+		
 		}
 		
-		if (config.scripts == null && config.script) {
-			config.scripts = [config.script];
-		}
-		
-		
-		return config;
 	}
+	
+	
+	/**
+	 * env: [String]
+	 * test: String | [String]
+	 */
+	function cfg_loadConfig(config) {
+		var path = config.config;
+		if (path == null) {
+			path = net.URI.combine(config.base, /test.?[\\\/]?$/.test(config.base) ? 'config.js' : 'test/config.js');
+		}
+		
+		var file = new io.File(path);
+		
+		if (file.exists() === false) {
+			return;
+		}
+		
+		cfg = require(file.uri.toLocalFile());
+			
+		if (Array.isArray(cfg.env)) {
+			config.env = cfg.env;
+		}
+	
+		if (config.scripts.length === 0 && cfg.tests) {
+			cfg_appendScript(cfg.tests, config);
+		}
+	}
+	
+	function cfg_appendScript(path, config, asPath) {
+		var scripts = config.scripts,
+			base = config.base,
+			isBrowser = !!config.browser;
+			
+		if (Array.isArray(path)) {
+			ruqq.arr.each(path, function(x){
+				cfg_appendScript(x, config);
+			});
+			return;
+		}
+		
+		if (asPath !== true && ~path.indexOf('*')) {
+			// asPath here is actually to prevent recursion in case if
+			// file, which is resolved by globbing, contains '*'
+			new io.Directory(config.base).readFiles(path).files.forEach(function(file){
+				path = file.uri.toRelativeString(config.base);
+				
+				cfg_appendScript(path, config, true);
+			});
+			return;
+		}
+		
+		if (isBrowser && path_isForNode(path)) 
+			return;
+		
+		
+		if (isBrowser === false && path_isForBrowser(path)) 
+			return;
+		
+		scripts.push(path);
+	}
+	
+	function path_isForNode(path) {
+		return /\-node\.[\w]+$/.test(path) || /\/node\//.test(path);
+	}
+	function path_isForBrowser(path) {
+		return /\-dom\.[\w]+$/.test(path) || /\/dom\//.test(path);
+	}
+	
 	
 	
 		
@@ -664,7 +870,10 @@
 			var file = new io.File(uri);
 			
 			if (file.exists()) {
-				io.File.watcher.watch(file, callback);
+				io.File.watcher.watch(file, function(){
+					console.log(' - file changed - ', file.uri.file);
+					callback();
+				});
 			}
 		});
 	}
@@ -672,8 +881,11 @@
 	var status_blank = 1,
 		status_connecting = 2,
 		status_connected = 3,
-		status_testing = 4,
-		status_ready = 5;
+		status_prepair = 4;
+		status_testing = 5,
+		status_ready = 6,
+		util = require('util');
+		
 	
 	var Runner = (function() {
 	
@@ -707,6 +919,10 @@
 				this.config = config;
 				this.status = status_blank;
 				this.files = utest_resolveFiles(config.base, config.scripts);
+				
+			},
+			notifyTest: function(url){
+				console.log('\nTest: ', (url.length > 23 ? '...' + url.substr(-20) : url).bold);
 			},
 			onComplete: function(stats) {
 				this.status = status_ready;
@@ -718,24 +934,51 @@
 							return 0;
 						}
 						
+						if (x[key] == null) {
+							return aggr;
+						}
+						
+						if (typeof x[key] === 'object' && 'length' in x[key]) {
+							return x[key].length + aggr;
+						}
+						
 						return x[key] + aggr;
 					});
 				}
 	
 				var total = count('total'),
 					failed = count('failed'),
+					timeouts = count('timeouts'),
+					callbacks = count('callbacks'),
 					browsers = stats.length;
 	
 				if (total === 0) {
 					console.error('No assertions');
 					failed++;
 				}
+				
+				if (callbacks !== 0 || timeouts !== 0) {
+					!failed && failed++;
+				}
 	
 				console.log('\nDone. ' [failed ? 'red' : 'green'].bold);
-				console.log('%1/%2'.format(total, failed)
-					.green);
+				
+				failed > total && (failed = total);
+				console.log('bold{Assertions}: bold{green{%1}}(bold{red{%2}})'
+								.format(total - failed, failed)
+								.colorize());
+				
+				console.log('bold{Timeouts}: bold{%1{%2}}'
+								.format(timeouts ? 'red' : 'green', timeouts)
+								.colorize());
+				
+				console.log('bold{Failed Callbacks}: bold{green{%1}}'.format(callbacks).colorize());
 	
 				if (config.watch == null) {
+					if (this.socket) {
+						this.socket.socket.disconnectSync();
+					}
+					
 					process.exit(failed);
 					return;
 				}
@@ -746,8 +989,52 @@
 					resources = this.getResources();
 				}
 	
-				watch(this.config.base, resources, this.runTests.bind(this));
-				console.log(' - watcher active'.red);
+				
+				watch(this.config.base, resources, this.run.bind(this));
+				console.log(' - watcher active'.yellow);
+			},
+			
+			
+			// assertion events
+			
+			onFailure: function(data){
+				if (!data.stack) {
+					console.error('Unknown exception - ', data);
+					return;
+				}
+				
+				data = assert.resolveData(data, this.config.base);
+				
+				console.log('\n');
+				
+				if (data.file && data.line != null) {
+					
+					var path = data.file.replace(/\/?utest\//i, '/'),
+						uri = new net.URI(this.config.base).combine(path),
+						source = new io.File(uri).read().split(/\r\n|\r|\n/g),
+						line = source[data.line - 1],
+						code = line && line.trim();
+					
+					if (data.actual && data.expected) {
+						var msg = 'bold{yellow{%1}} bold{red{<=>}} bold{yellow{%2}}';
+						console.log(msg
+										.colorize()
+										.format(data.actual, data.expected));
+					}
+					
+					console.log('bold{%1}:%2'.colorize().format(data.file, data.line + 1));
+					console.log('  bold{cyan{ >> }} bold{red{ %1 }}'.colorize().format(code));
+					return;
+				}
+					
+				
+				console.error(data.message);
+				console.error(data.stack);
+				
+			},
+			
+			onSuccess: function(){
+				util.print(' |'.green.bold);
 			}
 		});
 	
@@ -756,10 +1043,15 @@
 	// source RunnerClient.js
 	var RunnerClient = Class({
 		Base: Runner,
+		Construct: function(){
+			
+		},
 		run: function(done) {
-	
+			
+			this.run = this.runTests;
+			
 			var that = this,
-				config = this.config,
+				confit = this.config,
 				port = config.port || 5777,
 				util = require('util'),
 				io_client = require('socket.io-client'),
@@ -780,14 +1072,16 @@
 			})
 	
 			.on('error', function() {
-				done(
-					'Test server connection error - http://localhost:%1/test'
-					.format(port));
+				var msg = 'Test server connection error - http://localhost:%1/utest';
+				done(msg.format(port));
 			})
 	
-			.on('server:utest:end', this.onComplete.bind(this))
+			.on('server:utest:end', function(){
+				that.onComplete.apply(that, arguments);
+			})
 	
 			.on('server:error', function(message) {
+				that.socket.socket.disconnectSync();
 				done(message);
 			})
 	
@@ -798,32 +1092,35 @@
 			})
 	
 			.on('slave:start', function(stats) {
-				var message = 'Testing #{browser.name} #{browser.version}'
+				var message = '\n#{browser.name} #{browser.version}'.bold;
 				console.log(message.format(stats.userAgent));
 				console.log('');
 			})
-				.on('slave:end', function(stats) {
-				console.log('\nAsserts: %d Failed: %d', stats.total, stats.failed);
+			.on('slave:end', function(stats) {
+				console.log('\nSlave completed'[stats.failed ? 'red' : 'green']);
 			})
 	
 			.on('slave:error', function(error) {
 				console.error(error);
 			})
-	
-			.on('slave:assert:failure', function(args) {
-				args.unshift('\n');
-				console.error.apply(console, args);
-	
+			
+			.on('slave:utest:script', function(info){
+				that.notifyTest(info.script);
 			})
 	
-			.on('slave:assert:success', function() {
-				util.print(' |'.green.bold);
-			});
+			.on('slave:assert:failure', function(args) {
+				var data = args[0];
+				
+				that.onFailure(data);
+				
+			})
 	
+			.on('slave:assert:success', that.onSuccess.bind(that));
 		},
 	
 		runTests: function() {
-			console.log('.. running tests');
+			console.log(' -  running tests  -  ', Date.format(new Date(), 'HH:mm:ss'));
+			
 			switch (this.status) {
 				case status_blank:
 				case status_connected:
@@ -840,9 +1137,10 @@
 	
 		function resource_clear(resource) {
 			
-			var bin = include.getResources(),
-				type = resource.type;
-			if (type) {
+			var bin = include.getResources();
+			
+			
+			for (var type in bin) {
 				for(var key in bin[type]){
 					if (bin[type][key] === resource){
 						delete bin[type][key];
@@ -850,6 +1148,7 @@
 					}
 				}
 			}
+			
 			if (resource.includes) {
 				ruqq.arr.each(resource.includes, function(data){
 					resource_clear(data.resource);
@@ -873,33 +1172,81 @@
 		return Class({
 			Base: Runner,
 			Construct: function() {
-				Class.bind(this, 'singleComplete');
+				assert.onsuccess = this.onSuccess.bind(this);
+				assert.onfailure = this.onFailure.bind(this);
+				
+				Class.bind(this, 'singleComplete', 'runTests');
 			},
 			run: function(done) {
-				this.runTests();
-			},
-			runTests: function() {
 				if (status_ready !== this.status && status_blank !== this.status) {
 					console.warn('Node is busy ... ', this.status);
 					return;
 				}
-	
+				this.status = status_prepair;
+				
+				var that = this;
+				
+				this.loadEnv(this.config.base, this.config.env, function(env){
+					Log('Environment Loaded', env && Object.keys(env), 90);
+					that.runTests();
+				});
+				
+			},
+			
+			loadEnv: function(base, env, callback){
+				if (env == null) {
+					callback();
+					return;
+				}
+				if (Array.isArray(env) === false) {
+					console.warn('"env" property should be an array of strings', env);
+					callback();
+					return;
+				}
+				
+				var resource = include.instance();
+				
+				base = new net.URI(base);
+				ruqq.arr.each(env, function(x){
+					var file = new io.File(base.combine(x));
+					if (file.exists() === false) {
+						console.log('Resource from Env - 404 -', x);
+						return;
+					}
+					
+					resource.inject(file.uri.toString());
+				});
+				
+				
+				resource.done(function(resp){
+					setTimeout(function(){
+						callback(resp);
+					});
+				});
+			},
+			
+			runTests: function() {
+				
 				this.index = -1;
 				this.status = status_testing;
 				this.stats = [];
 				this.clearResources();
 				this.process();
+				
 			},
 	
 			singleComplete: function() {
 				this.stats.push({
 					url: this.files[this.index].uri.toString(),
 					total: assert.total,
-					failed: assert.failed
+					failed: assert.failed,
+					timeouts: assert.timeouts,
+					callbacks: assert.callbacks,
 				});
 	
-				var message = '\nTotal: %1. Failed: %2'.format(assert.total, assert.failed);
-				console.log(message[assert.failed ? 'red' : 'green'].bold);
+				//var message = '\nTotal: %1. Failed: %2'.format(assert.total, assert.failed);
+				//console.log(message[assert.failed ? 'red' : 'green'].bold);
+				//console.log('\n');
 	
 				this.process();
 			},
@@ -908,22 +1255,23 @@
 					this.onComplete(this.stats);
 					return;
 				}
-				assert.total = 0;
-				assert.failed = 0;
+				
+				assert.reset();
 				TestSuite.clear();
 	
 				var that = this,
 					url = this.files[this.index].uri.toString();
 	
-				console.log('Test:', url.length > 23 ? '...' + url.substr(-20) : url);
+				
+				this.notifyTest(url);
 	
 				var incl = include
 					.cfg('path', config.base)
 					.instance(url)
 					.js(url)
 					.done(function(resp) {
-	
-					setTimeout(function() {
+					
+					process.nextTick(function() {
 						TestSuite.run(that.singleComplete);
 					});
 				});

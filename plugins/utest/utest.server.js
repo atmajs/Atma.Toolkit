@@ -17,8 +17,7 @@ include.js({
 			this.socket = socket
 				.on('browser:log', function(type, args) {
 	
-				(logger[type] || logger.log)
-					.apply(logger, args);
+				(logger[type] || logger.log).apply(logger, args);
 	
 			})
 	
@@ -31,8 +30,10 @@ include.js({
 				that.trigger('end', this, result);
 			})
 	
+			.on('browser:utest:script', this.pipe('browser:utest:script'))
 			.on('browser:assert:success', this.pipe('browser:assert:success'))
-				.on('browser:assert:failure', this.pipe('browser:assert:failure'));
+			.on('browser:assert:failure', this.pipe('browser:assert:failure'));
+			
 		},
 	
 		run: function(config) {
@@ -81,7 +82,7 @@ include.js({
 					.on('browser:assert:success', this.pipe('browser:assert:success'))
 					.on('browser:assert:failure', this.pipe('browser:assert:failure'))
 					.on('browser:utest:start', this.pipe('browser:utest:start'))
-					
+					.on('browser:utest:script', this.pipe('browser:utest:script'))
 					;
 					
 			}.bind(this));
@@ -160,9 +161,12 @@ include.js({
 			}
 		});
 		
+		var __socket, __config;
+		
 		return Class({
 			Construct: function(socket, io, port) {
-		
+				
+				
 				this.socket = socket
 		
 				.on('disconnect', this.disconnected)
@@ -184,20 +188,27 @@ include.js({
 						.on('slave:end', Pipe(socket, 'slave:end'))
 						.on('slave:error', Pipe(socket, 'slave:error'))
 						.on('server:utest:end', Pipe(socket, 'server:utest:end'))
-		
+						.on('browser:utest:script', Pipe(socket, 'slave:utest:script'))
 		
 						.on('browser:assert:failure', Pipe(socket, 'slave:assert:failure'))
 						.on('browser:assert:success', Pipe(socket, 'slave:assert:success'))
-		
+						
 					;
 		
+					__config = config;
 					utest.run(config, done);
 		
 				});
 			},
 			
 			disconnected: function() {
-		
+				__config = null;
+			},
+			
+			Static: {
+				getCurrentConfig: function(){
+					return __config;
+				}
 			}
 		});
 	

@@ -6,15 +6,19 @@ include.exports = {
 		
 		globals.extend({
 			actions: {
-				test: uri.combine('/utest.node.js').toString()
+				test: getPath('/utest.node.js')
 			},
 			server: {
-				controllers: [uri.combine('env/controller.js').toString()],
+				controllers: [getPath('env/controller.js')],
 				websockets: {
-					'/node' : uri.combine('/utest.server.js').toString()
+					'/node' : getPath('/utest.server.js')
 				}
 			}
 		});
 
 	}
 };
+
+function getPath(path) {
+	return uri.combine(path).toString();
+}
