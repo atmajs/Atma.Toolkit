@@ -1,119 +1,191 @@
 
 (function(global) {
     'use strict';
+	
+	var rgx_protocol = /^([a-zA-Z]+):\/\//,
+		rgx_fileWithExt = /([^\/]+(\.[\w\d]+)?)$/i,
+		rgx_extension = /\.[\w\d]+$/i,
+		rgx_win32Drive = /(^\/?\w+:)\/[^\/]/
+		
+		;
 
-    var helper = {
-        isURI: function(o){
-            return typeof o === 'object' && typeof o.combine === 'function';
-        },
-        combinePathes: function() {
-            var args = arguments;
-            var str = '';
-            for (var i = 0; i < args.length; i++) {
-                if (!args[i]) {
-                    continue;
-                }
-                if (!str) {
-                    str = args[i];
-                    continue;
-                }
-                if (str[str.length - 1] != '/') {
-                    str += '/';
-                }
-                str += args[i][0] == '/' ? args[i].substring(1) : args[i];
-            }
-            return str;
-        },
-        parseProtocol: function(o){
-            var value = /^([a-zA-Z]+):\/(\/)?/.exec(o.value); // @ 'c:/file.txt'| 'protocol://host.com'
+	function util_isUri(object) {
+		return object && typeof object === 'object' && typeof object.combine === 'function';
+	}
+	
+	function util_combinePathes(/*args*/) {
+		var args = arguments,
+			str = '';
+		for (var i = 0, x, imax = arguments.length; i < imax; i++){
+			x = arguments[i];
+			if (!x) 
+				continue;
+		
+			if (!str) {
+				str = x;
+				continue;
+			}
+			
+			if (str[str.length - 1] !== '/') 
+				str += '/';
+			
+			str += x[0] === '/' ? x.substring(1) : x;
+		}
+		return str;
+	}
+	
+	function normalize_pathsSlashes(str) {
+		
+		if (str[str.length - 1] === '/') {
+			return str.substring(0, str.length - 1);
+		}
+		return str;
+	}
+	
+	function util_clone(source) {
+		var uri = new URI(),
+			key;
+		for (key in source) {
+			if (typeof source[key] === 'string') {
+				uri[key] = source[key];
+			}
+		}
+		return uri;
+	}
+	
+	function normalize_uri(str) {
+		 return str
+					.replace(/\\/g,'/')
+					.replace(/^\.\//,'')
+                    
+                    // win32 drive path
+                    .replace(/^(\w+):\/([^\/])/, '/$1:/$2') 
+					
+					;
+	}
+	
+	function util_win32Path(path) {
+		if (rgx_win32Drive.test(path) && path[0] === '/') {
+			return path.substring(1);
+		}
+		return path;
+	}
+	
+	function parse_protocol(obj) {
+		var match = rgx_protocol.exec(obj.value); 
 
-            if (value == null) {
-                
-                if (o.value.charAt(0) === '/') {
-                    o.protocol = 'file'; // @*nix /home/..
-                }
-                
-                return;
-            }
-            if (value[2] == null){
-                o.protocol = 'file';
-                return;
-            }
-            o.protocol = value[1];
-            o.value = o.value.substring(value[0].length);
-        },
-        parseHost: function(o){
-            if (o.protocol == null) {
-                return;
-            }
-            var i = o.value.indexOf('/', 2);
-            if (~i){
-                o.host = o.value.substring(0, i);
-            }else{
-                o.host = o.value;
-            }
-            o.value = o.value.replace(o.host,'');
-
-            ////if (o.protocol === 'file' && o.host[0] == '/'){
-            ////    o.host = o.host.substring(1);
-            ////}
-        },
-        parseSearch: function(o){
-            var i = o.value.indexOf('?');
-            if (~i) {
-                o.search = o.value.substring(i);
-                o.value = o.value.replace(o.search, '');
-            }
-        },
-        parseFile: function(o){
-            var value = /\/?([^\/]+\.[^\/]+)$/i.exec(o.value);
-            var file = value ? value[1] : null;
-            if (file) {
-                o.file = file;
-                o.value = o.value.replace(file, '');
-
-                if (o.value[o.value.length - 1] == '/') {
-                    o.value = o.value.substring(0, o.value.length - 1);
-                }
-                value = /\.(\w+)$/i.exec(o.file);
-                o.extension = value ? value[1] : null;
-            }
+        if (match == null && obj.value[0] === '/'){
+            obj.protocol = 'file';
         }
-    }
+
+		if (match == null) 
+			return;
+		
+		
+		obj.protocol = match[1];
+		obj.value = obj.value.substring(match[0].length);
+	}
+	
+	function parse_host(obj) {
+		if (obj.protocol == null)
+			return;
+		
+		if (obj.protocol === 'file') {
+			var match = rgx_win32Drive.exec(obj.value);
+			if (match) {
+				obj.host = match[1];
+				obj.value = obj.value.substring(obj.host.length);
+			}
+			return;
+		}
+		  
+		var pathStart = obj.value.indexOf('/', 2);
+		
+		obj.host = ~pathStart
+				? obj.value.substring(0, pathStart)
+				: obj.value;
+				
+		
+		obj.value = obj.value.replace(obj.host,'');
+	}
+	
+	function parse_search(obj) {
+		var question = obj.value.indexOf('?');
+		if (question === -1)
+			return;
+		
+		obj.search = obj.value.substring(question);
+		obj.value = obj.value.substring(0, question);
+	}
+	
+	function parse_file(obj) {
+		var match = rgx_fileWithExt.exec(obj.value),
+			file = match == null ? null : match[1];
+		
+		
+		if (file == null) 
+			return
+		
+		
+		obj.file = file;
+		obj.value = obj.value.replace(file, '');
+		obj.value = normalize_pathsSlashes(obj.value);
+		
+		
+		match = rgx_extension.exec(file);
+		
+		
+		obj.extension = match == null ? null : match[0];
+	
+	}
+	
 
 
 
     var URI = function(uri) {
-        if (uri == null) {
+        if (uri == null) 
             return this;
-        }
-        if (typeof uri === 'object' && typeof uri.combine === 'function') {
+        
+        if (util_isUri(uri)) 
             return uri.combine('');
-        }
+        
 
-        uri = uri.replace(/\\/g,'/').replace(/^\.\//,'');
+        uri = normalize_uri(uri);
+		
 
         this.value = uri;
-        helper.parseProtocol(this);
-        helper.parseHost(this);
+		
+        parse_protocol(this);
+        parse_host(this);
 
-        helper.parseSearch(this);
-        helper.parseFile(this);
+        parse_search(this);
+        parse_file(this);
 
+		
         // normilize path - "/some/path"
-        this.path = this.value.replace(/\/*$/, '');
+        this.path = normalize_pathsSlashes(this.value);
+
+        if (/^[\w]+:\//.test(this.path)){
+            this.path = '/' + this.path;
+        }
+
         return this;
     }
-    URI.combine = helper.combinePathes;
+ 
 
     URI.prototype = {
         cdUp: function() {
-            if (!this.path || this.path == '/') {
+			if (!this.path)
+				return this;
+			
+			if (this.path === '/')
+				return this;
+			
+			// win32 - is base drive
+            if (/^\/?[a-zA-Z]+:\/?$/.test(this.path)) 
                 return this;
-            }
-            if (this.protocol == 'file' && /^\/?[a-zA-Z]+:\/?$/.test(this.path)) {
-                return this;
-            }
+            
+			
             this.path = this.path.replace(/\/?[^\/]+\/?$/i, '');
             return this;
         },
@@ -122,90 +194,95 @@
          * '../path', 'path','./path' - relative to current path
          */
         combine: function(path) {
-            if (typeof path === 'object' && typeof path.combine === 'function') {
-                path = path.toString();
-            }
-
-            var uri = new URI();
-            for (var key in this) {
-                if (typeof this[key] === 'string') {
-                    uri[key] = this[key];
-                }
-            }
-
-            if (!path) {
-                return uri;
-            }
-
-            if (this.protocol == 'file' && path[0] == '/') {
-                path = path.substring(1);
-            }
-
+			
+			if (util_isUri(path)) 
+				path = path.toString();
+			
+			
+			if (!path) 
+				return util_clone(this);
+			
+			if (rgx_win32Drive.test(path)) {
+				return new URI(path);
+			}
+			
+            var uri = util_clone(this);
+			
             uri.value = path;
-            helper.parseSearch(uri);
-            helper.parseFile(uri);
+			
+            parse_search(uri);
+            parse_file(uri);
+			
+			if (!uri.value) 
+				return uri;
+			
 
-            if (uri.value) {
-                path = uri.value.replace(/^\.\//i, '');
+            
+			path = uri.value.replace(/^\.\//i, '');
 
-                if (path[0] == '/') {
-                    uri.path = path;
-                    return uri;
-                }
-                while (/^(\.\.\/?)/ig.test(path)) {
-                    uri.cdUp();
-                    path = path.substring(3);
-                }
+			if (path[0] === '/') {
+				uri.path = path;
+				return uri;
+			}
+			
+			
+			
+			while (/^(\.\.\/?)/ig.test(path)) {
+				uri.cdUp();
+				path = path.substring(3);
+			}
 
-                uri.path = helper.combinePathes(uri.path, path);
-            }
+			uri.path = normalize_pathsSlashes(util_combinePathes(uri.path, path));
+		
             return uri;
         },
         toString: function() {
-            var str = this.host ? this.protocol + '://' : '';
-            if (this.protocol === 'file') {
-                str += '/';
-            }
 
-            return str + helper.combinePathes(this.host, this.path, this.file) + (this.search || '');
+            var str = this.protocol ? this.protocol + '://' : '';
+            
+            return str + util_combinePathes(this.host, this.path, this.file) + (this.search || '');
         },
         toPathAndQuery: function(){
-            return helper.combinePathes(this.path, this.file) + (this.search || '');
+            return util_combinePathes(this.path, this.file) + (this.search || '');
         },
         /**
          * @return Current URI Path{String} that is relative to @arg1 URI
          */
         toRelativeString: function(uri) {
-            if (typeof uri === 'string') {
+            if (typeof uri === 'string') 
                 uri = new URI(uri);
-            }
-            if (uri.protocol != this.protocol || uri.host != this.host) {
-                return this.toString();
-            }
+            
+            //if (uri.protocol !== this.protocol || uri.host !== this.host) 
+            //    return this.toString();
+            
 
-            if (this.path.indexOf(uri.path) == 0) { /** host folder */
+            if (this.path.indexOf(uri.path) === 0) {
+				// host folder 
                 var p = this.path ? this.path.replace(uri.path, '') : '';
-                if (p[0] === '/') {
+                if (p[0] === '/') 
                     p = p.substring(1);
-                }
-                return helper.combinePathes(p, this.file) + (this.search || '');
+                
+				
+                return util_combinePathes(p, this.file) + (this.search || '');
             }
 
-            /** sub folder */
-            var current = this.path.split('/');
-            var relative = uri.path.split('/');
-            var commonpath = '';
-            var i = 0,
+            // sub folder 
+            var current = this.path.split('/'),
+				relative = uri.path.split('/'),
+            	commonpath = '',
+            	i = 0,
                 length = Math.min(current.length, relative.length);
+				
             for (; i < length; i++) {
-                if (current[i] == relative[i]) {
+                if (current[i] === relative[i]) 
                     continue;
-                }
+                
                 break;
             }
-            if (i > 0) {
+			
+            if (i > 0) 
                 commonpath = current.splice(0, i).join('/');
-            }
+            
             if (commonpath) {
                 var sub = '',
                     path = uri.path,
@@ -218,7 +295,7 @@
                     path = path.replace(/\/?[^\/]+\/?$/i, '');
                     sub += '../';
                 }
-                return helper.combinePathes(sub, forward, this.file);
+                return util_combinePathes(sub, forward, this.file);
             }
 
 
@@ -226,13 +303,14 @@
         },
 
         toLocalFile: function() {
-            return helper.combinePathes(this.host, this.path, this.file);
+			var path = util_combinePathes(this.host, this.path, this.file);
+            
+			return util_win32Path(path);
         },
         toLocalDir: function() {
-            if (this.protocol !== 'file') {
-                return this.toDir();
-            }
-            return helper.combinePathes(this.host, this.path, '/');
+            var path = util_combinePathes(this.host, this.path, '/');
+			
+			return util_win32Path(path);
         },
         toDir: function(){
             var str = this.toString();
@@ -240,14 +318,15 @@
             return this.file ? str.substring(0, str.lastIndexOf('/') + 1) : str;
         },
         isRelative: function() {
-            return !this.host;
+            return !(this.host || this.path[0] === '/');
         },
         getName: function(){
             return this.file.replace('.' + this.extension,'');
         }
     }
 
-    URI.combinePathes = helper.combinePathes;
+    URI.combinePathes = util_combinePathes;
+	URI.combine = util_combinePathes;
 
 
     if (global.net == null) {
@@ -257,4 +336,4 @@
     global.net.URI = URI;
 
 
-})(typeof window === 'undefined' ? global : window);
+}(typeof window === 'undefined' ? global : window));
