@@ -1291,8 +1291,8 @@
 			},
 			send: function() {
 	
-				if (this.url.indexOf('file:///') > -1) {
-					this.url = this.url.replace('file:///', '');
+				if (this.url.indexOf('file://') !== -1) {
+					this.url = getFile(this.url);
 				}
 	
 				if (cfg.sync === true) {
@@ -1347,8 +1347,14 @@
 	
 	
 		function getFile(url) {
-			return url.replace('file:///', '')
-				.replace(/\\/g, '/');
+			url = url.replace('file://', '').replace(/\\/g, '/');
+			
+			if (/^\/\w+:\/[^\/]/i.test(url)){
+				// win32 drive
+				return url.substring(1);
+			}
+			
+			return url;
 		}
 	
 		function getDir(url) {
@@ -1413,7 +1419,7 @@
 						includePath = io.env.applicationDir.toLocalDir() + 'node_modules';
 					}else {
 						console.error('Could not resolve global NPM Directory from system path');
-						console.log('searched with pattern /npm');
+						console.log('searched with pattern /npm in', PATH, delimiter);
 					}
 				}
 	

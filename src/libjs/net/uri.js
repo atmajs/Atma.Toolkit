@@ -4,7 +4,7 @@
 	
 	var rgx_protocol = /^([a-zA-Z]+):\/\//,
 		rgx_fileWithExt = /([^\/]+(\.[\w\d]+)?)$/i,
-		rgx_extension = /\.[\w\d]+$/i,
+		rgx_extension = /\.([\w\d]+)$/i,
 		rgx_win32Drive = /(^\/?\w+:)\/[^\/]/
 		
 		;
@@ -135,7 +135,7 @@
 		match = rgx_extension.exec(file);
 		
 		
-		obj.extension = match == null ? null : match[0];
+		obj.extension = match == null ? null : match[1];
 	
 	}
 	
@@ -313,9 +313,9 @@
 			return util_win32Path(path);
         },
         toDir: function(){
-            var str = this.toString();
-
-            return this.file ? str.substring(0, str.lastIndexOf('/') + 1) : str;
+        	 var str = this.protocol ? this.protocol + '://' : '';
+            
+            return str + util_combinePathes(this.host, this.path, '/')
         },
         isRelative: function() {
             return !(this.host || this.path[0] === '/');

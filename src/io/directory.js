@@ -9,13 +9,20 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 
 	io.Directory = Class({
 		Construct: function(directory) {
-
+			
 			if (directory == null || directory === '/') {
 				this.uri = io.env.currentDir;
-			} else {
-				this.uri = new URI(directory);
-				delete this.uri.file;
+				return;
 			}
+			
+			if (typeof directory === 'string' && directory[directory.length - 1] !== '/') {
+				console.warn('@ directory path should be ended with slash');
+				console.warn(directory);
+			}
+			
+			this.uri = new URI(directory);
+			
+			delete this.uri.file;
 		},
 		exists: function() {
 			return fs.existsSync(this.uri.toLocalDir());
