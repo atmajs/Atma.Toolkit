@@ -1,7 +1,7 @@
 
 module.exports = {
 	environments: {
-		libjs: "/src/server/env/libjs.js",
-		project: "/src/server/env/project.js"
+		libjs: "{ijs}/src/server/env/libjs.js",
+		project: "{ijs}/src/server/env/project.js"
 	}
 };

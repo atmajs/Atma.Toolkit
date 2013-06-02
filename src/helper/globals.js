@@ -71,7 +71,30 @@ include
 			}
 		}
 		
-	}
+	};
+	
+	
+	__globals.resolvePathFromProject = function(path){
+		if (!(path && path[0] === '{')) {
+			return path;
+		}
+		
+		var match = /\{([\w]+)\}\//.exec(path),
+			projectName = match && match[1],
+			project = __globals.projects[projectName],
+			projectPath = project && project.path;
+			
+		if (!projectPath) {
+			console.error('Project could be not resolved - ', path);
+			return path;
+		}
+		
+		path = path.substring(match[0].length);
+		
+		return net.URI.combinePathes(projectPath, path);
+	};
+	
+	
 	
 	
 	

@@ -8,7 +8,8 @@ include
 
 	var File = io.File,
 		mask = resp.Mask,
-		resource = include;
+		resource = include,
+		globals = resp.globals;
 		
 	
 	
@@ -41,9 +42,6 @@ include
 				
 				var scripts = Env.process(request.url),
 					req = new net.URI(request.url);
-				
-				
-				console.log('path', req.toLocalFile());
 				
 				scripts.push({
 					path: req.toLocalFile()
@@ -79,12 +77,11 @@ include
 		var src = environments[env];
 		
 		
-		if (src[0] === '/') {
-			src = io.env.applicationDir.combine(src).toString();
+		if (src[0] === '{') {
+			src = globals.resolvePathFromProject(src);
 		}
 		
 		resource.js(src + '::Env').done(function(resp){
-			console.warn(Object.keys(resp));
 			callback(resp.Env);
 		});
 	}
