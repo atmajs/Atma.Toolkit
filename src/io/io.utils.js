@@ -85,7 +85,7 @@
 								dirCanBeMatched = true;
 								break;
 							}
-							Log('Glob: Cant be matched %s | %s', dirroot, patternRoot, patternRootCount, 90);
+							Log('Glob: Not matched %s | %s', dirroot, patternRoot, patternRootCount, 90);
 						}
 
 						if (dirCanBeMatched === false) {

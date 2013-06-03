@@ -1363,30 +1363,63 @@
 	
 	
 		Resource.prototype.inject = function(pckg) {
-			var current = include;
-			
-			include.state = include.state >= 3 ? 3 : 2;
-			include
-				.create()
-				.load(pckg)
-				.done(function(resp){
+				var current = this;
+				
+				current.state = current.state >= 3 ? 3 : 2;
+				
+				var bundle = current.create();
+					
+				bundle.load(pckg).done(function(resp){
+		
+					var sources = resp.load,
+						key,
+						resource;
+					
+					try {
+						for(var i = 0; i< bundle.includes.length; i++){
+							//@TODO - refactor
+							
+							var resource = bundle.includes[i].resource,
+								source = resource.exports;
 	
+							
+							var res = new Resource('js');
+							for(var key in resource){
+								res[key] = resource[key];
+							}
 	
-				var sources = resp.load,
-					key;
-				try {
-					for (key in sources) {
-						__eval(sources[key], include , true);
+							resource = res;
+							resource.exports = null;
+							resource.type = 'js';
+							resource.includes = null;
+							resource.state = 3;
+							
+							bundle.includes[i].resource = res;
+	
+							__eval(source, resource, true);
+	
+							
+							resource.readystatechanged(3);
+	
+						}
+					} catch (e) {
+						console.error('Injected Script Error\n', e, key);
 					}
-				} catch (e) {
-					console.error('Injected Script Error\n', e);
-				}
+		
+					
+					bundle.on(4, function(){
+						
+						current
+							.includes
+							.splice
+							.apply(current.includes, [bundle, 1].concat(bundle.includes));
 	
-				include.readystatechanged(3);
-			});
-	
-			return current;
-		};
+						current.readystatechanged(3);
+					});
+				});
+		
+				return current;
+			};
 	
 	
 		Resource.prototype.instance = function(currentUrl) {
