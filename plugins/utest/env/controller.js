@@ -45,7 +45,12 @@ include
 			if (resource) {
 				var SocketHandler = WebSockets.getConnectionHandler('/node'),
 					config = SocketHandler.getCurrentConfig();
-					
+				
+				if (Array.isArray(config)) {
+					config = ruqq.arr.first(config, function(x){
+						return x.base != null;
+					});
+				}
 				
 				if (config && config.base) {
 					var base = new net.URI(config.base).toLocalDir();
@@ -55,6 +60,8 @@ include
 					return;
 					
 				}
+				
+				console.warn('Invalid config - no base path information', config)
 				
 				response.writeHeader(500, {
 					'Content-Type': 'text/html'

@@ -9911,6 +9911,19 @@ function __eval(source, include) {
 
 
 
+
+// source ../src/utils/array.js
+function arr_isArray(array) {
+	return !!(array != null && array.length != null && typeof array.splice === 'function');
+}
+
+function arr_isEmpty(array) {
+	if (arr_isArray(array) === false)
+		return true;
+		
+	return !array.length;
+}
+
 // source ../src/assert/assert.browser.js
 (function(global){
 	
@@ -10363,8 +10376,8 @@ function __eval(source, include) {
 		return assert;
 	}
 	
-	function wrapFn(assert, key) {
-		var original = key == null ? assert : assert[key];
+	function wrapFn(assertFn, key) {
+		var original = key == null ? assertFn : assertFn[key];
 		
 		return function(){
 			assert.total++;
@@ -10467,7 +10480,15 @@ function __eval(source, include) {
 		var lines = [];
 		lines.push('Message: ' + message);
 		lines.push('File: ' + file + ':' + lineNumber);
-		console.error(lines.join('\n'));
+		
+		message = lines.join('\n');
+		console.error(message);
+		
+		socket.emit('browser:utest:error', {
+			error: message
+		});
+		
+		//-state = state_ready;
 	};
 	
 	// source notify.js
@@ -10479,10 +10500,6 @@ function __eval(source, include) {
 				break;
 		}
 		
-	}
-	// source utils/array.js
-	function arr_isArray(array) {
-		return array && array.length != null && typeof array.splice === 'function'
 	}
 	// source utils/logger.js
 	(function() {
@@ -10619,11 +10636,11 @@ function __eval(source, include) {
 	}());
 	
 	var script_insertMany = function(bundle, callback){
-		//if (arr_isArray(bundle) === false) {
-		//	callback();
-		//	return;
-		//}
-		//
+		if (!(arr_isArray(bundle) && bundle.length)) {
+			callback();
+			return;
+		}
+		
 		for (var i = 0, x, imax = bundle.length; i < imax; i++){
 			x = bundle[i];
 			
@@ -10765,6 +10782,8 @@ function __eval(source, include) {
 					return _configs;
 				}
 			},
+			
+			// Class
 			Construct: function(config){
 				this.config = config;
 				this.scripts = config.scripts;
@@ -10872,7 +10891,7 @@ function __eval(source, include) {
 
 	function utest_start(config) {
 		
-		if (!config || !config.scripts) {
+		if (!config) {
 			socket.emit('browser:utest:end', {
 				error: 'No scripts to be tested'
 			});
@@ -10899,52 +10918,8 @@ function __eval(source, include) {
 			
 		});
 		
-		////state = state_busy;
-		////assert.reset();
-		////TestSuite.clear();
-		////
-		////include_clearCache();
-		////
-		////socket.emit('browser:utest:start', {
-		////	userAgent: window.browserInfo
-		////});
-		////
-		////
-		////for (var i = 0, imax = config.scripts.length; i < imax; i++) {
-		////	script_insert({
-		////		path: config.scripts[i]
-		////	}, i == imax - 1 ? utest_end : null);
-		////}
 	}
 
-	//////function utest_end(force) {
-	//////	if (force !== true && typeof include !== 'undefined') {
-	//////		
-	//////		include_ready(function(){
-	//////			utest_end(true);
-	//////		});
-	//////		return;
-	//////	}
-	//////	
-	//////	// findout resources for watcher
-	//////	// do this here, as TestScripts could also add/remove scripts
-	//////	var resources = script_getResources();
-	//////	
-	//////	TestSuite.run(function(){
-	//////		
-	//////		socket.emit('browser:utest:end', {
-	//////			total: assert.total,
-	//////			failed: assert.failed,
-	//////			timeouts: assert.timeouts,
-	//////			callbacks: assert.callbacks,
-	//////			
-	//////			userAgent: window.browserInfo,
-	//////			resources: resources
-	//////		});
-	//////		
-	//////		state = state_ready;
-	//////	});
-	//////}
 
 	
 }());
