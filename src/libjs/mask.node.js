@@ -23,7 +23,7 @@
             return lib;
         };
 
-    if (typeof exports === 'object') {
+    if (typeof module !== 'undefined') {
         module.exports = construct();
     } else if (typeof define === 'function' && define.amd) {
         define(construct);
@@ -565,6 +565,12 @@
 	}());
 	
 	// source ../src/expression/exports.js
+	/**
+	 * ExpressionUtil
+	 *
+	 * Helper to work with expressions
+	 **/
+	
 	var ExpressionUtil = (function(){
 	
 		// source 1.scope-vars.js
@@ -578,16 +584,18 @@
 			op_Plus = '+', //2,
 			op_Divide = '/', //3,
 			op_Multip = '*', //4,
-			op_LogicalOr = '||', //5,
-			op_LogicalAnd = '&&', //6,
-			op_LogicalNot = '!', //7,
-			op_LogicalEqual = '==', //8,
-			op_LogicalNotEqual = '!=', //10,
-			op_LogicalGreater = '>', //11,
-			op_LogicalGreaterEqual = '>=', //12,
-			op_LogicalLess = '<', //13,
-			op_LogicalLessEqual = '<=', //14,
-			op_Member = '.', // 15
+			op_Modulo = '%', //5,
+			
+			op_LogicalOr = '||', //6,
+			op_LogicalAnd = '&&', //7,
+			op_LogicalNot = '!', //8,
+			op_LogicalEqual = '==', //9,
+			op_LogicalNotEqual = '!=', //11,
+			op_LogicalGreater = '>', //12,
+			op_LogicalGreaterEqual = '>=', //13,
+			op_LogicalLess = '<', //14,
+			op_LogicalLessEqual = '<=', //15,
+			op_Member = '.', // 16
 		
 			punc_ParantheseOpen = 20,
 			punc_ParantheseClose = 21,
@@ -942,7 +950,7 @@
 				c = template.charCodeAt(index),
 				ref;
 		
-			if (c === 34 || c === 39){
+			if (c === 34 || c === 39) {
 				index++;
 				ref = parser_getString(c);
 				index++;
@@ -955,15 +963,15 @@
 				if (
 					c > 47 && // ()+-*,/
 		
-					c !== 58 && // :
-					c !== 60 && // <
-					c !== 61 && // =
-					c !== 62 && // >
-					c !== 63 && // ?
+				c !== 58 && // :
+				c !== 60 && // <
+				c !== 61 && // =
+				c !== 62 && // >
+				c !== 63 && // ?
 		
-					c !== 124 && // |
+				c !== 124 && // |
 		
-					index < length) {
+				index < length) {
 		
 					index++;
 					continue;
@@ -980,94 +988,92 @@
 				return null;
 			}
 		
-			if (code === 40) {
-				// )
-				return punc_ParantheseOpen;
-			}
-			if (code === 41) {
-				// )
-				return punc_ParantheseClose;
-			}
-			if (code === 44) {
-				// ,
-				return punc_Comma;
-			}
+			switch (code) {
+				case 40:
+					// )
+					return punc_ParantheseOpen;
+				case 41:
+					// )
+					return punc_ParantheseClose;
+				case 44:
+					// ,
+					return punc_Comma;
+				case 46:
+					// .
+					return punc_Dot;
+				case 43:
+					// +
+					return op_Plus;
+				case 45:
+					// -
+					return op_Minus;
+				case 42:
+					// *
+					return op_Multip;
+				case 47:
+					// /
+					return op_Divide;
+				case 37:
+					// %
+					return op_Modulo;
 		
-			if (code === 46) {
-				// .
-				return punc_Dot;
-			}
-		
-			if (code === 43) {
-				// +
-				return op_Plus;
-			}
-			if (code === 45) {
-				// -
-				return op_Minus;
-			}
-			if (code === 42) {
-				// *
-				return op_Multip;
-			}
-			if (code === 47) {
-				// /
-				return op_Divide;
-			}
-		
-			if (code === 61) {
-				// =
-				if (template.charCodeAt(++index) !== code) {
-					_throw('Not supported (Apply directive)');
-					return null;
-				}
-				return op_LogicalEqual;
-			}
-		
-			if (code === 33) {
-				// !
-				if (template.charCodeAt(index + 1) === 61) {
+				case 61:
 					// =
-					index++;
-					return op_LogicalNotEqual;
-				}
-				return op_LogicalNot;
-			}
+					if (template.charCodeAt(++index) !== code) {
+						_throw('Not supported (Apply directive) - view can only access model/controllers');
+						return null;
+					}
+					return op_LogicalEqual;
 		
-			if (code === 62){
-				// >
-				if (template.charCodeAt(index + 1) === 61){
-					index++;
-					return op_LogicalGreaterEqual;
-				}
-				return op_LogicalGreater;
-			}
+				case 33:
+					// !
+					if (template.charCodeAt(index + 1) === 61) {
+						// =
+						index++;
+						return op_LogicalNotEqual;
+					}
+					return op_LogicalNot;
 		
-			if (code === 60){
-				// <
-				if (template.charCodeAt(index + 1) === 61){
-					index++;
-					return op_LogicalLessEqual;
-				}
-				return op_LogicalLess;
-			}
+				case 62:
+					// >
+					if (template.charCodeAt(index + 1) === 61) {
+						index++;
+						return op_LogicalGreaterEqual;
+					}
+					return op_LogicalGreater;
 		
-			if (code === 38){
-				// &
-				if (template.charCodeAt(++index) !== code){
-					_throw('Single Binary Operator AND');
-					return null;
-				}
-				return op_LogicalAnd;
-			}
+				case 60:
+					// <
+					if (template.charCodeAt(index + 1) === 61) {
+						index++;
+						return op_LogicalLessEqual;
+					}
+					return op_LogicalLess;
 		
-			if (code === 124){
-				// |
-				if (template.charCodeAt(++index) !== code){
-					_throw('Single Binary Operator OR');
-					return null;
-				}
-				return op_LogicalOr;
+				case 38:
+					// &
+					if (template.charCodeAt(++index) !== code) {
+						_throw('Single Binary Operator AND');
+						return null;
+					}
+					return op_LogicalAnd;
+		
+				case 124:
+					// |
+					if (template.charCodeAt(++index) !== code) {
+						_throw('Single Binary Operator OR');
+						return null;
+					}
+					return op_LogicalOr;
+				
+				case 63:
+					// ?
+					return punc_Question;
+		
+				case 58:
+					// :
+					return punc_Colon;
+		
 			}
 		
 			if (code >= 65 && code <= 90 || code >= 97 && code <= 122 || code === 95 || code === 36) {
@@ -1085,20 +1091,9 @@
 				return go_string;
 			}
 		
-			if (code === 63){
-				// "
-				return punc_Question;
-			}
-		
-			if (code === 58){
-				// :
-				return punc_Colon;
-			}
-		
 			_throw('Unexpected / Unsupported directive');
 			return null;
 		}
-		
 		// source 5.parser.js
 		function expression_parse(expr) {
 		
@@ -1112,7 +1107,7 @@
 				state = state_body,
 				c, next, directive;
 		
-			while (true) {
+			outer: while (true) {
 		
 				if (index < length && (c = template.charCodeAt(index)) < 33) {
 					index++;
@@ -1125,85 +1120,85 @@
 		
 				directive = parser_getDirective(c);
 		
-				if (directive == null && index < length){
+				if (directive == null && index < length) {
 					break;
 				}
 		
-				if (punc_ParantheseOpen === directive) {
-					current = ast_append(current, new Ast_Statement(current));
-					current = ast_append(current, new Ast_Body(current));
+				switch (directive) {
+					case punc_ParantheseOpen:
+						current = ast_append(current, new Ast_Statement(current));
+						current = ast_append(current, new Ast_Body(current));
 		
-					index++;
-					continue;
-				}
-		
-				if (punc_ParantheseClose === directive) {
-					var closest = type_Body;
-					if (state === state_arguments) {
-						state = state_body;
-						closest = type_FunctionRef;
-					}
-		
-					do {
-						current = current.parent;
-					} while (current != null && current.type !== closest);
-		
-					if (closest === type_Body){
-						current = current.parent;
-					}
-		
-					if (current == null) {
-						_throw('OutOfAst Exception - body closed');
-						break;
-					}
-		
-					index++;
-					continue;
-				}
-		
-				if (punc_Comma === directive) {
-					if (state !== state_arguments) {
-						_throw('Unexpected punctuation, comma');
-						break;
-					}
-					do {
-						current = current.parent;
-					} while (current != null && current.type !== type_FunctionRef);
-		
-					if (current == null) {
-						_throw('OutOfAst Exception - next argument');
-						break;
-					}
-		
-					current = current.newArgument();
-		
-					index++;
-					continue;
-				}
-		
-				if (punc_Question === directive){
-					ast = new Ast_TernaryStatement(ast);
-					current = ast.case1;
-		
-					index++;
-					continue;
-				}
-		
-				if (punc_Colon === directive){
-					current = ast.case2;
-		
-					index++;
-					continue;
-				}
-		
-				if (punc_Dot === directive){
-					c = template.charCodeAt(index+1);
-					if (c >= 48 && c <= 57){
-						directive = go_number;
-					}else{
-						directive = go_ref;
 						index++;
-					}
+						continue;
+		
+		
+					case punc_ParantheseClose:
+						var closest = type_Body;
+						if (state === state_arguments) {
+							state = state_body;
+							closest = type_FunctionRef;
+						}
+		
+						do {
+							current = current.parent;
+						} while (current != null && current.type !== closest);
+		
+						if (closest === type_Body) {
+							current = current.parent;
+						}
+		
+						if (current == null) {
+							_throw('OutOfAst Exception - body closed');
+							break outer;
+						}
+		
+						index++;
+						continue;
+		
+		
+					case punc_Comma:
+						if (state !== state_arguments) {
+							_throw('Unexpected punctuation, comma');
+							break outer;
+						}
+						do {
+							current = current.parent;
+						} while (current != null && current.type !== type_FunctionRef);
+		
+						if (current == null) {
+							_throw('OutOfAst Exception - next argument');
+							break outer;
+						}
+		
+						current = current.newArgument();
+		
+						index++;
+						continue;
+		
+					case punc_Question:
+						ast = new Ast_TernaryStatement(ast);
+						current = ast.case1;
+		
+						index++;
+						continue;
+		
+		
+					case punc_Colon:
+						current = ast.case2;
+		
+						index++;
+						continue;
+		
+		
+					case punc_Dot:
+						c = template.charCodeAt(index + 1);
+						if (c >= 48 && c <= 57) {
+							directive = go_number;
+						} else {
+							directive = go_ref;
+							index++;
+						}
 				}
 		
 		
@@ -1217,114 +1212,109 @@
 					continue;
 				}
 		
-				// @TODO - replace operations with numbers and use > < compare
-				if ( //
-				op_Minus === directive || //
-				op_Plus === directive || //
-				op_Multip === directive || //
-				op_Divide === directive || //
-				op_LogicalAnd === directive || //
-				op_LogicalOr === directive || //
-				op_LogicalEqual === directive || //
-				op_LogicalNotEqual === directive || //
+				switch (directive) {
 		
-				op_LogicalGreater === directive || //
-				op_LogicalGreaterEqual === directive || //
-				op_LogicalLess === directive || //
-				op_LogicalLessEqual === directive
+					case op_Minus:
+					case op_Plus:
+					case op_Multip:
+					case op_Divide:
+					case op_Modulo:
 		
-				) {
+					case op_LogicalAnd:
+					case op_LogicalOr:
+					case op_LogicalEqual:
+					case op_LogicalNotEqual:
 		
-					while(current && current.type !== type_Statement){
-						current = current.parent;
-					}
+					case op_LogicalGreater:
+					case op_LogicalGreaterEqual:
+					case op_LogicalLess:
+					case op_LogicalLessEqual:
 		
-					if (current.body == null) {
-						_throw('Unexpected operator', current);
-						break;
-					}
+						while (current && current.type !== type_Statement) {
+							current = current.parent;
+						}
 		
-					current.join = directive;
+						if (current.body == null) {
+							_throw('Unexpected operator', current);
+							break outer;
+						}
 		
-					do {
-						current = current.parent;
-					} while (current != null && current.type !== type_Body);
+						current.join = directive;
 		
-					if (current == null) {
-						console.error('Unexpected parent', current);
-					}
+						do {
+							current = current.parent;
+						} while (current != null && current.type !== type_Body);
+		
+						if (current == null) {
+							console.error('Unexpected parent', current);
+						}
 		
 		
-					index++;
-					continue;
-				}
-		
-				if ( //
-				go_string === directive || //
-				go_number === directive //|| //
-				//go_ref === directive
-				) {
-					if (current.body != null && current.join == null) {
-						_throw('Directive Expected');
-						break;
-					}
-				}
-		
-				if (go_string === directive) {
-					index++;
-					ast_append(current, new Ast_Value(parser_getString(c)));
-					index++;
-					continue;
-				}
-		
-				if (go_number === directive) {
-					ast_append(current, new Ast_Value(parser_getNumber(c)));
-					//index++;
-					continue;
-				}
-		
-				if (go_ref === directive) {
-					var ref = parser_getRef();
-		
-					while (index < length) {
-						c = template.charCodeAt(index);
-						if (c < 33){
+						index++;
+						continue;
+					case go_string:
+					case go_number:
+						if (current.body != null && current.join == null) {
+							_throw('Directive Expected');
+							break;
+						}
+						if (go_string === directive) {
 							index++;
+							ast_append(current, new Ast_Value(parser_getString(c)));
+							index++;
+		
+						}
+		
+						if (go_number === directive) {
+							ast_append(current, new Ast_Value(parser_getNumber(c)));
+						}
+		
+						continue;
+		
+					case go_ref:
+						var ref = parser_getRef();
+		
+						while (index < length) {
+							c = template.charCodeAt(index);
+							if (c < 33) {
+								index++;
+								continue;
+							}
+							break;
+						}
+		
+						if (c === 40) {
+		
+							// (
+							// function ref
+							state = state_arguments;
+							index++;
+		
+							var fn = ast_append(current, new Ast_FunctionRef(current, ref));
+		
+							current = fn.newArgument();
 							continue;
 						}
+		
+						if (c === 110 && ref === 'null') {
+							ref = null;
+						}
+		
+						if (c === 102 && ref === 'false') {
+							ref = false;
+						}
+		
+						if (c === 116 && ref === 'true') {
+							ref = true;
+						}
+		
+						current = ast_append(current, typeof ref === 'string' ? new Ast_SymbolRef(current, ref) : new Ast_Value(ref));
+						
 						break;
-					}
-		
-					if (c === 40) {
-		
-						// (
-						// function ref
-						state = state_arguments;
-						index++;
-		
-						var fn = ast_append(current, new Ast_FunctionRef(current, ref));
-		
-						current = fn.newArgument();
-						continue;
-					}
-		
-					if (c === 110 && ref === 'null'){
-						ref = null;
-					}
-		
-					if (c === 102 && ref === 'false'){
-						ref = false;
-					}
-		
-					if (c === 116 && ref === 'true'){
-						ref = true;
-					}
-		
-					current = ast_append(current, typeof ref === 'string' ? new Ast_SymbolRef(current, ref) : new Ast_Value(ref));
 				}
 			}
 		
-			if (current.body == null && current.type === type_Statement){
+			if (current.body == null && current.type === type_Statement) {
 				_throw('Unexpected end of expression');
 			}
 		
@@ -1332,7 +1322,6 @@
 		
 			return ast;
 		}
-		
 		// source 6.eval.js
 		function expression_evaluate(mix, model, cntx, controller) {
 		
@@ -1403,6 +1392,9 @@
 						break;
 					case op_Multip:
 						result *= value;
+						break;
+					case op_Modulo:
+						result %= value;
 						break;
 					case op_LogicalNotEqual:
 						result = result != value;
@@ -1519,8 +1511,7 @@
 		
 					while (next != null) {
 						if (type_FunctionRef === next.type) {
-							refs = _extractVars(next);
-							return null;
+							return _extractVars(next);
 						}
 						if (type_SymbolRef !== next.type) {
 							console.error('Ast Exception: next should be a symbol/function ref');
@@ -1536,15 +1527,15 @@
 				}
 		
 		
-				if ( //
-				type_Statement === expr.type || //
-				type_UnaryPrefix === expr.type || //
-				type_Ternary === expr.type //
-				) {
-					x = _extractVars(expr.body);
-					refs = _append(refs, x);
+				switch (expr.type) {
+					case type_Statement:
+					case type_UnaryPrefix:
+					case type_Ternary:
+						x = _extractVars(expr.body);
+						refs = _append(refs, x);
+						break;
 				}
-		
+				
 				if (type_Ternary === expr.type) {
 					x = _extractVars(ast.case1);
 					refs = _append(refs, x);
@@ -1557,6 +1548,25 @@
 				if (type_FunctionRef === expr.type) {
 					for(var i = 0, length = expr.arguments.length; i < length; i++){
 						x = _extractVars(expr.arguments[i]);
+						refs = _append(refs, x);
+					}
+					
+					x = null;
+					var parent = expr;
+					outer: while ((parent = parent.parent)) {
+						switch (parent.type) {
+							case type_SymbolRef:
+								x = parent.body + (x == null ? '' : '.' + x);
+								break;
+							case type_Body:
+							case type_Statement:
+								break outer;
+							default:
+								x = null;
+								break outer;
+						}
+					}
+					if (x != null) {
 						refs = _append(refs, x);
 					}
 				}
@@ -1572,6 +1582,23 @@
 	
 		return {
 			parse: expression_parse,
+			
+			/**
+			 * Expression.eval(expression [, model, cntx, controller]) -> result
+			 * - expression (String): Expression, only accessors are supoorted
+			 *
+			 * All symbol and function references will be looked for in 
+			 *
+			 * 1. model
+			 * 2. cntx
+			 * 3. controller
+			 * 4. controller.parent
+			 * 5. and so on
+			 *
+			 * Sample:
+			 * '(user.age + 20) / 2'
+			 * 'fn(user.age + "!") + x'
+			 **/
 			eval: expression_evaluate,
 			varRefs: refs_extractVars
 		};
@@ -2971,6 +2998,19 @@
 			},
 	
 	
+			/**
+			 * mask.registerAttrHandler(attrName, Handler) -> void
+			 * - attrName (String): any attribute string name
+			 * - Handler (Function)
+			 *
+			 * Handler Interface, <i>(similar to Utility Interface)</i>
+			 * ``` customAttribute(maskNode, attributeValue, model, cntx, element, controller) ```
+			 *
+			 * You can change do any changes to maskNode's template, current element value,
+			 * controller, model.
+			 *
+			 * Note: Attribute wont be set to an element.
+			 **/
 			registerAttrHandler: function(attrName, Handler){
 				CustomAttributes[attrName] = Handler;
 			},
@@ -2979,9 +3019,18 @@
 			 * - utilName (String): name of the utility
 			 * - fn (Function): util handler
 			 *
-			 *	Register Utility Function. Template Example: '~[myUtil:key]'
+			 *	Register Utility Function. Template Example: '~[myUtil: value]'
 			 *		utility interface:
-			 *		<b>function(key, model, type, cntx, element, name){}</b>
+			 *	```
+			 *	function(value, model, type, cntx, element, name);
+			 *	```
+			 *
+			 *	- value (String): string from interpolation part after util definition
+			 *	- model (Object): current Model
+			 *	- type (String): 'attr' or 'node' - tells if interpolation is in TEXTNODE value or Attribute
+			 *	- cntx (Object): Context Object
+			 *	- element (HTMLNode): current html node
+			 *	- name (String): If interpolation is in node attribute, then this will contain attribute name
 			 *
 			 **/
 			registerUtility: function (utilityName, fn) {
@@ -3049,13 +3098,13 @@
 			},
 	
 			Utils: {
-				/**
-				 * mask.Utils.Condition -> ConditionUtil
-				 *
-				 * [[ConditionUtil]]
-				 **/
 				Condition: ConditionUtil,
-	
+				
+				/**
+				 * mask.Util.Expression -> ExpressionUtil
+				 *
+				 * [[ExpressionUtil]]
+				 **/
 				Expression: ExpressionUtil,
 	
 				/**
@@ -3400,7 +3449,8 @@
 	
 			var array = util_getProperty(model, compo.attr.foreach || compo.attr.each),
 				nodes = compo.nodes,
-				item = null;
+				item = null,
+				indexAttr = compo.attr.index || 'index';
 	
 			compo.nodes = [];
 			compo.template = nodes;
@@ -3410,8 +3460,10 @@
 				return;
 			}
 	
-			for (var i = 0, length = array.length; i < length; i++) {
-				compo.nodes[i] = compo_init(nodes, array[i], container, compo);
+			for (var i = 0, x, length = array.length; i < length; i++) {
+				x = compo_init(nodes, array[i], container, compo);
+				x[indexAttr] = i;
+				compo.nodes[i] = x;
 			}
 	
 			for(var method in ListProto){
@@ -3570,7 +3622,7 @@
 			Dom = mask.Dom,
 			__array_slice = Array.prototype.slice;
 		
-		if (!domLib){
+		if (document != null && domLib == null){
 			console.warn('jQuery / Zepto etc. was not loaded before compo.js, please use Compo.config.setDOMLibrary to define dom engine');
 		}
 		
@@ -4224,8 +4276,8 @@
 				if (typeof controller.dispose === 'function') {
 					var previous = controller.dispose;
 					controller.dispose = function(){
-						disposer();
-						previous();
+						disposer.call(this);
+						previous.call(this);
 					};
 			
 					return;
@@ -4899,6 +4951,29 @@
 			};
 		
 		}());
+		
+	
+		// source ../src/handler/slot.js
+		
+		function SlotHandler() {}
+		
+		mask.registerHandler(':slot', SlotHandler);
+		
+		SlotHandler.prototype = {
+			constructor: SlotHandler,
+			renderEnd: function(element, model, cntx, container){
+				this.slots = {};
+		
+				this.expression = this.attr.on;
+		
+				this.slots[this.attr.signal] = this.handle;
+			},
+			handle: function(){
+				var expr = this.expression;
+		
+				mask.Utils.Expression.eval(expr, this.model, global, this);
+			}
+		};
 		
 	
 	
