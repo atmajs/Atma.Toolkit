@@ -1,4 +1,3 @@
-var program = require('commander');
 
 include.exports = {
 
@@ -54,7 +53,7 @@ include.exports = {
 				parseType(x);
 			}
 			if (i == 0) {
-				parseOverrides(program, x);
+				parseOverrides(x);
 			}
 		}
 
@@ -87,8 +86,8 @@ function parseType(config) {
 	}
 }
 
-function parseOverrides(program, config) {
-	var array = program.rawArgs,
+function parseOverrides(config) {
+	var array = process.argv,
 		i = 0,
 		length = array.length,
 		action = config.action,
@@ -151,7 +150,7 @@ function parseOverrides(program, config) {
 
 
 function getCurrentGroups(config){
-    var overrides = parseOverrides(program, {}),
+    var overrides = parseOverrides({}),
         groups = [];
 
     if (overrides.args) {

@@ -8,26 +8,16 @@ include.js({
 }).done(function(resp) {
 
     
+    
     var actions =  resp.globals.actions,
-        program = require('commander'),
-        args = program.args,
+        args = process.argv.slice(2),
+        action = args[0],
         config;
     
-    
 
-    global.program = program;
-
-    if (!(args && args.length > 0)) {
-        args = ['build.js'];
-    }
-
-
-    var entry = args[0].trim();
-
-
-    if (actions[entry] != null) {
+    if (actions[action] != null) {
         var cfg = resp.configHelper.prepairConfig({
-            action: entry
+            action: action
         });
 
         cfg.state = 4;
@@ -36,10 +26,17 @@ include.js({
         return;
     }
 
-    var file = new io.File(entry);
+    var file = new io.File(action);
+    
+    if (file.exists() === false){
+        file = new io.File('build.js');
+        args.unshift('build.js');
+        
+        process.argv.splice(2, 'build.js');
+    }
 
 
-    if (file.exists() == false) {
+    if (file.exists() === false) {
         console.error('File doesnt exist (404)', file.uri.toLocalFile());
         return;
     }
@@ -67,7 +64,7 @@ include.js({
     }
 
     global.Settings.initialize(global.config);
-    global.config = resp.configHelper.prepairConfig(global.config);
+    global.config = resp.configHelper.prepairConfig(global.config, args);
     global.config.state = 4;
 
 

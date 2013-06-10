@@ -184,7 +184,7 @@
 				copyFileSync(from, to);
 			},
 			exists: function(file) {
-				return fs.existsSync(file);
+				return fs.existsSync(file) && fs.statSync(file).isFile();
 			},
 			readSync: function(file, asBuffer) {
 				Log && Log('io.utils:file.read', file, 99);

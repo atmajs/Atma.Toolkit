@@ -15,7 +15,7 @@
 				io: ['files/templateHandler']
 			}).done(function() {
 
-				var folder = config.name || global.program.args[1];
+				var folder = config.name || process.argv[3];
 
                 config = Object.extend(config,{
 					targetDir  : new io.Directory(new net.URI(process.cwd() + '/')),
