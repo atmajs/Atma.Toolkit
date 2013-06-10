@@ -128,7 +128,7 @@
 		
 		
 		obj.file = file;
-		obj.value = obj.value.replace(file, '');
+		obj.value = obj.value.substring(0, obj.value.length - file.length);
 		obj.value = normalize_pathsSlashes(obj.value);
 		
 		

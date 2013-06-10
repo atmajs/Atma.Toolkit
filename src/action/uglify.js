@@ -29,7 +29,7 @@ include.js({
                 file.read();
                 resp.Uglify(file, config);
 
-                new io.File(file.uri.combine('/' + file.uri.getName() + '.min.' + file.uri.extension)).write(file.content);
+                new io.File(file.uri.combine(file.uri.getName() + '.min.' + file.uri.extension)).write(file.content);
             });
 
             done();
