@@ -8,9 +8,9 @@
 				helper: ['referenceHelper::refHelper', 'globals']
 			})
 			.done(function(resp) {
-				var args = require('commander').args,
-					path = config.path || args[1],
-					name = config.name || args[2],
+				var args = process.argv,
+					path = config.path || args[3],
+					name = config.name || args[4],
 					projects = resp.globals && resp.globals.projects;
 
 
@@ -26,9 +26,9 @@
 					return done && done(new Error('Symbolic link points to undefined path: ' + path));
 				}
 
-
+				
+				
 				resp.refHelper.create(io.env.currentDir, name, path);
-
                 return done && done();
 			});
 		}
