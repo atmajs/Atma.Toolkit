@@ -761,31 +761,31 @@ include.js({
 				if (cfg_hasScripts(setts) === false) {
 					cfg_getScripts(setts, config);
 					
+					
+					if (arg && !(config.suites && config.suites[arg])) 
+						return done('Argument is not resolved as script, nor as suite name: ' + arg);
+					
+					
 					if (arg) {
-						setts.suites = setts.suites && setts.suites[arg];
-						
-						if (!setts.suites) {
-							done('Argument is not resolved as script, nor as suite name: ' + arg);
-							return;
+						var suites = config.suites;
+						for (var key in suites) {
+							if (key !== arg)
+								delete suites[key];
 						}
-						setts.nodeScripts = [];
-						setts.domScripts = [];
-					}
 						
+						setts.suites = cfg_parseSuites(suites, setts.base);
+					}
 				}
-				
-				
 				
 				
 				var configs = cfg_split(setts);
 				
-				if (configs.length === 0) {
-					done('No scripts to test');
-					return;
-				}
+				if (configs.length === 0) 
+					return done('No scripts to test');
 				
-				new RunnerSuite(configs, setts).run(done);
 				
+				
+				return new RunnerSuite(configs, setts).run(done);
 			}
 		};
 		
@@ -1361,7 +1361,7 @@ include.js({
 				}
 			}
 			
-			function suite_loadEnv(suite, callback) {
+			function suite_loadEnv(runner, suite, callback) {
 				var base = suite.base,
 					env = suite.env;
 					
@@ -1396,7 +1396,6 @@ include.js({
 					resource.inject(path);
 				});
 				
-				
 				resource.done(function(resp){
 					setTimeout(function(){
 						for (var lib in resp) {
@@ -1406,6 +1405,8 @@ include.js({
 						callback(resp);
 					});
 				});
+				
+				_runner.envResource = resource;
 			}
 			
 			var _suites = null,
@@ -1427,7 +1428,7 @@ include.js({
 				_runner.files = _suite.files;
 				_runner.config = _suite;
 				
-				suite_loadEnv(_suite, callback);
+				suite_loadEnv(_runner, _suite, callback);
 			}
 		
 			return Class({
@@ -1506,10 +1507,15 @@ include.js({
 		
 				clearResources: function() {
 					this.resources && ruqq.arr.each(this.resources, resource_clear);
+					this.envResource && resource_clear(this.envResource);
+					
 					this.resources = [];
+					this.envResource = null;
 				},
 		
 				getResources: function() {
+					this.envResource && this.resources.push(this.envResource);
+					
 					return ruqq.arr.aggr(this.resources, [], resource_aggrIncludes);
 				}
 			});

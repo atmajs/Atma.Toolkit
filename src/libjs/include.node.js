@@ -1,21 +1,28 @@
 
 // source ../src/head.js
-(function (factory) {
+(function (root, factory) {
     'use strict';
 
-	var root, doc;
-	
-    if (typeof window !== 'undefined' && typeof document !== 'undefined'){
-		root = window;
-        doc = document;
-    } else {
-		root = global;
-	}
+    var doc;
+
+    if (typeof exports !== 'undefined' && (root === exports || root == null)){
+
+    	root = global;
+
+    }else{
+    	
+    	if (root == null) {
+			root = typeof window === 'undefined' || doc == null ? global : window;
+		}
+
+		doc = typeof document !== 'undefined' ? document : null;
+    }
+
 	
 	
 	factory(root, doc);
 
-}(function (global, document) {
+}(this, function (global, document) {
     'use strict';
 
 	// source ../src/1.scope-vars.js
@@ -1000,9 +1007,29 @@
 	// source ../src/7.CustomLoader.js
 	var CustomLoader = (function() {
 	
-		var _loaders = {};
+		// source loader/json.js
+			
+		var JSONParser = {
+			process: function(source, res){
+				try {
+					return JSON.parse(source);
+				} catch(error) {
+					console.error(error, source);
+					return null;
+				}
+			}
+		};
+		
+		
 	
+		var _loaders = {
+			'json': JSONParser
+		};
 	
+		cfg.loader = {
+			json : 1
+		}
+		
 		function createLoader(url) {
 			var extension = url.substring(url.lastIndexOf('.') + 1);
 	
@@ -1024,15 +1051,25 @@
 	
 			return (_loaders[extension] = new Resource('js', Routes.resolve(namespace, path), namespace));
 		}
+		
+		function doLoad(resource, loader, callback) {
+			XHR(resource, function(resource, response) {
+				callback(resource, loader.process(response, resource));
+			});
+		}
 	
 		return {
 			load: function(resource, callback) {
 	
 				var loader = createLoader(resource.url);
+				
+				if (loader.process) {
+					doLoad(resource, loader, callback);
+					return;
+				}
+				
 				loader.done(function() {
-					XHR(resource, function(resource, response) {
-						callback(resource, loader.exports.process(response, resource));
-					});
+					doLoad(resource, loader.exports, callback);
 				});
 			},
 			exists: function(resource) {
@@ -1319,7 +1356,8 @@
 		};
 	
 		__eval = function(source, include, isGlobalCntx) {
-	
+			module.exports = {};
+			
 			global.include = include;
 			global.require = require;
 			global.exports = module.exports;
@@ -1338,9 +1376,14 @@
 				console.error(e.stack);
 			}
 			
-	
+			
+			
 			if (include.exports == null) {
-				include.exports = module.exports;
+				var exports = module.exports;
+				
+				if (typeof exports !== 'object' || Object.keys(exports).length) {
+					include.exports = module.exports;
+				}
 			}
 	
 		};
@@ -1385,20 +1428,19 @@
 								source = resource.exports;
 	
 							
-							////var res = new Resource('js');
-							////for(var key in resource){
-							////	res[key] = resource[key];
-							////}
-	
-							////resource = res;
-							//// modify existed res instance
-							
 							resource.exports = null;
 							resource.type = 'js';
 							resource.includes = null;
 							resource.state = 3;
 							
-							////bundle.includes[i].resource = res;
+							
+							for (var key in bin.load) {
+								if (bin.load[key] === resource) {
+									delete bin.load[key];
+									break;
+								}
+							}
+							
 	
 							__eval(source, resource, true);
 	

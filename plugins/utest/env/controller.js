@@ -100,7 +100,7 @@ include
 			add_script(scripts, 'include.routes(' + JSON.stringify(routes, null, 4) + ')');
 		}
 
-		add_script(scripts, 'include.cfg({ path: "utest/" })');		
+		add_script(scripts, 'include.cfg({ path: "/utest/" })');		
 		return scripts;
 	}
 
