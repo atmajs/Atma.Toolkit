@@ -34,7 +34,7 @@
 			}
 
 			if (path[0] === '/') {
-				uri = io.env.currentDir.combine(path);
+				uri = io.env.currentDir.combine(path.substring(1));
 			} else {
 				uri = currentUri.combine(path);
 			}
@@ -42,6 +42,8 @@
 			var file = new io.File(uri);
 			if (file.exists() === false) {
 				console.error('File Importer: File does not exists', file.uri.toLocalFile());
+				
+				console.error('--', path, currentUri.toString(), io.env.currentDir.toLocalFile());
 				return full;
 			}
 
