@@ -1,13 +1,5 @@
 (function(g) {
 
-	var color;
-
-	include.js({
-		helper: 'stdout'
-	}).done(function(resp) {
-		color = resp.stdout.color;
-	});
-
 	var fs = require('fs'),
 		fsextra = require('fs.extra'),
 		copyFileSync = function(srcFile, destFile) {
@@ -147,7 +139,7 @@
 				try {
 					fs.writeFileSync(path, content);
 				} catch (error) {
-					console.log(color('red{.save():} red{bold{' + error + '}}'));
+					console.log('red{.save():} red{bold{' + error + '}}'.colorize());
 				}
 			},
 			copy: function(from, to, callback) {
@@ -168,12 +160,12 @@
 				try {
 					fs.copy(from, to, callback);
 				} catch (error) {
-					console.log(color('red{.copy():} red{bold{' + error + '}}'));
+					console.log('red{.copy():} red{bold{' + error + '}}'.colorize());
 				}
 			},
 			copySync: function(from, to) {
 				if (fs.existsSync(from) == false) {
-					console.error(color('file/copy - red{404 Error}'), from);
+					console.error('file/copy - red{404 Error}'.colorize(), from);
 					return;
 				}
 				var folder = urlhelper.getDir(to);
@@ -193,7 +185,7 @@
 				try {
 					content = fs.readFileSync(file, asBuffer ? null : 'utf-8');
 				} catch (error) {
-					console.log(color('red{.read():} red{bold{' + error + '}}'));
+					console.log('red{.read():} red{bold{' + error + '}}'.colorize());
 				}
 
 				return content;
@@ -220,7 +212,7 @@
 				try {
 					fs.symlinkSync(source, target, 'junction');
 				} catch (error) {
-					console.log(color('red{symlink: bold{' + error.toString() + '}}'));
+					console.log('red{symlink: bold{%1}}'.colorize().format(error.toString()));
 				}
 			}
 		}

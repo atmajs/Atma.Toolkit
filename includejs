@@ -32,7 +32,7 @@
 		script: [ //
 		'sys', //
 		'helpers', //
-		'helper/stdout', //
+		'helper/colorize', //
 		'helper/extensions', //
 		],
 		io: 'package',

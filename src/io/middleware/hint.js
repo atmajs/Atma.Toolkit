@@ -1,13 +1,6 @@
-include.js({
-	script: 'helper/stdout::stdout'
-}).done(function(resp) {
+(function() {
 
-
-
-
-
-	var jshint = require('jshint').JSHINT,
-		color = resp.stdout.color;
+	var jshint = require('jshint').JSHINT;
 
 
 	include.exports = function(file, config) {
@@ -44,11 +37,16 @@ include.js({
 		var start = Date.now(),
 			result = jshint(file.content, options, globals);
 
-
 		console.log( //
-        color(String.format( //
-        '%1 [%2ms] %3',  result ? 'green{Success}' : 'red{Warn ' + jshint.errors.length + '}', Date.now() - start, file.uri.file //
-        )));
+        '%1 [%2ms] %3'
+        	.format(result 
+        				? 'green{Success}' 
+        				: 'red{Warn ' + jshint.errors.length + '}'
+        			, Date.now() - start
+					, file.uri.file)
+
+        	.colorize()
+        );
 
 		if (!result) {
 			jshint.errors.forEach(function(e) {
@@ -61,14 +59,18 @@ include.js({
 
 				if (evidence) {
 
-					var msg = String.format(color('[yellow{%1}:yellow{%2}] bold{%3}'), 'L' + e.line, 'C' + character, e.reason);
+					var msg = '[yellow{%1}:yellow{%2}] bold{%3}'
+								.colorize()
+								.format('L' + e.line, 'C' + character, e.reason);
 
 
 					console.log(msg);
-				} else {
-					console.log(e.reason);
-				}
+					return;
+				} 
+
+				console.log(e.reason);
+				
 			});
 		}
 	};
-});
+}());

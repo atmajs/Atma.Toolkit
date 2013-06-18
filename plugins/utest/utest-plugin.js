@@ -11,7 +11,8 @@ include.exports = {
 			server: {
 				controllers: [getPath('env/controller.js')],
 				websockets: {
-					'/node' : getPath('/utest.server.js')
+					'/node' : getPath('/utest.server.js'),
+					'/utest-browser' : function(){}
 				}
 			}
 		});

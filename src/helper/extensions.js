@@ -1,28 +1,4 @@
 
-include.js('stdout.js').done(function(resp){
-	var colors = resp.stdout.colors,
-		colorize = resp.stdout.colorize,
-		color = resp.stdout.color;
-		
-	function define(key, fn) {
-		Object.defineProperty(String.prototype, key, {
-			get: fn
-		});
-	}
-	
-	Object.keys(colors).forEach(function(key){
-		
-		define(key, function(){
-			return colorize(key, this);
-		});
-		
-	});
-	
-	String.prototype.colorize = function(){
-		return color(this);
-	}
-});
-
 
 String.prototype.format = function(){
 	var fn = String.format;
