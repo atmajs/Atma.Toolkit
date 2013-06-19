@@ -71,9 +71,15 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
                 }
             }
 
-			console.log('Copy:', this.uri.toLocalFile(), targetUri.toLocalFile());
+            var from = this.uri.toLocalFile(),
+            	to   =  targetUri.toLocalFile();
 
-			utils.file.copySync(this.uri.toLocalFile(), targetUri.toLocalFile());
+            var _from = from.substr(-25).replace(/([^\/]+)$/, 'green{bold{$1}}').colorize(),
+            	_to   = to.substr(-25).replace(/([^\/]+)$/, 'green{bold{$1}}').colorize();
+
+			console.log('Copy:', _from, _to);
+
+			utils.file.copySync(from, to);
 			return this;
 		},
 		exists: function() {

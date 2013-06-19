@@ -60,7 +60,7 @@
 				}
 
 
-				console.log(color(String.format('green{File Import %1 into %2}', uri.file, currentUri.file)));
+				console.log('File Import %1 into %2'.green.format(currentUri.file));
 
 				return full.replace('import', 'source') + io.env.newLine + content;
 			});

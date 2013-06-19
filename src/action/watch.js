@@ -40,7 +40,7 @@ include.js({
 				io.File.watcher.watch(file, onFileChanged);
 			});
 
-			console.log(color('bold{green{Listen %d files}}'), collection.length);
+			console.log('Listen %d files'.bold.green, collection.length);
 		},
 
 		onFileChanged: function(path) {
@@ -68,7 +68,7 @@ include.js({
 				(new resp.Processor()).run(global.config, function(){
 					setTimeout(function() {
 						watcher.isBusy = false;
-						console.log(color('green{Listen...}'));
+						console.log('Listen...'.green);
 					}, 500);
 				});
 			});

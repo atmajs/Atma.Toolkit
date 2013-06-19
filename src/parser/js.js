@@ -137,7 +137,7 @@ include.js([ //
 
 				eval(javascriptCode);
 			} catch (e) {
-				console.log(color('red{bold{Javascript Include Eval Error:}}'), javascriptCode, e);
+				console.log('Javascript Include Eval Error:'.red.bold, javascriptCode, e);
 				return [];
 			}
 

@@ -123,7 +123,7 @@ include.js([ //
 
 		}
 
-		//console.log(color('green{No accessor for}'), value, alias, _functionName, _accessors);
+		//console.log('No accessor for', value, alias, _functionName, _accessors);
 
 
 		return false;

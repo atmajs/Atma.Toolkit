@@ -54,7 +54,7 @@ include.js({
 
             var file = new io.File(this.uri);
             if (file.exists() == false){
-                console.log(color('red{bold{404 - }}'), this.uri.toLocalFile());
+                console.log('404 - '.red.bold, this.uri.toLocalFile());
                 return this;
             }
 
