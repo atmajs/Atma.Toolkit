@@ -166,17 +166,17 @@ include.js({
 		return Class({
 			Construct: function(socket, io, port) {
 				
+				console.log('\tNode Client Connected'.green);
 				
 				this.socket = socket
 		
 				.on('disconnect', this.disconnected)
 				.on('client:utest', function(config, done) {
 		
-					var clients = io.of('/utest-browser')
-						.clients();
+					var clients = io.of('/utest-browser').clients();
 		
 					if (clients.length === 0) {
-						var message = 'No Slaves Captured - navigate to http://localhost:%1'.format(port || 5777)
+						var message = 'No Slaves Captured - navigate to http://localhost:%1/utest/'.format(port || 5777)
 						socket.emit('server:error', message);
 						return;
 					}

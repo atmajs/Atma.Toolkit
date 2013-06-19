@@ -7,10 +7,10 @@
 	}
 	
 	
-	 //if (typeof module !== 'undefined') {
-	 //	module.exports = factory(root);
-	 //	return;
-	 //}
+	// if (typeof module !== 'undefined') {
+	// 	module.exports = factory(root);
+	// 	return;
+	// }
 	
 	root.Class = factory(root);
 	
@@ -1527,10 +1527,79 @@
 	
 	
 	
-	Class.T = 'T';
+	
 	return Class;
 	
 }));
+
+// source ../.reference/libjs/include.builder/src/helper/colorize.js
+(function() {
+	
+	/**
+	 *	String.prototype
+	 *			.red
+	 *			.green
+	 *			.yellow
+	 *			.blue
+	 *			.magento
+	 *			.cyan
+	 *			.bold
+	 *			.italic
+	 *			.underline
+	 *			.inverse
+	 *
+	 *			.colorize()
+	 */
+
+    function replacement(value) {
+        return START + value + '$1' + END;
+    }
+
+    var START = '\u001b[',
+        END = '\u001b[0m',
+        
+        colors = {
+            red: '31m',
+            green: '32m',
+            yellow: '33m',
+            blue: '34m',
+            magenta: '35m',
+            cyan: '36m',
+            
+    
+            bold: '1m',
+            italic: '3m',
+            underline: '4m',
+            inverse: '7m'
+        };
+    
+	function color(str) {
+
+		for (var key in colors) {
+			str = str.replace(new RegExp(key + '\\{([^\\}]+)\\}', 'g'), replacement(colors[key]));
+		}
+
+		return str;
+    }
+
+	
+	Object.keys(colors).forEach(function(key){
+		
+		Object.defineProperty(String.prototype, key, {
+			get: function(){
+				return START + colors[key] + this + END
+			},
+			enumerable: false
+		});
+		
+	});
+	
+	String.prototype.colorize = function(){
+		return color(this);
+	};
+
+    
+}());    
 
 // source ../.reference/libjs/include/lib/include.js
 
@@ -1538,26 +1607,24 @@
 (function (root, factory) {
     'use strict';
 
-    var doc;
-
-    if (typeof exports !== 'undefined' && (root === exports || root == null)){
-
-    	root = global;
-
-    }else{
-    	
-    	if (root == null) {
-			root = typeof window === 'undefined' || doc == null ? global : window;
-		}
-
-		doc = typeof document !== 'undefined' ? document : null;
+	var _global, _exports, _document;
+	
+	if (typeof exports !== 'undefined' && (root === exports || root == null)){
+		// raw nodejs module
+    	_global = global;
     }
-
 	
+	if (_global == null) {
+		_global = typeof window === 'undefined' ? global : window;
+	}
 	
-	factory(root, doc);
+	_document = _global.document;
+	_exports = root || _global;
+    
+	
+	factory(_global, _exports, _document);
 
-}(this, function (global, document) {
+}(this, function (global, exports, document) {
     'use strict';
 
 
@@ -2836,10 +2903,9 @@
 	
 	// source ../src/10.export.js
 	
-	global.include = new Include();
+	exports.include = new Include();
 	
-	global.includeLib = {
-		//Helper: Helper,
+	exports.includeLib = {
 		Routes: RoutesLib,
 		Resource: Resource,
 		ScriptStack: ScriptStack,
@@ -2875,45 +2941,60 @@ function __eval(source, include) {
 // source ../src/umd-head.js
 (function (root, factory) {
     'use strict';
+    
+    var _global, _exports, _document;
 
-    if (root == null && typeof global !== 'undefined'){
-        root = global;
+    
+	if (typeof exports !== 'undefined' && (root === exports || root == null)){
+		// raw nodejs module
+    	_global = global;
     }
+	
+	if (_global == null) {
+		_global = typeof window === 'undefined' || window.document == null ? global : window;
+	}
+    
+    _document = _global.document;
+	_exports = root || _global;
+    
 
-    var doc = typeof document === 'undefined' ? null : document,
-        construct = function(plugins){
+    function construct(plugins){
 
-            if (plugins == null) {
-                plugins = {};
-            }
-            var lib = factory(root, doc, plugins),
-                key;
+        if (plugins == null) {
+            plugins = {};
+        }
+        var lib = factory(_global, plugins, _document),
+            key;
 
-            for (key in plugins) {
-                lib[key] = plugins[key];
-            }
-
-            return lib;
-        };
-
-    if (typeof module !== 'undefined') {
-        module.exports = construct();
-    } else if (typeof define === 'function' && define.amd) {
-        define(construct);
-    } else {
-
-        var plugins = {},
-            lib = construct(plugins);
-
-        root.mask = lib;
-
-        for (var key in plugins) {
-            root[key] = plugins[key];
+        for (key in plugins) {
+            lib[key] = plugins[key];
         }
 
+        return lib;
+    };
+
+    
+    if (typeof module !== 'undefined') {
+        module.exports = construct();
+        return;
+    }
+    if (typeof define === 'function' && define.amd) {
+        define(construct);
+        return;
+    }
+    
+    var plugins = {},
+        lib = construct(plugins);
+
+    _exports.mask = lib;
+
+    for (var key in plugins) {
+        _exports[key] = plugins[key];
     }
 
-}(this, function (global, document, exports) {
+    
+
+}(this, function (global, exports, document) {
     'use strict';
 
 
@@ -11123,8 +11204,30 @@ function __eval(source, include) {
 			
 			this.onComplete = callback;
 			
+			this.handleBangs();
 			runCase(this.suite.before, this.nextCase);
 		},
+		
+		handleBangs: function(){
+			var has = ruqq.arr.any(Object.keys(this.suite), function(x){
+				return x[0] === '!';
+			});
+			
+			if (!has)
+				return;
+			
+			for (var key in this.suite) {
+				// reserved
+				if (['before','after','teardown'].indexOf(key) !== -1) {
+					continue;
+				}
+				
+				if (key[0] !== '!') {
+					delete this.suite[key];
+				}
+			}
+		},
+		
 		nextCase: function(){
 			for (var key in this.suite) {
 				if (~this.processed.indexOf(key)) {
@@ -11136,12 +11239,20 @@ function __eval(source, include) {
 					continue;
 				}
 				
+				if (key.substring(0,2) === '//') {
+					console.warn(key.substring(2), '(skipped)'.bold);
+					this.processed.push(key);
+					continue;
+					
+				}
+				
 				if (typeof this.suite[key] !== 'function') {
 					continue;
 				}
 				
 				this.processed.push(key);
 				
+				console.print((' ' + key + ': ').bold);
 				runCase(this.suite[key], this.nextCase, this.suite.teardown, key);
 				
 				return;
@@ -11815,6 +11926,10 @@ function arr_isEmpty(array) {
 	}
 	// source utils/logger.js
 	(function() {
+	
+		console.print = function(){
+			console.log.apply(console, arguments);
+		};
 	
 		for (var key in console) {
 			if (typeof console[key] !== 'function') {

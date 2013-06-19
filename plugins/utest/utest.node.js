@@ -126,8 +126,30 @@ include.js({
 				
 				this.onComplete = callback;
 				
+				this.handleBangs();
 				runCase(this.suite.before, this.nextCase);
 			},
+			
+			handleBangs: function(){
+				var has = ruqq.arr.any(Object.keys(this.suite), function(x){
+					return x[0] === '!';
+				});
+				
+				if (!has)
+					return;
+				
+				for (var key in this.suite) {
+					// reserved
+					if (['before','after','teardown'].indexOf(key) !== -1) {
+						continue;
+					}
+					
+					if (key[0] !== '!') {
+						delete this.suite[key];
+					}
+				}
+			},
+			
 			nextCase: function(){
 				for (var key in this.suite) {
 					if (~this.processed.indexOf(key)) {
@@ -139,12 +161,20 @@ include.js({
 						continue;
 					}
 					
+					if (key.substring(0,2) === '//') {
+						console.warn(key.substring(2), '(skipped)'.bold);
+						this.processed.push(key);
+						continue;
+						
+					}
+					
 					if (typeof this.suite[key] !== 'function') {
 						continue;
 					}
 					
 					this.processed.push(key);
 					
+					console.print((' ' + key + ': ').bold);
 					runCase(this.suite[key], this.nextCase, this.suite.teardown, key);
 					
 					return;
@@ -792,7 +822,7 @@ include.js({
 		
 	
 		
-		// source utils.js
+		// source utils/cfg.js
 		function cfg_prepair(config, arg) {
 				
 			var base = config.base;
@@ -1047,6 +1077,19 @@ include.js({
 				}
 			});
 		}
+		// source utils/logger.js
+		(function(){
+			
+			var util = require('util');
+			
+			console.print = function(){
+				var message = Array.prototype.slice.call(arguments).join(' ');
+				
+				util.print(message);
+			};
+			
+		}());
+		
 		// source Runner.js
 		var status_blank = 1,
 			status_connecting = 2,
