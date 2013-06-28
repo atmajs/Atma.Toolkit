@@ -1,15 +1,14 @@
 include.js({
 	handler: 'css::CssHandler',
-	parser: 'js.ast::JS',
+	parser: ['js.ast::JS', 'util/includeMock']
 }).js('html.js::HtmlBuilder').done(function(resp) {
 
-	var G = global,
-		Sys = G.sys,
-		R = G.ruqq,
-		UglifyJS = require('uglify-js'),
-		BuilderHelper = {
+	var Sys = global.sys,
+		UglifyJS = require('uglify-js');
+		
+	var BuilderHelper = {
 			jsRaw: function(solution, stack, output) {
-				var includeIndex = R.arr.indexOf(stack, function(x) {
+				var includeIndex = ruqq.arr.indexOf(stack, function(x) {
 					return x.url.indexOf('include.js') > -1;
 				});
 
@@ -55,54 +54,55 @@ include.js({
 			},
 			jsAst: function(solution, stack, output) {
 				var ast = UglifyJS.parse(''),
-					includeIndex = R.arr.indexOf(stack, function(x) {
-						return x.url.indexOf('include.js') > -1;
-					}),
-					embedInfo = function() {
-						var info = (function() {
-							var arr = [];
+					includeIndex = ruqq.arr.indexOf(stack, function(x) {
+						return x.url.indexOf('include.js') !== -1;
+					});
+					
+				function embedInfo() {
+					var info = (function() {
+						var arr = [];
 
-							function appendInfo(method, object) {
-								arr.push(String.format('include.%1(%2);', method, JSON.stringify(object)));
-							}
-
-							appendInfo('register', solution.bin);
-
-							return arr.join(Sys.newLine);
-						})();
-
-
-						ast.body = ast.body.concat(UglifyJS.parse(info).body);
-					},
-
-					defineCurrentInclude = function(index, resource) {
-						if (i <= includeIndex) {
-							return false;
+						function appendInfo(method, object) {
+							arr.push(String.format('include.%1(%2);', method, JSON.stringify(object)));
 						}
 
-						if (resource.info.hasExports) {
-							return true;
-						}
+						appendInfo('register', solution.bin);
+						
+						appendInfo('routes', resp.includeMock.toJsonRoutes());
+						
+						return arr.join(Sys.newLine);
+					}());
 
-						if (resource.info.IncludeSymbolRef == false) {
-							return false;
-						}
 
+					ast.body = ast.body.concat(UglifyJS.parse(info).body);
+				}
+				
+				
+				
+				
+				function defineCurrentInclude(i, resource) {
+					if (i <= includeIndex) 
+						return false;
+
+					if (resource.info.hasExports)
 						return true;
-					};
 
-				for (var i = 0, resource, length = stack.length; i < length; i++) {
-					resource = stack[i];
+					if (resource.info.IncludeSymbolRef == false)
+						return false;
 
-                    if (resource.ast == null){
-                        continue;
-                    }
+					return true;
+				}
+
+				stack.forEach(function(resource, i){
+					
+                    if (resource.ast == null)
+                        return;
 
 					resp.JS.reduceIncludes(resource);
 
                     var setCurrentInclude = defineCurrentInclude(i, resource);
 					if (setCurrentInclude) {
-						var code = String.format("include.setCurrent({ id: '#{id}', namespace: '#{namespace}', url: '#{url}'});", {
+						var code = "include.setCurrent({ id: '#{id}', namespace: '#{namespace}', url: '#{url}'});".format({
 							id: resource.appuri,
 							namespace: resource.namespace || '',
 							url: resource.appuri
@@ -118,7 +118,7 @@ include.js({
 					ast.body = ast.body.concat(UglifyJS.parse(';').body);
 
 					if (setCurrentInclude) {
-						var code = String.format("include.getResource('%1', 'js').readystatechanged(3);", resource.appuri),
+						var code = "include.getResource('%1', 'js').readystatechanged(3);".format(resource.appuri),
 							body = UglifyJS.parse(code).body;
 
 						ast.body = ast.body.concat(body);
@@ -127,7 +127,7 @@ include.js({
 					if (i == includeIndex) {
 						embedInfo();
 					}
-				}
+				});
 
 
 				return (output.js = ast);
@@ -137,10 +137,12 @@ include.js({
 			},
 			css: function(solution, stack, output) {
 				console.log('Build css... [start]');
-				for (var i = 0, x, length = stack.length; x = stack[i], i < length; i++) {
-					new resp.CssHandler(solution.uri, solution.uris.outputDirectory, x);
-				}
-				output.css = R.arr.select(stack, 'content').join(Sys.newLine);
+				
+				stack.forEach(function(resource, i){
+					new resp.CssHandler(solution.uri, solution.uris.outputDirectory, resource);
+				});
+				
+				output.css = ruqq.arr.select(stack, 'content').join(Sys.newLine);
 				console.log('Build css... [end]');
 			},
 			lazy: function(solution, stack, output) {
@@ -150,15 +152,17 @@ include.js({
 				this.ofType('load', solution, stack, output);
 			},
 			ofType: function(type, solution, stack, output) {
-				var stream = [];
-				for (var i = 0, x, length = stack.length; x = stack[i], i < length; i++) {
-					stream.push(String.format("<script type='include/#{type}' id='includejs-#{id}' data-appuri='#{appuri}'> #{content} </script>", {
+				var stream = [],
+					template = "<script type='include/#{type}' id='includejs-#{id}' data-appuri='#{appuri}'> #{content} </script>";
+				
+				stack.forEach(function(resource, i){
+					stream.push(template.format({
 						type: type,
-						appuri: x.namespace || x.appuri,
-						content: x.content,
-						id: x.id.replace(/\W/g, '')
+						appuri: resource.namespace || resource.appuri,
+						content: resource.content,
+						id: resource.id.replace(/\W/g, '')
 					}));
-				}
+				});
 				output[type] = stream.join(Sys.newLine);
 
 			}
@@ -177,14 +181,14 @@ include.js({
 				return;
 			}
 
-			solution.bin[type] = R.arr.select(stack, ['id', 'url', 'namespace']);
+			solution.bin[type] = ruqq.arr.select(stack, ['id', 'url', 'namespace']);
 			solution.output[type] = [];
 
 
 			BuilderHelper[type](solution, stack, solution.output);
 		},
 
-		build: function(solution, idfr) {
+		build: function(solution, done) {
             _filesCount = {};
 			solution.output = {};
 			solution.bin = {};
@@ -213,7 +217,7 @@ include.js({
 
 
 
-			idfr.resolve && idfr.resolve();
+			done && done();
 		}
 	}
 
@@ -243,7 +247,7 @@ include.js({
 		function distinct(stack) {
 			for (var i = 0; i < stack.length; i++) {
 				for (var j = 0; j < i; j++) {
-					if (stack[i].url == stack[j].url) {
+					if (stack[i].url === stack[j].url) {
 						stack.splice(i, 1);
 						i--;
 						break;

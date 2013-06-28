@@ -28,7 +28,11 @@ include.js({
 
 
 			if (builtOutput.css) {
-				var href = solution.uris.outputDirectory.combine('style.css').toRelativeString(solution.uri);
+				var href = solution
+					.uris
+					.outputDirectory
+					.combine('style.css')
+					.toRelativeString(solution.uris.outputMain);
 
 				if (solution.config.version) {
 					href += '?v=' + solution.config.version;
@@ -51,7 +55,12 @@ include.js({
 			}
 
 			if (builtOutput.js) {
-                var src = solution.uris.outputDirectory.combine('script.js').toRelativeString(solution.uri);
+                var src = solution
+					.uris
+					.outputDirectory
+					.combine('script.js')
+					.toRelativeString(solution.uris.outputMain);
+					
                 if (solution.config.version) {
 					src += '?v=' + solution.config.version;
 				}

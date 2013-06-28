@@ -7,58 +7,53 @@ include.js({
 
 
 	include.exports = {
-		process: function(config, idfr) {
+		process: function(config, done) {
 
             if (config.uri instanceof net.URI === false){
-                console.error('File is not defined', config.file);
-                idfr.resolve && idfr.resolve(1);
+                done('File is not defined ' + config.file);
                 return;
             }
 
 			if (new io.File(config.uri.toLocalFile()).exists() == false) {
-				console.error('File doesnt exists (404)', config.uri.toLocalFile());
-                idfr.resolve && idfr.resolve(1);
+				done('File doesnt exists (404) ' + config.uri.toLocalFile());
 				return;
 			}
 			if (!config.type) {
-				console.error('Unknown solution type', config.type);
-                idfr.resolve && idfr.resolve(1);
+				done('Unknown solution type ' + config.type);
 				return;
 			}
 
 
             /** @TODO lots of modules, depends on global config, so put that current config to global */
             var globalConfig = global.config,
-                listener = {
-                    resolve: function(){
-                        global.config = globalConfig;
-                        idfr && idfr.resolve();
-                    }
-                };
-
+                listener = function(){
+					global.config = globalConfig;
+					done();
+				};
             global.config = config;
 
 
-			new Solution(config, {
-				resolve: function(solution) {
-					console.log('Resources Loaded');
-					switch (solution.config.action) {
-					case 'project-import':
-					case 'project-reference':
-						include.js('resourceSource.js').done(function(resp) {
-							resp.resourceSource.action(solution.config.action, listener);
-						});
-						break;
-					case 'build':
-						include.js({
-							script: 'builder/build'
-						}).done(function(resp) {
-							resp.build.build(solution, listener);
-						});
-						break;
-					}
+			var solution = new Solution(config, function(solution) {
+				console.log('Resources Loaded');
+				
+				switch (solution.config.action) {
+				case 'project-import':
+				case 'project-reference':
+					include.js('resourceSource.js').done(function(resp) {
+						resp.resourceSource.action(solution.config.action, listener);
+					});
+					break;
+				case 'build':
+					include.js({
+						script: 'builder/build'
+					}).done(function(resp) {
+						resp.build.build(solution, listener);
+					});
+					break;
 				}
-			}).process();
+			});
+			
+			solution.process();
 		}
 	}
 });

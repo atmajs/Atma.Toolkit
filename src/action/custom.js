@@ -31,11 +31,11 @@ include.exports = {
 
             if (resp.Script && resp.Script.process) {
                 resp.Script.process(config, done);
-            } else {
-                console.warn("Hint: To allow multiple custom scripts to be called one after another export 'process' function:");
-                console.warn("include.exports = { process: function(config, done){ ... } }");
+                return;
             }
-
+            
+            console.log("Hint: To allow multiple custom scripts to be called one after another export 'process' function:".blue.bold);
+            console.log("include.exports = { process: function(config, done){ ... } }".blue.bold);
         });
     }
 }

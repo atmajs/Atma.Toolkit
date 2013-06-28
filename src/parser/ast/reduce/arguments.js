@@ -83,7 +83,8 @@ include.js([ //
 
 	function getResourceAppUri(namespace, template) {
 		var route = resp.Include.Routes.resolve(namespace, template);
-		return global.urlhelper.resolveAppUri(route.path, _resource.appuri);
+		
+		return path_resolveAppUri(route.path, _resource.appuri);
 	}
 
 	function hasAccessor(value, namespace) {
@@ -91,7 +92,7 @@ include.js([ //
 			alias = route.alias;
 
 		if (!alias) {
-			var url = global.urlhelper.resolveAppUri(route.path, _resource.appuri);
+			var url = path_resolveAppUri(route.path, _resource.appuri);
 			alias = resp.Include.Routes.parseAlias({
 				path: url
 			});

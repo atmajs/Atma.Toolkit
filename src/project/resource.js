@@ -1,45 +1,44 @@
 include.js({
-    parser: ['html::HTML', 'js.ast::JS']
+    parser: ['html::HTML', 'js.ast::JS'],
+    server: 'controllers/static-reference::RefPath'
 }).done(function(resp) {
 
 
-    var ruqq = global.ruqq,
-        cache = {},
-        Resource = Class({
+    var __cache = {};
+    
+    var Resource = Class({
         Construct: function(includeData, parent) {
 
             var _type = includeData.type,
                 _url = includeData.url,
                 _namespace = includeData.namespace,
-                _uri = includeData.uri; // ?optional
+                _uri = includeData.uri,
+                _parentLocation = parent && parent.directory,
+                _parentAppUri = parent && parent.appuri; // ?optional
 
 
             this.type = _type;
             this.namespace = _namespace;
-
-
-            this.uri = _uri || urlhelper.resolveUri(_url, parent && parent.directory);
-            this.appuri = urlhelper.resolveAppUri(_url, parent && parent.appuri);
+            
+            this.uri = _uri || path_resolveUri(_url, _parentLocation, solution.directory);
+            this.appuri = path_resolveAppUri(_url, _parentAppUri);
 
 
 
             console.log('R:', this.appuri);
 
-            if (cache[this.appuri]){
-                return cache[this.appuri];
-            }
+            if (__cache[this.appuri])
+                return __cache[this.appuri];
+            
 
-            cache[this.appuri] = this;
+            __cache[this.appuri] = this;
+            
 
-            this.url = this.appuri;//_url;
-
-            this.location = global.urlhelper.getDir(this.appuri);
-            this.directory = global.urlhelper.getDir(this.uri.toString());
-
-
+            this.url = this.appuri;
+            this.location = path_getDir(this.appuri);
+            this.directory = path_getDir(this.uri.toString());
             this.id = this.appuri;
-
-            this.idfr = parent;
+            
             this.includes = [];
             this.index = -1;
 
@@ -48,34 +47,42 @@ include.js({
 
         load: function(){
 
-            if (this.content){
+            if (this.content)
                 return this;
-            }
+            
 
             var file = new io.File(this.uri);
-            if (file.exists() == false){
+            
+            if (!file.exists()) 
+                file = new io.File(resp.RefPath(this.uri.toLocalFile()));
+            
+            
+            if (file.exists() === false){
                 console.log('404 - '.red.bold, this.uri.toLocalFile());
                 return this;
             }
 
             this.content = file.read();
+            
+            var that = this,
+                includes = null;
 
             switch (this.type) {
             case 'html':
-                this.includes = ruqq.arr.map(resp.HTML.extractIncludes(this.content, solution.directory, solution.variables), function(x){
-                    return new Resource(x, this);
-                }.bind(this));
+                includes = resp.HTML.extractIncludes(this.content, solution.directory, solution.variables);
+                
+                this.includes = includes.map(function(x){
+                    return new Resource(x, that);
+                });
+                
                 break;
             case 'js':
-                ////if (this.type == 'js' && this.url.indexOf('include.js') > -1) {
-                ////    break;
-                ////}
+                
+                includes = resp.JS.extractIncludes(this, solution.directory, solution.variables);
 
-                var includes = resp.JS.extractIncludes(this, solution.directory, solution.variables);
-
-                this.includes = ruqq.arr.map(includes, function(x){
-                    return new Resource(x, this);
-                }.bind(this));
+                this.includes = includes.map(function(x){
+                    return new Resource(x, that);
+                });
 
                 break;
             case 'css':
@@ -93,19 +100,19 @@ include.js({
         },
         Static: {
             getResource: function(appuri){
-                return cache[appuri];
+                return __cache[appuri];
             },
             clearCache: function(path){
 
                 if (!path){
-                    cache = {};
+                    __cache = {};
                     return;
                 }
 
-                for (var key in cache){
-                    var resource = cache[key];
+                for (var key in __cache){
+                    var resource = __cache[key];
                     if (resource.uri.toLocalFile().toLowerCase() === path.toLowerCase()){
-                        delete cache[key];
+                        delete __cache[key];
                         return;
                     }
                 }

@@ -5,7 +5,11 @@ include.js({
 		process: function(config, done) {
 
 			if (config.files == null) {
-				done(new Error('Set file(s) in config.files'));
+				config.files = config.args;
+			}
+		
+			if (config.files == null) {
+				done('Set file(s) in config.files');
 				return;
 			}
 
@@ -25,7 +29,7 @@ include.js({
                 aggr.push(file);
             });
 
-            ruqq.arr.each(files, function(file){
+            files.forEach(function(file){
                 file.read();
                 resp.Uglify(file, config);
 

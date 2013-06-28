@@ -32,56 +32,7 @@ include.js({
 
         new io.File(global.solution.resource.uri).write(global.solution.resource.content);
     }
-    
-    // var referenceResources = (function(){
-        
-    //     return function(){
-    //         var globals = JSON.parse(new io.File(io.env.applicationDir.combine('globals.txt')).read()),
-    //             referenceDir = io.env.applicationDir.combine('.reference/');
-            
-    //         var routes = new io.File(io.env.currentDir.combine('include.routes.js')),
-    //             includeRoutes;
-    //         if (routes.exists() == false){
-    //             console.error('"%s" does not exists', file.uri.toString());
-    //             return 0;
-    //         }
-
-
-            
-    //         var include = {
-    //             routes: function(cfg){
-    //                 includeRoutes = cfg;
-    //             }
-    //         }          
-    //         try{  
-    //             eval(routes.read());
-    //         }catch(e){};
-
-    //         if (!includeRoutes){
-    //             console.error('Routes couldnt be parsed');
-    //             return 0;
-    //         }
-
-    //         routes = includeRoutes;
-            
-            
-    //         for(var key in routes){
-    //             if (routes[key].indexOf('.import') == -1) continue;
-                
-    //             var projectName = routes[key].replace(/^.*\.import\/([^\/]+).+/g,'$1');
-                
-    //             if (!projectName || projectName in globals.projects == false){
-    //                 console.error('Project "%s" not defined in globals', projectName);
-    //                 return 0;
-    //             }                
-    //             var reference = new net.URI(globals.projects[projectName].path);
-                
-    //             resp.refHelper.create(new net.URI(global.solution.uri.toDir()), projectName, reference)
-    //         }
-            
-    //         return 1;
-    //     }
-    // })();
+  
 
     var importResources = (function() {
         function processCopy(parent, processed) {

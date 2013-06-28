@@ -3,12 +3,6 @@
 var mainFile = process.mainModule.filename,
 	uri = new net.URI(mainFile);
 
-
-////////if (uri.file == null) {
-////////	uri.path = G.urlhelper.getDir(uri.path);
-////////}
-
-
 global.io == null && (global.io = {});
 
 io.env = {

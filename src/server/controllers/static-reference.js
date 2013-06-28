@@ -7,7 +7,7 @@ include
 .done(function(resp){
 
 	include.exports = function(path){
-		var ref_index = path.indexOf('.reference');
+		var ref_index = path.indexOf('.reference/');
 		if (ref_index == -1) {
 			return path;
 		}

@@ -3,26 +3,26 @@
 (function (root, factory) {
     'use strict';
 
-    var doc;
-
-    if (typeof exports !== 'undefined' && (root === exports || root == null)){
-
-    	root = global;
-
-    }else{
-    	
-    	if (root == null) {
-			root = typeof window === 'undefined' || doc == null ? global : window;
-		}
-
-		doc = typeof document !== 'undefined' ? document : null;
+	var _global, _exports, _document;
+	
+	if (typeof exports !== 'undefined' && (root === exports || root == null)){
+		// raw nodejs module
+    	_global = _exports = global;
     }
-
+	
+	if (_global == null) {
+		_global = typeof window === 'undefined' ? global : window;
+	}
+	if (_exports == null) {
+		_exports = root || _global;
+	}
+	
+	_document = _global.document;
 	
 	
-	factory(root, doc);
+	factory(_global, _exports, _document);
 
-}(this, function (global, document) {
+}(this, function (global, exports, document) {
     'use strict';
 
 	// source ../src/1.scope-vars.js
@@ -154,8 +154,10 @@
 			return '';
 		}
 		var scripts = document.getElementsByTagName('script'),
-			last = scripts[scripts.length - 1];
-		return last && last.getAttribute('src') || '';
+			last = scripts[scripts.length - 1],
+			url = last && last.getAttribute('src') || '';
+			
+		return (url[0] === '/') ? url : '/' + url;
 	}
 	
 	function path_resolveUrl(url, parent) {
@@ -200,7 +202,13 @@
 			/**
 			 *	@param route {String} = Example: '.reference/libjs/{0}/{1}.js'
 			 */
-			register: function(namespace, route) {
+			register: function(namespace, route, currentInclude) {
+				
+				if (typeof route === 'string' && route[0] !== '/') {
+					var location = path_getDir((currentInclude || include).url || path_resolveCurrent());
+					
+					route = location + route;
+				}
 	
 				routes[namespace] = route instanceof Array ? route : route.split(/[\{\}]/g);
 	
@@ -1300,10 +1308,9 @@
 	
 	// source ../src/10.export.js
 	
-	global.include = new Include();
+	exports.include = new Include();
 	
-	global.includeLib = {
-		//Helper: Helper,
+	exports.includeLib = {
 		Routes: RoutesLib,
 		Resource: Resource,
 		ScriptStack: ScriptStack,

@@ -3,9 +3,9 @@
 
 
 	function resolveSettings(config) {
-		if (config.action == 'settings') {
+		if (config.action == 'settings') 
 			return config;
-		}
+		
 
 		var setts = config.settings;
 

@@ -129,7 +129,7 @@
 	include.exports = io.utils = {
 		file: {
 			save: function(path, content) {
-				var folder = g.urlhelper.getDir(path);
+				var folder = path_getDir(path);
 				if (folder && fs.existsSync(folder) == false) {
 					fsextra.mkdirpSync(folder);
 				}
@@ -152,7 +152,7 @@
 
 					callback && callback(404);
 				}
-				var folder = urlhelper.getDir(to);
+				var folder = path_getDir(to);
 				if (fs.existsSync(folder) == false) {
 					fsextra.mkdirpSync(folder);
 				}
@@ -168,7 +168,7 @@
 					console.error('file/copy - red{404 Error}'.colorize(), from);
 					return;
 				}
-				var folder = urlhelper.getDir(to);
+				var folder = path_getDir(to);
 				if (fs.existsSync(folder) == false) {
 					fsextra.mkdirpSync(folder);
 				}

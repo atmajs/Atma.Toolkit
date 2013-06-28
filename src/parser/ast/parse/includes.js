@@ -4,7 +4,7 @@ include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(fu
 		typeOf = util.is.type,
         _info = null;
 
-	include.exports = function parseIncludes(ast) {
+	include.exports = function parseIncludes(ast, currentResource) {
 
 		_info = {
 			includes: []
@@ -17,7 +17,7 @@ include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(fu
 			}).scope || ast;
 
 
-			processInclude(node, scope);
+			processInclude(node, scope, currentResource);
 
 			return true;
 		});
@@ -31,7 +31,7 @@ include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(fu
 
 
 
-	function processInclude(node, scope) {
+	function processInclude(node, scope, currentResource) {
 
 		var arr = [];
 		util.each(node, function(node) {
@@ -73,7 +73,7 @@ include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(fu
 			}
 		});
 
-		var resource = new resp.Include();
+		var resource = new resp.Include(currentResource);
 
 		ruqq.arr.each(arr, function(x) {
             resource[x.type].apply(resource, x.args);

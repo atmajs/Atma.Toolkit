@@ -25,13 +25,12 @@
 		io: '/src/io/{0}.js',
 		server: '/src/server/{0}.js'
 	}).js({
-		_: '/src/helper/logger.js',
+		_: ['/src/helper/logger.js', '/src/utils/exports.js'],
 		ruqq: ['net/uri', 'utils', 'arr'],
         settings: '/src/app.settings.js',
 		parser: ['config'],
 		script: [ //
 		'sys', //
-		'helpers', //
 		'helper/colorize', //
 		'helper/extensions', //
 		],

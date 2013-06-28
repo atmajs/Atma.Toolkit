@@ -45,7 +45,7 @@ include.js({
 	function copyImages(cssFile, targetUri) {
 
 		var solutionUri = global.solution.uri,
-			isSubDir = global.urlhelper.isSubDir(solutionUri.toString(), cssFile.uri.toString()),
+			isSubDir = path_isSubDir(solutionUri.toString(), cssFile.uri.toString()),
 			images = cssFile.images,
 			dir = net.URI.combine(targetUri.toLocalDir(), 'images/');
 

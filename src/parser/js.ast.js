@@ -13,7 +13,7 @@ include.js([ //
 		extractIncludes: function(resource, directory, variables) {
 
             var ast = (resource.ast = util.parse(resource.content)),
-                info = resp.parseIncludes(ast);
+                info = resp.parseIncludes(ast, resource);
 
 			/**
 			 * is used in future include reducing */

@@ -7,6 +7,7 @@ include.js({
 	script: 'project/resource::Resource'
 }).done(function(resp) {
 
+	console.warn(typeof obj_each);
 
 	function prepairConfig(config) {
 		config = resp.configHelper.prepairConfig(config);

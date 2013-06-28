@@ -16,8 +16,8 @@
                 dist = config.dist;
 
             if (files instanceof Array === false){
-                console.error('Specify array of files to concatenate in {config}.files');
-                done && done(new Error('No files'));
+                done('Specify array of files to concatenate in {config}.files');
+                return;
             }
 
 
@@ -32,13 +32,8 @@
 
             });
 
-
             new io.File(dist).write(output.join(''));
-
-            console.log('Done - ', dist);
-
-
-            done && done();
+            done();
         }
     }
 

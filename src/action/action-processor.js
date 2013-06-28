@@ -29,7 +29,7 @@ include.js('/src/helper/globals.js').done(function(resp) {
                     return;
                 }
                 
-                console.log('/* Done */');
+                console.log('// Done'.green);
                 _done && _done();
                 return;
             }
@@ -43,7 +43,8 @@ include.js('/src/helper/globals.js').done(function(resp) {
          */
         global.config = current;
 
-        var handler, handlerPath = _actions[current.action];
+        var handler,
+            handlerPath = _actions[current.action];
         
         if (!handlerPath) {
             console.warn('Error: Unknown Handler', current.action);

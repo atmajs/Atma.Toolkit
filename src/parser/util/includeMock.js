@@ -1,10 +1,14 @@
-(function(global){
+(function(){
   
 	var Routes = global.includeLib.Routes();
 
 	include.exports = Class({
-		Construct: function() {
+		Construct: function(resource) {
+			
+			this.url = resource.url;
+			this.location = resource.location;
 			this.includes = [];
+			
 			ruqq.arr.each(['js', 'css', 'load', 'lazy'], function(x) {
 				this[x] = function(pckg) {
 
@@ -32,12 +36,38 @@
 				return Routes.getRoutes();
 			}
 			for (var key in arg) {
-                Routes.register(key, arg[key]);
+                Routes.register(key, arg[key], this);
 			}
 			return this;
 		},
         Static: {
-            Routes: Routes
+            Routes: Routes,
+			toJsonRoutes: function(){
+				var result = {},
+					routes = Routes.getRoutes();
+				
+				for (var key in routes) {
+					result[key] = _join(routes[key]);
+				}
+				
+				function _join(route) {
+					var result = '';
+					for (var i = 0, x, imax = route.length; i < imax; i++){
+						x = route[i];
+						
+						if (i % 2 === 0) {
+							result += x;
+							continue;
+						}
+						
+						result += '{%1}'.format(x);
+					}
+					
+					return result;
+				}
+				
+				return result;
+			}
         }
 	});
-}(typeof window === 'undefined' ? global : window));
+}());
