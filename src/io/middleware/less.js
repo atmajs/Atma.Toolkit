@@ -1,9 +1,11 @@
 (function() {
 
-	include.exports = function(file) {
+	include.exports = function(file, done) {
+		
 		var filename = file.uri.toLocalFile(),
 			less = require('less'),
 			parser = new less.Parser({
+				syncImport: true,
 				filename: filename,
 				paths: [file.uri.toLocalDir()]
 			}),
@@ -25,5 +27,6 @@
 			}
 		});
 
+		
 	}
 }());

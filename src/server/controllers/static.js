@@ -34,9 +34,11 @@ include
 			}
 			
 			if (file.exists() === true) {
+				
 				var mimeType = MimeTypes[file.uri.extension] || 'text/plain',
 					content = file.read('binary');
 
+					
 				response.writeHeader(200, {
 					'Content-Type': mimeType
 				});
