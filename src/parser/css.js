@@ -16,6 +16,10 @@ include.exports = {
 
 			var imguri = new net.URI(href),
 				base = href[0] === '/' ? baseuri : uri;
+				
+			if (href[0] === '/') {
+				href = href.substring(1);
+			}
 
 			imgbin.push({
 				mimeType: 'image/png',
