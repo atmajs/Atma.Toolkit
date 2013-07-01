@@ -7,6 +7,19 @@ include.js({
 	
 	var __EventEmitter = resp.EventEmitter;
 
+	// source ../src/node/utils/logger.js
+	(function(){
+		
+		var util = require('util');
+		
+		console.print = function(){
+			var message = Array.prototype.slice.call(arguments).join(' ');
+			
+			util.print(message);
+		};
+		
+	}());
+	
 	// source ../src/server/BrowserTunnel.js
 	
 	var BrowserTunnel = Class({

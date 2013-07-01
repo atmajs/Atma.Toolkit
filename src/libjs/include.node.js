@@ -192,20 +192,44 @@
 		return url;
 	}
 	
+	function path_isRelative(path) {
+		var c = path.charCodeAt(0);
+		
+		switch (c) {
+			case 47:
+				// /
+				return false;
+			case 102:
+				// f
+			case 104:
+				// h
+				return /^file:|https?:/.test(path) === false;
+		}
+		
+		return true;
+	}
+	
 	// source ../src/2.Routing.js
 	var RoutesLib = function() {
 	
 		var routes = {},
 			regexpAlias = /([^\\\/]+)\.\w+$/;
 	
+		
+			
 		return {
 			/**
 			 *	@param route {String} = Example: '.reference/libjs/{0}/{1}.js'
 			 */
 			register: function(namespace, route, currentInclude) {
 				
-				if (typeof route === 'string' && route[0] !== '/') {
-					var location = path_getDir((currentInclude || include).url || path_resolveCurrent());
+				if (typeof route === 'string' && path_isRelative(route)) {
+					var res = currentInclude || include,
+						location = res.location || path_getDir(res.url || path_resolveCurrent());
+						
+					if (path_isRelative(location)) {
+						location = '/' + location;
+					}
 					
 					route = location + route;
 				}
@@ -739,10 +763,14 @@
 			 *	Create new Resource Instance,
 			 *	as sometimes it is necessary to call include. on new empty context
 			 */
-			instance: function() {
+			instance: function(url) {
 				var resource;
 				resource = new Resource();
 				resource.state = 4;
+				
+				if (url) {
+					resource.location = path_getDir(url);
+				}
 				
 				return resource;
 			},

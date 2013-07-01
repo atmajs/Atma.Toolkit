@@ -90,6 +90,8 @@ include.js({
 				console.error(error.stack || error);
 				
 				this.errors++;
+				
+				assert.errors++;
 				done();
 				
 			}
@@ -643,6 +645,7 @@ include.js({
 			total: 0,
 			failed: 0,
 			callbacks: 0,
+			errors: 0,
 			timeouts: [],
 			
 			reset: function(){
@@ -650,6 +653,7 @@ include.js({
 				this.callbacks = 0;
 				this.failed = 0;
 				this.total = 0;
+				this.errors = 0;
 				
 				this.timeouts = [];
 			},
@@ -815,7 +819,10 @@ include.js({
 				
 				
 				
-				return new RunnerSuite(configs, setts).run(done);
+				return new RunnerSuite(configs, setts).run(function(){
+					console.log('>> done', arguments);
+					done.apply(this, arguments);
+				});
 			}
 		};
 		
@@ -1181,10 +1188,15 @@ include.js({
 						failed = count('failed'),
 						timeouts = count('timeouts'),
 						callbacks = count('callbacks'),
+						errors = count('errors'),
 						browsers = stats.length;
 		
 					if (total === 0) {
 						console.error('No assertions');
+						failed++;
+					}
+					
+					if (errors > 0) {
 						failed++;
 					}
 					
@@ -1324,7 +1336,6 @@ include.js({
 		
 				.on('server:log', function(type, args) {
 					var fn = console[type] || console.log;
-		
 					fn.apply(console, args);
 				})
 		
@@ -1513,6 +1524,7 @@ include.js({
 						total: assert.total,
 						failed: assert.failed,
 						timeouts: assert.timeouts,
+						errors: assert.errors,
 						callbacks: assert.callbacks,
 					});
 		
@@ -1588,7 +1600,13 @@ include.js({
 				if (this.watch !== true) {
 					
 					this.closeSockets();
-					process.exit(this.getFailed());
+					
+					var failed = this.getFailed();
+					
+					console.log('');
+					console.log(failed === 0 ? 'Success'.green.bold : 'Failed'.red.bold);
+					
+					process.exit(failed);
 					
 				}
 				
