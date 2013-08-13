@@ -1,10 +1,12 @@
-include.js({
+include
+.js({
 	handler: 'css::CssHandler',
 	parser: ['js.ast::JS', 'util/includeMock']
-}).js('html.js::HtmlBuilder').done(function(resp) {
+})
+.js('html.js::HtmlBuilder')
+.done(function(resp) {
 
-	var Sys = global.sys,
-		UglifyJS = require('uglify-js');
+	var UglifyJS = require('uglify-js');
 		
 	var BuilderHelper = {
 			jsRaw: function(solution, stack, output) {
@@ -15,7 +17,7 @@ include.js({
 				for (var i = 0, x, length = stack.length; i < length; i++) {
 					x = stack[i];
 
-					if (i > includeIndex) {
+					if (i > includeIndex && x.appuri) {
 						var s = String.format("include.setCurrent({ id: '#{id}', namespace: '#{namespace}', url: '#{url}'});", {
 							id: x.appuri,
 							namespace: x.namespace || '',
@@ -27,7 +29,7 @@ include.js({
 
 					output.js.push(x.content);
 
-					if (i > includeIndex) {
+					if (i > includeIndex && x.appuri) {
 						output.js.push(String.format("include.getResource('%1', 'js').readystatechanged(3);", x.appuri));
 					}
 				}
@@ -41,7 +43,7 @@ include.js({
 
 					appendInfo('register', solution.bin);
 
-					return arr.join(Sys.newLine);
+					return arr.join(io.env.newLine);
 				})();
 
 
@@ -50,7 +52,7 @@ include.js({
 				if (solution.type == 'js') {
 					output.push(resource.content);
 				}
-				return (output.js = output.js.join(Sys.newLine + ';'));
+				return (output.js = output.js.join(io.env.newLine + ';'));
 			},
 			jsAst: function(solution, stack, output) {
 				var ast = UglifyJS.parse(''),
@@ -70,7 +72,7 @@ include.js({
 						
 						appendInfo('routes', resp.includeMock.toJsonRoutes());
 						
-						return arr.join(Sys.newLine);
+						return arr.join(io.env.newLine);
 					}());
 
 
@@ -142,7 +144,7 @@ include.js({
 					new resp.CssHandler(solution.uri, solution.uris.outputDirectory, resource);
 				});
 				
-				output.css = ruqq.arr.select(stack, 'content').join(Sys.newLine);
+				output.css = ruqq.arr.select(stack, 'content').join(io.env.newLine);
 				console.log('Build css... [end]');
 			},
 			lazy: function(solution, stack, output) {
@@ -163,7 +165,7 @@ include.js({
 						id: resource.id.replace(/\W/g, '')
 					}));
 				});
-				output[type] = stream.join(Sys.newLine);
+				output[type] = stream.join(io.env.newLine);
 
 			}
 		};
@@ -199,25 +201,12 @@ include.js({
 			this.ofType('load', solution);
 			this.ofType('js', solution);
 
-            if (solution.output.js) {
-				new io.File(solution.uris.outputDirectory.combine('script.js')).write(solution.output.js);
-			}
-
-			if (solution.output.css) {
-				new io.File(solution.uris.outputDirectory.combine('style.css')).write(solution.output.css);
-			}
-
-			var msg = 'bold{green{Files: [JS: #{js}] [CSS: #{css}] [LOAD: #{load}] [LAZY: #{lazy}]}}';
-            console.log(msg.format(_filesCount).colorize());
-
-			resp.HtmlBuilder.build(solution, solution.output);
-
-			new io.File(solution.uris.outputMain).write(solution.output.html);
+            
+			if (solution.type === 'html')
+				resp.HtmlBuilder.build(solution, solution.output);
 
 
-
-
-			done && done();
+			done(_filesCount);
 		}
 	}
 
@@ -258,8 +247,8 @@ include.js({
 		}
 
 		function resolve(type, includes) {
-			var stack = distinct(build(type, includes));
-			return type == '-css' ? stack.reverse() : stack;
+			return distinct(build(type, includes));
+			//-return type == '-css' ? stack.reverse() : stack;
 		}
 
 		return {

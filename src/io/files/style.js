@@ -47,13 +47,13 @@ include.js({
 		var solutionUri = global.solution.uri,
 			isSubDir = path_isSubDir(solutionUri.toString(), cssFile.uri.toString()),
 			images = cssFile.images,
-			dir = net.URI.combine(targetUri.toLocalDir(), 'images/');
+			dir = net.Uri.combine(targetUri.toLocalDir(), 'images/');
 
 
 		for (var i = 0, x, length = images.length; x = images[i], i < length; i++) {
 
 			if (isSubDir == false) {
-				var uri = new net.URI(net.URI.combine(dir, x.uri.file));
+				var uri = new net.Uri(net.Uri.combine(dir, x.uri.file));
 
 				new io.File(x.uri).copyTo(uri);
 				x.replaceWith = getRewritenPath(uri, x.href, targetUri.toLocalDir());

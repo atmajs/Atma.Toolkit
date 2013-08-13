@@ -11,7 +11,7 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 	io.File = Class({
 		Construct: function(path, data) {
 
-			this.uri = new net.URI(path);
+			this.uri = new net.Uri(path);
 
             if (path && this.uri.isRelative() && io.env){
                 this.uri = io.env.currentDir.combine(this.uri);
@@ -65,7 +65,7 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 		copyTo: function(targetUri) {
 
             if (typeof targetUri === 'string'){
-                targetUri = new net.URI(targetUri);
+                targetUri = new net.Uri(targetUri);
                 if (targetUri.isRelative()){
                     targetUri = io.env.currentDir.combine(targetUri);
                 }

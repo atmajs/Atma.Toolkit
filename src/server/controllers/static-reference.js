@@ -32,6 +32,6 @@ include
 			return path;
 		}
 		
-		return net.URI.combine(projectPath + path.substring(ref_index + str.length));
+		return net.Uri.combine(projectPath + path.substring(ref_index + str.length));
 	}
 });

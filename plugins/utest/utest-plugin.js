@@ -1,5 +1,5 @@
 
-var uri = new net.URI(include.url);
+var uri = new net.Uri(include.url);
 
 include.exports = {
 	register: function(globals){

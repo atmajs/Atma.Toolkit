@@ -1,6 +1,6 @@
 include.js({
 	parser: ['js', 'css', 'html'],
-	script: ['io/files/style', 'project/solution']
+	script: ['io/files/style', 'solution/solution']
 }).done(function() {
 	var config = global.config;
 
@@ -9,7 +9,7 @@ include.js({
 	include.exports = {
 		process: function(config, done) {
 
-            if (config.uri instanceof net.URI === false){
+            if (config.uri instanceof net.Uri === false){
                 done('File is not defined ' + config.file);
                 return;
             }
@@ -47,7 +47,10 @@ include.js({
 					include.js({
 						script: 'builder/build'
 					}).done(function(resp) {
-						resp.build.build(solution, listener);
+						resp.build.build(solution, function(fileStats){
+							solution.onbuild(fileStats);
+							listener();
+						});
 					});
 					break;
 				}

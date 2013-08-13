@@ -21,7 +21,7 @@ include.exports = {
             return;
         }
 
-        var url = net.URI.combine('file:///', process.cwd().replace(/\\/g, '/'), script);
+        var url = net.Uri.combine('file:///', process.cwd().replace(/\\/g, '/'), script);
 
 
         include

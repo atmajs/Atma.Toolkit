@@ -6,8 +6,8 @@ include
 
 	var File = io.File;
 
-	var path = global.config.file || net.URI.combine(process.cwd(), 'temp.del'),	
-		uri = new net.URI(path),
+	var path = global.config.file || net.Uri.combine(process.cwd(), 'temp.del'),	
+		uri = new net.Uri(path),
 		folder = uri.toLocalDir();
 
 	console.log('Server at: ', folder);
@@ -20,13 +20,13 @@ include
 				base = folder;
 			}
 			
-            var uri = new net.URI(request.url);
+            var uri = new net.Uri(request.url);
             
             if (!uri.file){
                 uri = uri.combine('index.html');
             }
 			
-            var fullPath = net.URI.combine(base, uri.toLocalFile()),
+            var fullPath = net.Uri.combine(base, uri.toLocalFile()),
                 file = new File(fullPath);
             
 			if (file.exists() === false) {

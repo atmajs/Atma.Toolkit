@@ -19,25 +19,32 @@ include.js({
 
             this.type = _type;
             this.namespace = _namespace;
-            
-            this.uri = _uri || path_resolveUri(_url, _parentLocation, solution.directory);
-            this.appuri = path_resolveAppUri(_url, _parentAppUri);
-
-
-
-            console.log('R:', this.appuri);
-
-            if (__cache[this.appuri])
-                return __cache[this.appuri];
+            this.content = includeData.content;
             
 
-            __cache[this.appuri] = this;
-            
+            if (_url) {
+                this.uri = _uri || path_resolveUri(_url, _parentLocation, solution.directory);
+                this.appuri = path_resolveAppUri(_url, _parentAppUri);
 
-            this.url = this.appuri;
-            this.location = path_getDir(this.appuri);
-            this.directory = path_getDir(this.uri.toString());
-            this.id = this.appuri;
+
+                console.log('R:', this.appuri);
+
+                if (__cache[this.appuri])
+                    return __cache[this.appuri];
+                
+
+                __cache[this.appuri] = this;
+                
+
+                this.url = this.appuri;
+                this.location = path_getDir(this.appuri);
+                this.directory = path_getDir(this.uri.toString());
+                this.id = this.appuri;
+            }else{
+
+                this.uri = new net.Uri();
+                this.url = '';
+            }
             
             this.includes = [];
             this.index = -1;
@@ -46,30 +53,30 @@ include.js({
         },
 
         load: function(){
-
-            if (this.content)
-                return this;
-            
-
-            var file = new io.File(this.uri);
-            
-            if (!file.exists()) 
-                file = new io.File(resp.RefPath(this.uri.toLocalFile()));
-            
-            
-            if (file.exists() === false){
-                console.log('404 - '.red.bold, this.uri.toLocalFile());
-                return this;
+           
+            if (this.content == null) {
+                var file = new io.File(this.uri);
+                
+                if (!file.exists()) 
+                    file = new io.File(resp.RefPath(this.uri.toLocalFile()));
+                
+                
+                if (file.exists() === false){
+                    console.log('404 - '.red.bold, this.uri.toLocalFile());
+                    return this;
+                }
+    
+                this.content = file.read();
             }
-
-            this.content = file.read();
             
             var that = this,
                 includes = null;
 
             switch (this.type) {
             case 'html':
-                includes = resp.HTML.extractIncludes(this.content, solution.directory, solution.variables);
+                includes = resp
+                    .HTML
+                    .extractIncludes(this.content, solution.directory, solution.variables);
                 
                 this.includes = includes.map(function(x){
                     return new Resource(x, that);
@@ -78,7 +85,9 @@ include.js({
                 break;
             case 'js':
                 
-                includes = resp.JS.extractIncludes(this, solution.directory, solution.variables);
+                includes = resp
+                    .JS
+                    .extractIncludes(this, solution.directory, solution.variables);
 
                 this.includes = includes.map(function(x){
                     return new Resource(x, that);
@@ -117,10 +126,33 @@ include.js({
                     }
                 }
 
+            },
+            
+            fromMany: function(resources){
+                
+                
+                var array = resources.map(function(x){
+                    var res = new Resource(x);
+                    
+                    return res;
+                });
+                
+                return {
+                    includes: array,
+                    load: function(){
+                        
+                        ruqq.arr.invoke(array, 'load');
+                        return this;
+                    }
+                };
             }
         }
     });
 
-
-    include.exports = Resource;
+    if (global.sln == null) 
+        global.sln = {};
+        
+    
+    global.sln.Resource = include.exports = Resource;
+    
 });

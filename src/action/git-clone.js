@@ -45,7 +45,7 @@
                 libjsDir = libjsDir + '/';
             }
 
-            var file = new io.File(new net.URI(io.env.applicationDir).combine('globals/projects.txt'));
+            var file = new io.File(new net.Uri(io.env.applicationDir).combine('globals/projects.txt'));
             var globals = {
                 projects: {
                     libjs: {

@@ -22,7 +22,11 @@ include.js({
 
     
     var rewriteRoutes = function(from, to) {
-        global.parser.html.rewriteUrls(global.solution.resource, '.' + from + '/', '.' + to + '/');
+        global
+            .parser
+            .html
+            .rewriteUrls(global.solution.resource, '.' + from + '/', '.' + to + '/');
+        
         var routes = new io.File(global.solution.uri.combine('include.routes.js'));
         if (routes.exists()) {
             var source = routes.read();
@@ -30,7 +34,9 @@ include.js({
             routes.write(source);
         }
 
-        new io.File(global.solution.resource.uri).write(global.solution.resource.content);
+        new io
+            .File(global.solution.resource.uri)
+            .write(global.solution.resource.content);
     }
   
 

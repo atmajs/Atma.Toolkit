@@ -1,11 +1,8 @@
 
-include.js({
-	script: 'base/EventEmitter'
-})
 
-.done(function(resp){
+(function(){
 	
-	var __EventEmitter = resp.EventEmitter;
+	
 
 	// source ../src/node/utils/logger.js
 	(function(){
@@ -23,7 +20,7 @@ include.js({
 	// source ../src/server/BrowserTunnel.js
 	
 	var BrowserTunnel = Class({
-		Base: __EventEmitter,
+		Base: Class.EventEmitter,
 		Construct: function(socket, logger) {
 			var that = this;
 	
@@ -83,7 +80,7 @@ include.js({
 	
 	
 	var ServerUTest = Class({
-		Base: __EventEmitter,
+		Base: Class.EventEmitter,
 		Construct: function(sockets, logger) {
 			this.index = 0;
 			this.tunnels = ruqq.arr.map(sockets, function(x) {
@@ -231,4 +228,4 @@ include.js({
 
 
 	include.exports = SocketListener;
-});
+}());

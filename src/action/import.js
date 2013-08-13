@@ -62,7 +62,7 @@ include.js({
                 if (/\.[\w]{1,6}/g.test(dist)){
                     // is file
                 }else{
-                    dist = net.URI.combine(dist, file.uri.file);
+                    dist = net.Uri.combine(dist, file.uri.file);
                 }
 
                 resp.importer(file, config.defines);

@@ -66,6 +66,8 @@ include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(fu
 			case 'plugin':
 			case 'ajax':
 			case 'promise':
+			case 'client':
+			case 'server':
 				break;
 			default:
 				console.log('getIncludes: Unknown expression', node.expression);

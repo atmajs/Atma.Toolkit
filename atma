@@ -1,21 +1,19 @@
 #!/usr/bin/env node
 
-(function(w) {
+(function() {
 
-	require('libjs-class');
+	require('atma-libs/globals-dev');
 	require('./src/app.help.js');
-	require('./src/libjs/include.node.js');
 	require('socket.io');
 
 	include.cfg({
 		path: 'file:///' + __dirname.replace(/\\/g, '/') + '/',
 		lockedToFolder: true,
 		loader: {
-			coffee: '/src/libjs/loader/coffee/loader.js'
+			coffee: '/node_modules/atma-libs/include/loader/coffee/loader.js'
 		}
 	}).routes({
-		ruqq: '/src/libjs/{0}.js',
-		libjs: '/src/libjs/{0}.js',
+		
 		handler: '/src/handler/{0}.js',
 		parser: '/src/parser/{0}.js',
 		action: '/src/action/{0}.js',
@@ -25,21 +23,22 @@
 		io: '/src/io/{0}.js',
 		server: '/src/server/{0}.js'
 	}).js({
-		_: ['/src/helper/logger.js', '/src/utils/exports.js'],
-		ruqq: ['net/uri', 'utils', 'arr'],
-        settings: '/src/app.settings.js',
+		_: [
+			'/src/helper/logger.js',
+			'/src/utils/exports.js'
+		],
+		settings: '/src/app.settings.js',
 		parser: ['config'],
-		script: [ //
-		'sys', //
-		'helper/colorize', //
-		'helper/extensions', //
+		script: [ 
+			'helper/colorize', 
+			'helper/extensions', 
 		],
 		io: 'package',
 		
 		//
 		action: 'action-processor::Action'
 	}).done(function(resp) {
-
+		
 		Log('PROCESS', process, 99);
 		Log('CONFIG', global.config, 99);
 
@@ -57,4 +56,4 @@
 	});
 
 
-}(global));
+}());

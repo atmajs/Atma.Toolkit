@@ -23,7 +23,7 @@ include.exports = {
                     _source = file.uri.toLocalFile(),
                     _path = glob_getCalculatedPath(_relative, source);
                 
-                files[_source] =  net.URI.combine(target, _path);
+                files[_source] =  net.Uri.combine(target, _path);
             });
         }
 

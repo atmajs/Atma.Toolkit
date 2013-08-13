@@ -3,7 +3,7 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 	global.io == null && (global.io = {});
 
 	var utils = resp.IOUtils,
-		URI = global.net.URI,
+		Uri = global.net.Uri,
 		fs = require('fs');
 
 
@@ -20,7 +20,7 @@ include.js('io.utils.js::IOUtils').done(function(resp) {
 				console.warn(directory);
 			}
 			
-			this.uri = new URI(directory);
+			this.uri = new Uri(directory);
 			
 			delete this.uri.file;
 		},

@@ -23,9 +23,9 @@ function path_resolveUri(url, parentLocation, base) {
 		url = url.substring(1);
 	}
 	
-	var uri = new net.URI(url);
+	var uri = new net.Uri(url);
 	
-	return uri.isRelative() ? (new net.URI(parentLocation)).combine(uri) : uri;            
+	return uri.isRelative() ? (new net.Uri(parentLocation)).combine(uri) : uri;            
 }
 
 function path_resolveAppUri(url, parentPath) {

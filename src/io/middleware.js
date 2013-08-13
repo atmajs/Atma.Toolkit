@@ -1,17 +1,17 @@
 include.routes({
 	middleware: 'middleware/{0}.js'
 }).js({
-	middleware: [ //
-	'hint', //
-	'uglify', //
-	'cssmin', //
-	'coffee', //
-	'less', //
-	'condcomments', //
-	'importer', //
+	middleware: [ 
+		'hint', 
+		'uglify', 
+		'cssmin', 
+		'coffee', 
+		'less', 
+		'condcomments', 
+		'importer', 
 	],
 	
-	parser: 'config'
+	//parser: 'config'
 }).done(function(resp) {
 
 

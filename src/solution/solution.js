@@ -1,8 +1,13 @@
-include.js('resource.js::Resource').done(function(resp) {
-
+include
+.js('resource.js::Resource')
+.done(function(resp) {
     
-
-    global.Solution = Class({
+	if (typeof sln === 'undefined') 
+		sln = {};
+	
+	//@TODO remove globals, but also check dependencies
+	
+    sln.Solution = global.Solution = Class({
         Construct: function(config, done) {
             /** singleton */
             global.solution = this;
@@ -73,12 +78,59 @@ include.js('resource.js::Resource').done(function(resp) {
             return 0;
         },
 
+		onbuild: function(fileStats){
+			
+			var msg;
+			msg = 'bold{green{Files: [JS: #{js}] [CSS: #{css}] [LOAD: #{load}] [LAZY: #{lazy}]}}';
+			msg = msg
+				.format(fileStats)
+				.colorize();
+				
+            console.log(msg);
+			
+			this.save();
+
+		},
+		
+		save: function(){
+			if (this.output.js) {
+				new io
+					.File(this.uris.outputDirectory.combine('script.js'))
+					.write(this.output.js);
+			}
+
+			if (this.output.css) {
+				new io
+					.File(this.uris.outputDirectory.combine('style.css'))
+					.write(this.output.css);
+			}
+			
+			if (this.output.html) {
+				new io
+					.File(this.uris.outputMain)
+					.write(this.output.html);
+			}
+		},
         
         process: function() {
             this.resource.load();
             
             this.done(this);
             return this;
-        }
+        },
+		
+		Static: {
+			createEmpty: function(){
+				var config = {
+					uri: io
+							.env
+							.currentDir
+							.combine('/index.js'),
+					type: 'js'
+				};
+				
+				return new sln.Solution(config);
+			}
+		}
     });    
 });

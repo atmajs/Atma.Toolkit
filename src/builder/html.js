@@ -6,25 +6,25 @@ include.js({
 		build: function(solution, builtOutput) {
 			var doc = new resp.Document(solution.resource.content);
 
-			ruqq//
-            .arr(doc.getElementsByTagName('script')) //
-			.where(function(x) {
-				if (x.getAttribute('ignore')) {
-					return false;
-				}
-				return !!x.getAttribute('src');
-			}).each(function(x) {
-				x.parentNode.removeChild(x);
-			});
+			ruqq
+				.arr(doc.getElementsByTagName('script')) 
+				.where(function(x) {
+					if (x.getAttribute('ignore')) {
+						return false;
+					}
+					return !!x.getAttribute('src');
+				}).each(function(x) {
+					x.parentNode.removeChild(x);
+				});
 
 
-			ruqq//
-            .arr(doc.getElementsByTagName('link')) //
-			.where(function(x) {
-				return x.getAttribute('rel') == 'stylesheet';
-			}).each(function(x) {
-				x.parentNode.removeChild(x);
-			});
+			ruqq
+				.arr(doc.getElementsByTagName('link')) 
+				.where(function(x) {
+					return x.getAttribute('rel') == 'stylesheet';
+				}).each(function(x) {
+					x.parentNode.removeChild(x);
+				});
 
 
 			if (builtOutput.css) {
@@ -74,7 +74,12 @@ include.js({
 
 			var doctype = doc.doctype;
 			if (doctype) {
-				doctype = "<!DOCTYPE " + doctype.name + (doctype.publicId ? ' PUBLIC "' + doctype.publicId + '"' : '') + (!doctype.publicId && doctype.systemId ? ' SYSTEM' : '') + (doctype.systemId ? ' "' + doctype.systemId + '"' : '') + '>';
+				doctype = "<!DOCTYPE "
+					+ doctype.name
+					+ (doctype.publicId ? ' PUBLIC "' + doctype.publicId + '"' : '')
+					+ (!doctype.publicId && doctype.systemId ? ' SYSTEM' : '')
+					+ (doctype.systemId ? ' "' + doctype.systemId + '"' : '') + '>';
+					
 			} else {
 				doctype = "<!DOCTYPE html>";
 			}

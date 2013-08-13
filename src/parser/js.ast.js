@@ -12,7 +12,7 @@ include.js([ //
 	include.exports = {
 		extractIncludes: function(resource, directory, variables) {
 
-            var ast = (resource.ast = util.parse(resource.content)),
+            var ast = (resource.ast = util.parse(resource.content, {filename: resource.uri.toLocalFile() })),
                 info = resp.parseIncludes(ast, resource);
 
 			/**

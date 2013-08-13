@@ -91,7 +91,7 @@ include
 		
 		path = path.substring(match[0].length);
 		
-		return net.URI.combinePathes(projectPath, path);
+		return net.Uri.combinePathes(projectPath, path);
 	};
 	
 	
@@ -108,6 +108,12 @@ include
 		ruqq.arr.each(globals.plugins, function(plugin){
 			var url = String.format('%1plugins/%2/%2-plugin.js',__path, plugin);
 			include.js(url + '::Plugin').done(function(resp){
+				
+				if (resp.Plugin == null) {
+					console.error('Plugin 404 - ', url);
+					return;
+				}
+				
 				resp.Plugin.register(globals);
 			});
 		});

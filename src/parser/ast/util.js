@@ -114,7 +114,12 @@
 			case 'SymbolRef':
 				return getVariableValue(scope, node.name);
 			}
-			console.error('Evaluate Node: Unknown Node', node.TYPE);
+
+			var type = node.TYPE,
+				info = node.start || node.end || node,
+				file = '~' + info.file.substr(-25);
+
+			console.warn('[includes parser]: Dynamic Expression', type, file, ':', info.line);
 			return null;
 		},
 
@@ -213,8 +218,8 @@
 		evaluateNode: evaluateNode,
 		getArguments: getArguments,
 		getPropertyChain: getPropertyChain,
-		parse: function(code) {
-			return UglifyJS.parse(code);
+		parse: function(code, filename) {
+			return UglifyJS.parse(code, filename);
 		},
 		is: {
 			includeFunction: function(node) {

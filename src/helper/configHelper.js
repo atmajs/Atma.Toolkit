@@ -67,9 +67,9 @@ include.exports = {
 
 
 function parseFile(config) {
-	var uri = new net.URI(config.file);
+	var uri = new net.Uri(config.file);
 	if (uri.isRelative()) {
-		uri = new net.URI(net.URI.combine(process.cwd(), config.file));
+		uri = new net.Uri(net.Uri.combine(process.cwd(), config.file));
 	}
 	config.uri = uri;
 }

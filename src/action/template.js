@@ -19,7 +19,7 @@
 
 				
 				config = Object.extend(config,{
-					targetDir  : new io.Directory(new net.URI(process.cwd() + '/')),
+					targetDir  : new io.Directory(new net.Uri(process.cwd() + '/')),
 					sourceDir : new io.Directory(io.env.applicationDir.combine('template/').combine(folder + '/'))
                 });
 

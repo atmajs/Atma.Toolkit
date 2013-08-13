@@ -1,4 +1,13 @@
+## Deprecated
+
+**Use atma package instead**
+
+```bash
+$ npm install atma -g
+```
+
 ### IncludeJS Build Tool / nodejs "bash" scripts
+
 
 
 @see [IncludeJS Project](http://libjs.it/#includeBuilder)

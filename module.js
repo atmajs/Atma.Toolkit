@@ -29,15 +29,19 @@ include.cfg({
 	base: '/src/base/{0}.js',
 	io: '/src/io/{0}.js'
 }).js({
-	_: '/src/helper/logger.js',
+	_: ['/src/helper/logger.js', '/src/utils/exports.js'],
 	ruqq: ['net/uri', 'utils', 'arr'],
-    script: [ //
+	settings: '/src/app.settings.js',
+	parser: ['config'],
+	script: [ //
 	'sys', //
-	'helpers', //
-	'helper/stdout', //
+	'helper/colorize', //
+	'helper/extensions', //
 	],
 	io: 'package',
-    action: 'action-processor::ActionProcessor'
+	
+	//
+	action: 'action-processor::Action'
 }).done(function(resp){
     module.exports = resp;
 

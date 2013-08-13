@@ -14,17 +14,14 @@ include.exports = {
 			}
 			console.log('CSS match', href);
 
-			var imguri = new net.URI(href),
-				base = href[0] === '/' ? baseuri : uri;
+			var base = href[0] === '/' ? baseuri : uri,
+				imguri = new net.Uri(href[0] === '/' ? href.substring(1) : href);
 				
-			if (href[0] === '/') {
-				href = href.substring(1);
-			}
 
 			imgbin.push({
 				mimeType: 'image/png',
 				href: href,
-				uri: imguri.isRelative() ? base.combine(imguri) : imguri,
+				uri: base.combine(imguri),
 				baseuri: uri
 			});
 

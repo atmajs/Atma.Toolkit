@@ -1,12 +1,6 @@
 
-include.js({
-	script: 'base/EventEmitter'
-})
-
-.done(function(resp){
+(function(){
 	
-	var __EventEmitter = resp.EventEmitter;
-
 	// source ../src/utils/array.js
 	function arr_isArray(array) {
 		return !!(array != null && array.length != null && typeof array.splice === 'function');
@@ -834,7 +828,7 @@ include.js({
 				
 			var base = config.base;
 			if (base) {
-				base = new net.URI(net.URI.combine(base, '/'));
+				base = new net.Uri(net.Uri.combine(base, '/'));
 				if (base.isRelative()){
 					base = io.env.currentDir.combine(base);
 				}
@@ -842,7 +836,7 @@ include.js({
 				base = io.env.currentDir;
 			}
 			
-			config.base = net.URI.combine(base.toDir(), '/');
+			config.base = net.Uri.combine(base.toDir(), '/');
 			config.nodeScripts = [];
 			config.domScripts = [];
 			
@@ -853,13 +847,13 @@ include.js({
 					script += '.test';
 				}
 				
-				var uri = new net.URI(base).combine(script),
+				var uri = new net.Uri(base).combine(script),
 					file = new io.File(uri);
 				if (file.exists() === false) {
 					
 					if (/\/?test.?\//.test(script) === false) {
-						script = net.URI.combine('test/', script);
-						file.uri = new net.URI(base).combine(script);
+						script = net.Uri.combine('test/', script);
+						file.uri = new net.Uri(base).combine(script);
 						
 						if (file.exists() === false) 
 							script = null;
@@ -888,7 +882,7 @@ include.js({
 					var ext = /\.\w{1,5}$/.exec(script)
 					if (ext && ext[0] === '.test') {
 						script = script.replace(/\.\w{1,5}$/, '.js');
-						if (new io.File(new net.URI(base).combine(script)).exists()) {
+						if (new io.File(new net.Uri(base).combine(script)).exists()) {
 							(config.env || (config.env = [])).push(script);
 						}	
 					}
@@ -909,7 +903,7 @@ include.js({
 			var path = baseConfig.config;
 				
 			if (path == null) {
-				path = net.URI.combine(config.base, /test.?[\\\/]?$/.test(config.base) ? 'config.js' : 'test/config.js');
+				path = net.Uri.combine(config.base, /test.?[\\\/]?$/.test(config.base) ? 'config.js' : 'test/config.js');
 			}
 			
 			var file = new io.File(path);
@@ -1066,10 +1060,10 @@ include.js({
 			watch = function(){};
 			
 			
-			base = new net.URI(base);
+			base = new net.Uri(base);
 			ruqq.arr.each(resources, function(url){
 				
-				var uri = new net.URI(url);
+				var uri = new net.Uri(url);
 				if (uri.isRelative()) {
 					uri = base.combine(uri);
 				}
@@ -1125,10 +1119,10 @@ include.js({
 				var scripts = config.scripts,
 					base = config.base;
 				
-				base = new net.URI(base);
+				base = new net.Uri(base);
 				
 				for (var i = 0, x, imax = scripts.length; i < imax; i++){
-					x = new net.URI(scripts[i]);
+					x = new net.Uri(scripts[i]);
 					
 					if (x.isRelative()) {
 						x = base.combine(x);
@@ -1147,7 +1141,7 @@ include.js({
 			
 		
 			return Class({
-				Base: __EventEmitter,
+				Base: Class.EventEmitter,
 				Construct: function(config) {
 					this.config = config;
 					this.status = status_blank;
@@ -1251,7 +1245,7 @@ include.js({
 					if (data.file && data.line != null) {
 						
 						var path = data.file.replace(/(\/)?utest\//i, '$1'),
-							uri = new net.URI(this.config.base).combine(path),
+							uri = new net.Uri(this.config.base).combine(path),
 							source = new io.File(uri).read().split(/\r\n|\r|\n/g),
 							line = source[data.line - 1],
 							code = line && line.trim();
@@ -1431,7 +1425,7 @@ include.js({
 				
 				var resource = include.instance();
 				
-				base = new net.URI(base);
+				base = new net.Uri(base);
 				ruqq.arr.each(env, function(x){
 					var	parts = x.split('::'),
 						src = parts[0],
@@ -1711,7 +1705,7 @@ include.js({
 			
 	}());
 
-});
+}());
 
 
 // source ../vendor/sinon.js

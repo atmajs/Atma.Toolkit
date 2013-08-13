@@ -1,15 +1,14 @@
 {
-  "name": "includejs",
-  "description": "IncludeJS DEV Tool",
+  "name": "atma",
+  "description": "Atma.Toolkit",
   "preferGlobal": true,
   "author": {
     "name": "Alexander Kit",
     "email": "source.kit@gmail.com"
   },
-  "version": "0.9.31",
+  "version": "0.9.51",
   "bin": {
-    "includejs": "includejs",
-    "ijs": "includejs"
+    "atma": "atma"
   },
   "main": "module.js",
   "dependencies": {
@@ -20,7 +19,7 @@
     "clean-css": "~0.9.0",
     "jshint": "~0.9.1",
     "socket.io": "~0.9.13",
-    "libjs-class": "~1.0.3",
+    "atma-libs": "~0.8.41",
     "coffee-script": "~1.4.0",
     "less": "~1.3.3",
     "openurl": "~1.1.0",
@@ -28,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/tenbits/IncludeJS.Builder.git"
+    "url": "git://github.com/atmajs/Atma.Toolkit.git"
   },
   "license": "MIT"
 }

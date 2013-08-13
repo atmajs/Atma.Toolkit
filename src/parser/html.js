@@ -65,7 +65,7 @@ include.js({
 			var doc = new resp.Document(htmlSource),
 				includes = [];
 
-			directory = new net.URI(directory);
+			directory = new net.Uri(directory);
 
 			function add(type, x) {
 				var url, appuri;
