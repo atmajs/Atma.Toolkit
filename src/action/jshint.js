@@ -1,7 +1,13 @@
-include.js({
-	script: 'io/middleware/hint::JSHint'
-}).done(function(resp) {
+(function() {
 	include.exports = {
+		
+		help: {
+			description: 'Run JSHint on specified files',
+			args: {
+				files: '<array|string>',
+				jshint: '<object> jshint variables, support ignore property to ignore some files'
+			}
+		},
 		process: function(config, done) {
 
 
@@ -17,22 +23,27 @@ include.js({
 
             var files = ruqq.arr.aggr(config.files, [], function(x, aggr){
                 var file = new io.File(x);
-                if (file.exists() == false){
-                    console.error('File not found:', file.uri.toLocalFile());
+                if (file.exists() === false){
+                    logger.error('File not found:', file.uri.toLocalFile());
                     return;
                 }
                 aggr.push(file);
             });
 
-
+			
+			var JSHint = io
+				.File
+				.middleware
+				.hint
+				;
 
             ruqq.arr.each(files, function(file){
                 file.read();
-                resp.JSHint(file, config.jshint);
+                JSHint(file, config.jshint);
             });
 
             done();
 		}
 	};
 
-});
+}());

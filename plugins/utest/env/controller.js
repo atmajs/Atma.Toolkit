@@ -6,16 +6,13 @@
 
 include
 	.js({
-		libjs: 'mask.node::Mask',
-		helper: 'globals',
 		server: ['controllers/static::StaticHandler', 'websocket']
 	})
 	.load('./template.mask::env')
 	.done(function(resp) {
 
 	var File = io.File,
-		mask = resp.Mask,
-		globals = resp.globals,
+		globals = app.config.globals,
 		resource = include,
 		StaticHandler = resp.StaticHandler,
 		WebSockets = resp.websocket;
@@ -53,7 +50,7 @@ include
 				}
 				
 				if (config && config.base) {
-					var base = new net.URI(config.base).toLocalDir();
+					var base = new net.Uri(config.base).toLocalDir();
 					
 					request.url = resource;
 					StaticHandler.request(request, response, base);
@@ -61,7 +58,7 @@ include
 					
 				}
 				
-				console.warn('Invalid config - no base path information', config)
+				logger.warn('Invalid config - no base path information', config)
 				
 				response.writeHeader(500, {
 					'Content-Type': 'text/html'
@@ -93,7 +90,7 @@ include
 		}
 
 		add_source(scripts, '/socket.io/socket.io.js');
-		add_source(scripts, '/.reference/ijs/plugins/utest/utest.browser.js');
+		add_source(scripts, '/.reference/atma.toolkit/plugins/utest/utest.browser.js');
 
 		var routes = globals.defaultRoutes;
 		if (routes) {

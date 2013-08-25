@@ -12,6 +12,7 @@
 			
 		return !array.length;
 	}
+	// end:source ../src/utils/array.js
 	
 	// source ../src/UTest.js
 	(function(global){
@@ -242,6 +243,7 @@
 	
 	
 	
+	// end:source ../src/UTest.js
 	// source ../src/assert/assert.node.js
 	(function(global){
 		
@@ -630,6 +632,7 @@
 		
 		})(this);
 		
+		// end:source assert.js
 		// source assert.wrapper.js
 		
 		
@@ -729,6 +732,7 @@
 			};
 		}
 		
+		// end:source assert.wrapper.js
 		
 		var util = require('util');
 		
@@ -769,6 +773,7 @@
 		};
 		
 	}(this));
+	// end:source ../src/assert/assert.node.js
 	// source ../src/node/action.js
 	(function() {
 		
@@ -777,7 +782,7 @@
 		include.exports = {
 			process: function(setts, done) {
 	
-				var arg = setts.script || (setts.args && setts.args[0]),
+				var arg = setts.script || app.config.cli.args[1],
 					config;
 			
 				cfg_prepair(setts, arg);
@@ -812,9 +817,8 @@
 					return done('No scripts to test');
 				
 				
-				
 				return new RunnerSuite(configs, setts).run(function(){
-					console.log('>> done', arguments);
+					logger.log('>> done', arguments);
 					done.apply(this, arguments);
 				});
 			}
@@ -900,10 +904,15 @@
 		 * tests: String | [String]
 		 */
 		function cfg_loadConfig(baseConfig) {
+			
 			var path = baseConfig.config;
 				
 			if (path == null) {
-				path = net.Uri.combine(config.base, /test.?[\\\/]?$/.test(config.base) ? 'config.js' : 'test/config.js');
+				path = /test.?[\\\/]?$/.test(baseConfig.base)
+					? 'config.js'
+					: 'test/config.js';
+					
+				path = net.Uri.combine(baseConfig.base, path);
 			}
 			
 			var file = new io.File(path);
@@ -925,10 +934,10 @@
 			
 			if (Array.isArray(config.env)) 
 				baseConfig.env = ruqq.arr.distinct(baseConfig.env.concat(config.env));
-			
 		}
 		
 		function cfg_getScripts(baseConfig, config) {
+			
 			if (config.tests) {
 				
 				var tests = config.tests,
@@ -1078,6 +1087,7 @@
 				}
 			});
 		}
+		// end:source utils/cfg.js
 		// source utils/logger.js
 		(function(){
 			
@@ -1090,6 +1100,7 @@
 			};
 			
 		}());
+		// end:source utils/logger.js
 		
 		// source Runner.js
 		var status_blank = 1,
@@ -1154,7 +1165,7 @@
 					});
 				},
 				notifyTest: function(url){
-					console.log('\nTest: ', (url.length > 23 ? '...' + url.substr(-20) : url).bold);
+					logger.log('Test: ', (url.length > 23 ? '...' + url.substr(-20) : url).bold);
 				},
 				onComplete: function(stats) {
 					this.status = status_ready;
@@ -1162,7 +1173,7 @@
 					function count(key) {
 						return ruqq.arr.aggr(stats, 0, function(x, aggr) {
 							if (x.error) {
-								console.log(x.error);
+								logger.error(x.error);
 								return 0;
 							}
 							
@@ -1197,24 +1208,31 @@
 					if (callbacks !== 0 || timeouts !== 0) {
 						!failed && failed++;
 					}
+					
 		
-					console.log('\nDone. ' [failed ? 'red' : 'green'].bold);
+					logger.log('\nDone. '[failed ? 'red' : 'green'].bold);
 					
 					
-					console.log('bold{Assertions}: bold{green{%1}}(bold{red{%2}})'
-									.format(total - failed, failed)
-									.colorize());
+					logger.log(
+						'bold<Assertions>: bold<green<%1>>(bold<red<%2>>)'
+							.format(total - failed, failed)
+							.color);
 					
-					console.log('bold{Timeouts}: bold{%1{%2}}'
-									.format(timeouts ? 'red' : 'green', timeouts)
-									.colorize());
+					logger.log(
+						'bold<Timeouts>: bold<%1<%2>>'
+							.format(timeouts ? 'red' : 'green', timeouts)
+							.color);
 					
-					console.log('bold{Failed Callbacks}: bold{green{%1}}'.format(callbacks).colorize());
+					logger.log(
+						'bold<Failed Callbacks>: bold<green<%1>>'
+							.format(callbacks)
+							.color);
 		
 					this.failed = failed;
 					this.stats = stats;
 					
-					this.trigger('complete', this)
+					this.trigger('complete', this);
+					
 				},
 				
 				getResources: function(){
@@ -1234,13 +1252,13 @@
 				
 				onFailure: function(data){
 					if (!data.stack) {
-						console.error('Unknown exception - ', data);
+						logger.error('Unknown exception - ', data);
 						return;
 					}
 					
 					data = assert.resolveData(data, this.config.base);
 					
-					console.log('\n');
+					logger.log('');
 					
 					if (data.file && data.line != null) {
 						
@@ -1251,28 +1269,28 @@
 							code = line && line.trim();
 						
 						if ('actual' in data || 'expected' in data) {
-							var msg = 'bold{yellow{%1}} bold{red{<=>}} bold{yellow{%2}}',
-								actual = typeof data.actual === 'object'
-											? JSON.stringify(data.actual)
-											: data.actual,
+							var msg = '%s bold<red<↔>> %s';
+								//actual = typeof data.actual === 'object'
+								//			? JSON.stringify(data.actual)
+								//			: data.actual,
+								//			
+								//expected = typeof data.expected === 'object'
+								//			? JSON.stringify(data.expected)
+								//			: data.expected;
 											
-								expected = typeof data.expected === 'object'
-											? JSON.stringify(data.expected)
-											: data.expected;
-											
-							console.log(msg
-											.colorize()
-											.format(actual, expected));
+							logger.log(msg.color, data.actual, data.expected);
 						}
 						
-						console.log('bold{%1}:%2'.colorize().format(data.file, data.line + 1));
-						console.log('  bold{cyan{ >> }} bold{red{ %1 }}'.colorize().format(code));
+						logger
+							.log('  bold<%1>:%2'.color.format(data.file, data.line + 1))
+							.log('  bold<cyan< → >> bold<red< %1 >>'.color.format(code));
 						return;
 					}
 						
 					
-					console.error(data.message);
-					console.error(data.stack);
+					logger
+						.error(data.message)
+						.error(data.stack);
 					
 				},
 				
@@ -1283,6 +1301,7 @@
 		
 			
 		}());
+		// end:source Runner.js
 		// source RunnerClient.js
 		var RunnerClient = Class({
 			Base: Runner,
@@ -1293,8 +1312,12 @@
 				
 				this.run = this.runTests;
 				
+				//@ HACKY - io client workaround
+				var _io = global.io;
+				delete global.io;
+				
 				var that = this,
-					confit = this.config,
+					config = this.config,
 					port = config.port || 5777,
 					util = require('util'),
 					io_client = require('socket.io-client'),
@@ -1303,12 +1326,14 @@
 						'connect timeout': 2000
 					});
 		
+				global.io = _io;
+					
 				this.socket = socket;
 				this.status = status_connecting;
 		
 				socket
 					.on('connect', function() {
-					Log('utest - connected to server - ', 90);
+					logger(90).log('utest - connected to server - ');
 		
 					that.status = status_connected;
 					that.runTests();
@@ -1329,21 +1354,22 @@
 				})
 		
 				.on('server:log', function(type, args) {
-					var fn = console[type] || console.log;
-					fn.apply(console, args);
+					var fn = logger[type] || logger.log;
+					fn.apply(logger, args);
 				})
 		
 				.on('slave:start', function(stats) {
-					var message = '\n#{browser.name} #{browser.version}'.bold;
-					console.log(message.format(stats.userAgent));
-					console.log('');
+					var message = '#{browser.name} #{browser.version}'.bold;
+					logger
+						.log(message.format(stats.userAgent))
+						.log('');
 				})
 				.on('slave:end', function(stats) {
-					console.log('\nSlave completed'[stats.failed ? 'red' : 'green']);
+					logger.log('Slave completed'[stats.failed ? 'red' : 'green']);
 				})
 		
 				.on('slave:error', function(error) {
-					console.error(error);
+					logger.error(error);
 				})
 				
 				.on('slave:utest:script', function(info){
@@ -1361,7 +1387,7 @@
 			},
 		
 			runTests: function() {
-				console.log(' -  running tests  -  ', Date.format(new Date(), 'HH:mm:ss'));
+				logger.log(' -  running tests  -  ', Date.format(new Date(), 'HH:mm:ss'));
 				
 				switch (this.status) {
 					case status_blank:
@@ -1371,9 +1397,10 @@
 						this.socket.emit('client:utest', this.suites);
 						return;
 				}
-				console.warn('Server is not ready');
+				logger.warn('Server is not ready');
 			}
 		});
+		// end:source RunnerClient.js
 		// source RunnerNode.js
 		var RunnerNode = (function() {
 		
@@ -1412,13 +1439,13 @@
 			function suite_loadEnv(runner, suite, callback) {
 				var base = suite.base,
 					env = suite.env;
-					
+				
 				if (env == null) {
 					callback();
 					return;
 				}
 				if (Array.isArray(env) === false) {
-					console.warn('"env" property should be an array of strings', env);
+					logger.warn('"env" property should be an array of strings', env);
 					callback();
 					return;
 				}
@@ -1432,7 +1459,7 @@
 						alias = parts[1],
 						file = new io.File(base.combine(src));
 					if (file.exists() === false) {
-						console.log('Resource from Env - 404 -', x);
+						logger.warn('Resource from Env - 404 -', x);
 						return;
 					}
 					
@@ -1491,7 +1518,7 @@
 				},
 				run: function() {
 					if (status_ready !== this.status && status_blank !== this.status) {
-						console.warn('Node is busy ... ', this.status);
+						logger.warn('Node is busy ... ', this.status);
 						return;
 					}
 					this.status = status_prepair;
@@ -1570,6 +1597,7 @@
 			});
 		
 		}());
+		// end:source RunnerNode.js
 		
 		// source Suite.js
 		var RunnerSuite = Class({
@@ -1584,7 +1612,7 @@
 				this.base = settings.base;
 				this.watch = settings.watch;
 				
-				Log('RunnerSuite:', JSON.stringify(configs), settings, 90);
+				logger(90).log('RunnerSuite:', configs, settings);
 				
 				Class.bind(this, 'onComplete', 'process', 'runTests');
 			},
@@ -1597,15 +1625,16 @@
 					
 					var failed = this.getFailed();
 					
-					console.log('');
-					console.log(failed === 0 ? 'Success'.green.bold : 'Failed'.red.bold);
+					logger
+						.log('')
+						.log(failed === 0 ? 'Success'.green.bold : 'Failed'.red.bold);
 					
 					process.exit(failed);
 					
 				}
 				
 				watch(this.base, this.getResources(), this.runTests);
-				console.log(' - watcher active'.yellow);
+				logger.log(' - watcher active'.yellow);
 			},
 			
 			closeSockets: function(){
@@ -1676,7 +1705,6 @@
 				
 				if (this.watch == null && config.watch) {
 					this.watch = config.watch;
-					console.log('WWWWAAATCH')
 				}
 		
 				if (config.exec === 'browser') {
@@ -1700,10 +1728,12 @@
 		
 			that[prop] = [that[prop], value];
 		}
+		// end:source Suite.js
 		
 			
 			
 	}());
+	// end:source ../src/node/action.js
 
 }());
 
@@ -3389,3 +3419,5 @@ var sinon = (function (buster) {
     sinon.mock = mock;
     
 }(sinon));
+
+// end:source ../vendor/sinon.js

@@ -5,7 +5,7 @@ include.exports = {
 
         interpolate(config, config);
 
-		if (config instanceof Array === false) {
+		if (Array.isArray(config) === false) {
 
             if (typeof config === 'object' && !config.action){
                 // assume this is grouped config
@@ -23,7 +23,7 @@ include.exports = {
 
                     var cfg = config[groupName];
 
-                    if (cfg instanceof Array){
+                    if (Array.isArray(cfg)){
                         out = out.concat(cfg);
                         return;
                     }
@@ -62,9 +62,9 @@ include.exports = {
 		return config;
 	}
 
-}
+};
 
-
+/* private */
 
 function parseFile(config) {
 	var uri = new net.Uri(config.file);
@@ -168,28 +168,30 @@ function getCurrentGroups(config){
                 return;
             }
 
-            console.warn('GroupedConfig: Defaults contains not existed group name: ', x);
+            logger.warn('GroupedConfig: Defaults contains not existed group name: ', x);
         });
     }
 
     delete config.defaults;
 
-    if (!groups.length){
+    if (!groups.length)
         groups = Object.keys(config);
-    }
+    
 
-    if (!groups.length){
-        console.error('GroupedConfig: Defines no group names');
-    }
+    if (!groups.length)
+        logger
+			.warn('GroupedConfig: Defines no group names', config);
+    
 
-    Log('GroupedConfig - groups/overrides', groups, overrides, 95);
+    logger(95)
+        .log('GroupedConfig - groups/overrides', groups, overrides);
 
     return groups;
 }
 
 
 function interpolate(config, root){
-    if (config instanceof Array){
+    if (Array.isArray(config)){
         ruqq.arr.each(config, function(config){
             interpolate(config, root);
         });

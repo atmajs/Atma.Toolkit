@@ -1,7 +1,11 @@
-include.js({
-	script: 'io/middleware/uglify::Uglify'
-}).done(function(resp) {
+(function() {
 	include.exports = {
+		help: {
+			description: 'Compress javascript files',
+			args: {
+				files: '<string|array>'
+			}
+		},
 		process: function(config, done) {
 
 			if (config.files == null) {
@@ -31,7 +35,11 @@ include.js({
 
             files.forEach(function(file){
                 file.read();
-                resp.Uglify(file, config);
+                
+				io
+					.File
+					.middleware
+					.uglify(file, config);
 
                 new io.File(file.uri.combine(file.uri.getName() + '.min.' + file.uri.extension)).write(file.content);
             });
@@ -40,4 +48,4 @@ include.js({
 		}
 	};
 
-});
+}());

@@ -5,7 +5,7 @@ include.js(['arguments.js::reduceArguments', '../util.js::AstUtil', '../../util/
 	var _resource = null,
         util = resp.AstUtil,
         typeOf = util.is.type,
-        UglifyJS = require('uglify-js');
+        UglifyJS = global.UglifyJS || require('uglify-js');
 
 	include.exports = function reduceIncludes(resource, ast) {
 		_resource = resource;

@@ -3,5 +3,5 @@ node_modules/
 .komodotools
 *.komodoproject
 /build.*
-/install.*
+tools/
 test/

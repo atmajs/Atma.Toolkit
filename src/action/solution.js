@@ -1,6 +1,10 @@
 
 
 include.exports = {
+    
+    help: {
+        description: '<internal> Is used in build command'  
+    },
     process: function(config, done){
 
         include

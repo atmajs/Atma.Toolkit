@@ -1,13 +1,7 @@
-include
-
-.js({
-	helper: 'globals'
-})
-
-.done(function(resp){
+(function(){
 
 	include.exports = function(path){
-		var ref_index = path.indexOf('.reference/');
+		var ref_index = path.lastIndexOf('.reference/');
 		if (ref_index == -1) {
 			return path;
 		}
@@ -16,7 +10,7 @@ include
 		var regexp = /\.reference\/([^\/]+)/,
 			match = regexp.exec(path),
 			project = match && match[1],
-			projects = resp.globals.projects;
+			projects = app.config.globals.projects;
 			
 		
 		if (projects == null){
@@ -28,10 +22,13 @@ include
 			str = '.reference/' + project;
 			
 		if (projectPath == null) {
-			console.error('No project in {ijs}/globals/projects.txt - ', project);
+			logger
+				.error('No project in {atma}/globals/projects.txt - ', project)
+				.log('Run bold<$ atma globals> and add path to projects object'.color)
+			
 			return path;
 		}
 		
 		return net.Uri.combine(projectPath + path.substring(ref_index + str.length));
 	}
-});
+}());

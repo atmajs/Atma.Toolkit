@@ -10,6 +10,14 @@
      */
 
     include.exports = {
+        help: {
+            description: 'Does simple file concatenation from a list of files',
+            
+            args: {
+                files: '<array> file list',
+                dist: '<string> output file destination'
+            }
+        },
         process: function(config, done){
 
             var files = config.files,

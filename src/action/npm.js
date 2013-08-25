@@ -15,8 +15,14 @@
 	var spawn = require('child_process').spawn;
 
 	include.exports = {
+		help: {
+			description: 'Install NPM Modules into atma toolkit modules to require them from a custom models. Note: you can also install modules globals',
+			examples: [
+				'$ atma npm jquery'
+			]
+		},
 		process: function(config, done) {
-            exec(config.args, done);
+            exec(process.argv.splice(3), done);
 		}
 	};
 
@@ -32,7 +38,7 @@
 
 
 		child.on('exit', function(code) {
-			console.log('child process exited with code ' + code);
+			logger.log('child process exited with code ' + code);
 
             done();
 		});

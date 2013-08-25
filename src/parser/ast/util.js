@@ -1,5 +1,7 @@
-(function(global) {
-
+(function() {
+	
+	
+	
 	var UglifyJS = global.UglifyJS || require('uglify-js'),
 		nope = function() {
 			return true;
@@ -115,11 +117,11 @@
 				return getVariableValue(scope, node.name);
 			}
 
-			var type = node.TYPE,
-				info = node.start || node.end || node,
-				file = '~' + info.file.substr(-25);
-
-			console.warn('[includes parser]: Dynamic Expression', type, file, ':', info.line);
+			//var type = node.TYPE,
+			//	info = node.start || node.end || node,
+			//	file = '~' + info.file.substr(-25);
+			//
+			//console.warn('[includes parser]: Dynamic Expression', type, file, ':', info.line);
 			return null;
 		},
 
@@ -219,7 +221,14 @@
 		getArguments: getArguments,
 		getPropertyChain: getPropertyChain,
 		parse: function(code, filename) {
-			return UglifyJS.parse(code, filename);
+			
+			return UglifyJS.parse(code);
+			try {
+				return UglifyJS.parse(code, filename);
+			} catch(e) {
+				console.error('ast/parse', code, filename);
+			}
+			
 		},
 		is: {
 			includeFunction: function(node) {
@@ -241,4 +250,4 @@
 		transform: transform
 	};
 
-}(typeof window === 'undefined' ? global : window));
+}());

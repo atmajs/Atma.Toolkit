@@ -11,7 +11,6 @@ function defaultActions() {
 		'custom',
 		'template',
 		
-		'libjs-clone',
 		'globals',
 		'import',
 		
@@ -29,7 +28,6 @@ function defaultActions() {
 		'project-import',
 		'project-reference',
 		
-		'libjs-clone',
 		'git-clone'
 	];
 	
@@ -41,9 +39,10 @@ function defaultActions() {
 	
 	// overrides
 	var solution = '/src/action/solution.js';
-	paths['project-import'] = paths['project-reference'] = paths['build'] = solution;
+	paths['project-import'] =
+		paths['project-reference'] =
+			paths['build'] = solution;
 	
-	paths['git-clone'] = paths['libjs-clone'];
 	
 	return paths;
 }

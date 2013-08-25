@@ -6,7 +6,7 @@ include
 .js('html.js::HtmlBuilder')
 .done(function(resp) {
 
-	var UglifyJS = require('uglify-js');
+	var UglifyJS = global.UglifyJS || require('uglify-js');
 		
 	var BuilderHelper = {
 			jsRaw: function(solution, stack, output) {

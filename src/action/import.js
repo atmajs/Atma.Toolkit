@@ -1,6 +1,4 @@
-include.js({
-    script: 'io/middleware/importer'
-}).done(function(resp){
+(function(){
 
     /**
      *  Config {
@@ -11,6 +9,22 @@ include.js({
      */
 
     include.exports = {
+        help: {
+            description: 'Perfom import operations on specified files',
+            args: {
+                files: '<array|string> source file(s) (supports glob)',
+                output: '<string> output directory'
+            },
+            example: [
+                '$ atma import -files build/ -output release/',
+                '$ atma import -files build/lib.js -output release/lib.js',
+                '$ atma import -files foo.js;bar.js -output release/',
+                {
+                    files: 'build/',
+                    output: 'release/'
+                }
+            ]
+        },
         process: function(config, done){
 
             var files = config.files,
@@ -20,9 +34,13 @@ include.js({
 
                 if (~files.indexOf('*')){
 
-                    files = ruqq.arr.map(new io.Directory().readFiles(files).files, function(x){
-                       return x.uri.toLocalFile();
-                    });
+                    files = new io
+                        .Directory()
+                        .readFiles(files)
+                        .files
+                        .map(function(x){
+                            return x.uri.toLocalFile();
+                        });
 
                 }
                 else{
@@ -35,47 +53,61 @@ include.js({
             }
 
 
-            if (files instanceof Array === false){
-                console.error('Specify single/array of file(s) to process in {config}.files');
-                done && done(new Error('No files'));
+            if (Array.isArray(files) === false){
+                done('Specify single/array of file(s) to process in {config}.files');
+                return;
             }
 
 
-            io.File.getHookHandler().register(/./, 'read', resp.importer);
-            io.File.clearCache();
+            io
+                .File
+                .getHookHandler()
+                .register(/./, 'read', 'importer');
+                
+            io
+                .File
+                .clearCache();
 
-            ruqq.arr.each(files, function(x, index){
+            files.forEach(function(x, index){
                 var file = new io.File(x);
                 if (file.exists() == false){
-                    console.error('Import | File not exists - ', file.uri.toLocalFile());
+                    logger.error('Import | File not exists - ', file.uri.toLocalFile());
                     return;
                 }
 
                 var dist = output instanceof Array ? output[index] : output,
                     code = file.read();
 
-                if (!dist){
-                    console.error('output not defined at ', index, 'for resource', fiel.uri.file);
+                if (!dist) {
+                    logger.error('output not defined at %s for %s', index, file.uri.file);
                     return;
                 }
 
                 if (/\.[\w]{1,6}/g.test(dist)){
-                    // is file
+                    
+                    // is a file
                 }else{
+                    
                     dist = net.Uri.combine(dist, file.uri.file);
                 }
 
-                resp.importer(file, config.defines);
+                io
+                    .File
+                    .middleware
+                    .importer(file, config.defines);
+                    
 
-                new io.File(dist).write(file.content);
+                new io
+                    .File(dist)
+                    .write(file.content);
 
                 file.content = code;
 
-                console.log('Done - ', file.uri.file);
+                logger.log('Done - ', file.uri.file);
             });
 
             done && done();
         }
-    }
+    };
 
-});
+}());

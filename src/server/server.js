@@ -4,12 +4,9 @@
 
 	include
 		.js('routes.js::Routes', 'websocket.js::WebSocket', 'proxy.js')
-		.js({
-			helper: 'globals'
-		})
 		.done(function(resp) {
 			
-			var globals = resp.globals,
+			var appConfig = app.config,
 				routes = resp.Routes,
 				sockets = resp.WebSocket;
 			
@@ -37,23 +34,24 @@
 					
 					server.listen(port);
 					
-					console.log('Server Running on bold{green{%1}}'.format(port).colorize());
+					logger.log('Server Running on bold<green<%s>>'.color, port);
 	
 				}
 			};
 			
-			
-			
-			if (globals.server) {
+			if (appConfig.server) {
 				// Extend Controllers
 				
-				var controllers = globals.server.controllers;
+				
+				var controllers = appConfig.server.controllers;
 				if (controllers) {
 					var attachToRoutes = function(controller, src) {
 						if (!controller || !controller.attach) {
-							console.error([ //
-							'Defined controller has no attach function,', //
-							'that defines routes.', src].join(' '));
+							logger.error([ 
+								'Defined controller has no attach function,'
+								, 'that defines routes.'
+								, src
+							].join(' '));
 							return;
 						}
 						
@@ -77,12 +75,12 @@
 				
 				// Extend websockets
 				
-				var websockets = globals.server.websockets;
+				var websockets = appConfig.server.websockets;
 				if (websockets) {
 					var attachSocketListener= function(namespace, handler){
 						if (typeof handler !== 'function') {
-							console.error('WebSocket Listener - should be a class function')
-							console.error('\t', namespace, handler);
+							logger.error('WebSocket Listener - should be a class function')
+							logger.error('\t', namespace, handler);
 							return;
 						}
 						

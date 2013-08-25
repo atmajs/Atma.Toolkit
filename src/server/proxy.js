@@ -25,7 +25,7 @@ include.exports = Class({
 					return false;
 			}
 			
-			Log(' - prox - ', req.url, 60);
+			logger(60).log(' - prox - ', req.url);
 			
 			var options = Object.extend({
 				headers: req.headers,

@@ -16,6 +16,7 @@
 		};
 		
 	}());
+	// end:source ../src/node/utils/logger.js
 	
 	// source ../src/server/BrowserTunnel.js
 	
@@ -52,7 +53,7 @@
 				that = this;
 	
 			socket.emit('server:utest:handshake', function(stats) {
-				Log('UTest.tunnel - handshake - ', stats, 90);
+				logger(90).log('UTest.tunnel - handshake - ', stats);
 	
 				if (stats.ready === 1) {
 					socket.emit('server:utest', config);
@@ -76,6 +77,7 @@
 		}
 	});
 	
+	// end:source ../src/server/BrowserTunnel.js
 	// source ../src/server/ServerUTest.js
 	
 	
@@ -135,6 +137,7 @@
 		}
 	});
 	
+	// end:source ../src/server/ServerUTest.js
 	// source ../src/server/SocketListener.js
 	var SocketListener = (function(){
 		
@@ -143,7 +146,7 @@
 			var slice = Array.prototype.slice,
 				args;
 			return function() {
-				Log('Socket.Pipe', event, 95);
+				logger(95).log('Socket.Pipe', event);
 				args = slice.call(arguments);
 				args.unshift(event);
 				socket.emit.apply(socket, args);
@@ -225,6 +228,7 @@
 		
 	}());
 	
+	// end:source ../src/server/SocketListener.js
 
 
 	include.exports = SocketListener;

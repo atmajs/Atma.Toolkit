@@ -1,8 +1,4 @@
-include
-.js({
-	helper: 'globals'
-})
-.done(function(resp) {
+(function(resp) {
 
 	include.exports = {
 		process: function(url, scripts) {
@@ -10,15 +6,15 @@ include
 				scripts = [];
 			}
 
-			add_source(scripts, '/.reference/libjs/include/lib/include.js');
-			add_source(scripts, '/.reference/libjs/ruqq/lib/dom/jquery.js');
-			add_source(scripts, '/.reference/libjs/mask/lib/mask.js');
+			add_source(scripts, '/.reference/atma/include/lib/include.js');
+			add_source(scripts, '/.reference/atma/ruqq/lib/dom/jquery.js');
+			add_source(scripts, '/.reference/atma/mask/lib/mask.js');
 			
-			var routes = resp.globals.defaultRoutes;
+			var routes = app.config.globals.defaultRoutes;
 			if (routes) {
 				
 				add_script(scripts, 'include.routes(' + JSON.stringify(routes, null, 4) + ')');
-				add_script(scripts, "include.plugin({ lib: 'include/include.autoreload' });");
+				add_script(scripts, "include.plugin({ atma: 'include/include.autoreload' });");
 				
 			}
 			
@@ -41,4 +37,4 @@ include
 		});
 	}
 
-});
+}());

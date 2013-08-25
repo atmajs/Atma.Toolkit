@@ -12,11 +12,11 @@ include.exports = {
 			if (!href) {
 				console.error('NOT MATCHED', match);
 			}
-			console.log('CSS match', href);
+			
 
 			var base = href[0] === '/' ? baseuri : uri,
 				imguri = new net.Uri(href[0] === '/' ? href.substring(1) : href);
-				
+			
 
 			imgbin.push({
 				mimeType: 'image/png',

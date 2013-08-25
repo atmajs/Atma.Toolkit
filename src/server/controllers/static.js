@@ -1,19 +1,20 @@
 include
-.js('static-reference.js::RefPath', '../proxy.js')
-.js({
-	base: 'EventEmitter::Emitter'
-}).done(function(resp) {
+.js(
+	'static-reference.js::RefPath',
+	'../proxy.js'
+)
+.done(function(resp) {
 
 	var File = io.File;
 
-	var path = global.config.file || net.Uri.combine(process.cwd(), 'temp.del'),	
+	var path = app.current.file || net.Uri.combine(process.cwd(), 'temp.del'),	
 		uri = new net.Uri(path),
 		folder = uri.toLocalDir();
 
 	console.log('Server at: ', folder);
 
 	include.exports = new new Class({
-		Base: resp.Emitter,
+		Base: Class.EventEmitter,
 		request: function(request, response, base) {
 			
 			if (typeof base !== 'string') {

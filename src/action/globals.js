@@ -1,9 +1,19 @@
-(function() {
-	include.exports = {
-		process: function(config, done) {
-			require('openurl').open(io.env.applicationDir.combine('globals/projects.txt').toString());
-			done && done();
-		}
-	};
 
-}());
+include.exports = {
+	help: {
+		description: 'Opens file which contains projects information for editing'
+	},
+	process: function(config, done) {
+		
+		var path =	io
+			.env
+			.applicationDir
+			.combine('globals/projects.txt')
+			.toString();
+			
+		require('openurl').open(path);
+
+		done();
+	}
+};
+

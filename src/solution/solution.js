@@ -81,12 +81,13 @@ include
 		onbuild: function(fileStats){
 			
 			var msg;
-			msg = 'bold{green{Files: [JS: #{js}] [CSS: #{css}] [LOAD: #{load}] [LAZY: #{lazy}]}}';
+			msg = 'Files: [JS: #{js}] [CSS: #{css}] [LOAD: #{load}] [LAZY: #{lazy}]';
 			msg = msg
 				.format(fileStats)
-				.colorize();
+				.bold
+				.green;
 				
-            console.log(msg);
+            logger.log(msg);
 			
 			this.save();
 

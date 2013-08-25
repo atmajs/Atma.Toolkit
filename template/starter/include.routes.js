@@ -4,7 +4,7 @@ include.routes(%ROUTES%);
 
 if (DEBUG){
 	include.plugin({
-		lib: 'include/include.autoreload'
+		atma: 'include/include.autoreload'
 	});
 }
 
@@ -13,10 +13,10 @@ if (window.location.href.indexOf('file:') === 0){
 	include.cfg({
 		loader: {
 			'coffee': {
-				lib: 'include/loader/coffee/loader'
+				atma: 'include/loader/coffee/loader'
 			},
 			'less': {
-				lib: 'include/loader/less/loader'
+				atma: 'include/loader/less/loader'
 			}
 		}
 	});

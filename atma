@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 
-(function() {
+require('atma-libs/globals-dev');
+require('atma-logger');
+require('atma-io');
+require('./src/app.js').done(initialize);
 
-	require('atma-libs/globals-dev');
-	require('./src/app.help.js');
-	require('socket.io');
 
+function initialize(app) {
+	
 	include.cfg({
-		path: 'file:///' + __dirname.replace(/\\/g, '/') + '/',
-		lockedToFolder: true,
+		path: io.env.applicationDir.toString() + '/',
 		loader: {
 			coffee: '/node_modules/atma-libs/include/loader/coffee/loader.js'
 		}
@@ -19,41 +20,56 @@
 		action: '/src/action/{0}.js',
 		script: '/src/{0}.js',
 		helper: '/src/helper/{0}.js',
-		base: '/src/base/{0}.js',
-		io: '/src/io/{0}.js',
-		server: '/src/server/{0}.js'
+		server: '/src/server/{0}.js',
+		atma: '/{0}.js'
 	}).js({
-		_: [
-			'/src/helper/logger.js',
-			'/src/utils/exports.js'
+		atma: [
+			'src/utils/exports'
 		],
 		settings: '/src/app.settings.js',
-		parser: ['config'],
+		
 		script: [ 
-			'helper/colorize', 
 			'helper/extensions', 
 		],
-		io: 'package',
 		
-		//
-		action: 'action-processor::Action'
 	}).done(function(resp) {
 		
-		Log('PROCESS', process, 99);
-		Log('CONFIG', global.config, 99);
+		logger(99)
+			.log('> process:', process)
+			.log('> config:', app.config);
+		
 
-
-		if (!(global.config && global.config.state == 4)) {
-			console.error('Invalid Config', global.config)
+		if (app.config.tasks == null) {
+			logger.error('Invalid Config', app.config)
 			return 0;
 		}
 
-		(new resp['Action']()).run(global.config);
+		
+		app
+			.run()
+			.fail(function(error){
+				logger.error(error);
+				process.exit(1);
+			})
+			.always(function(){
+				if (app.errors.length) {
+					logger.error(app.errors);
+					
+					process.exit(1);
+				}
+				
+				logger.log(' // Done'.green);
+			});
 
 
 		return 1;
 
 	});
 
+	
+}
 
-}());
+	
+	
+	
+

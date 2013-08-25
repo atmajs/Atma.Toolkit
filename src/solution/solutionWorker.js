@@ -2,7 +2,6 @@ include.js({
 	parser: ['js', 'css', 'html'],
 	script: ['io/files/style', 'solution/solution']
 }).done(function() {
-	var config = global.config;
 
 
 
@@ -24,23 +23,14 @@ include.js({
 			}
 
 
-            /** @TODO lots of modules, depends on global config, so put that current config to global */
-            var globalConfig = global.config,
-                listener = function(){
-					global.config = globalConfig;
-					done();
-				};
-            global.config = config;
-
-
 			var solution = new Solution(config, function(solution) {
-				console.log('Resources Loaded');
+				logger.log(' - resources loaded - ');
 				
 				switch (solution.config.action) {
 				case 'project-import':
 				case 'project-reference':
 					include.js('resourceSource.js').done(function(resp) {
-						resp.resourceSource.action(solution.config.action, listener);
+						resp.resourceSource.action(solution.config.action, done);
 					});
 					break;
 				case 'build':
@@ -49,7 +39,7 @@ include.js({
 					}).done(function(resp) {
 						resp.build.build(solution, function(fileStats){
 							solution.onbuild(fileStats);
-							listener();
+							done();
 						});
 					});
 					break;

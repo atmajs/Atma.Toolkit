@@ -1,4 +1,18 @@
 include.exports = {
+    help: {
+        description: 'Copy files with glob pattern support',
+        args: {
+            'files': '<object> fileName: fileDestination'
+        },
+        example: [
+            {
+                files: {
+                    '/dev/index.html': '/release/index.html',
+                    '/src/**' : '/release/src/**'
+                }
+            }
+        ]
+    },
     process: function(config, done){
         var files = config.files;
 
@@ -17,14 +31,18 @@ include.exports = {
             
             delete files[source];
             
-            var dir = new io.Directory().readFiles(source).files.forEach(function(file){
+            var dir = new io
+                .Directory()
+                .readFiles(source)
+                .files
+                .forEach(function(file){
                 
-                var _relative = file.uri.toRelativeString(io.env.currentDir),
-                    _source = file.uri.toLocalFile(),
-                    _path = glob_getCalculatedPath(_relative, source);
-                
-                files[_source] =  net.Uri.combine(target, _path);
-            });
+                    var _relative = file.uri.toRelativeString(io.env.currentDir),
+                        _source = file.uri.toLocalFile(),
+                        _path = glob_getCalculatedPath(_relative, source);
+                    
+                    files[_source] =  net.Uri.combine(target, _path);
+                });
         }
 
         for(var source in files){

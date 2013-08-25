@@ -1,4 +1,17 @@
 include.exports = {
+    help: {
+        description: 'Run custom script',
+        args: {
+            'script' : '<string> script path'
+        },
+        example: [
+            '$ atma custom myscript.js',
+            {
+                action: 'custom',
+                script: 'foo/myscript.js'
+            }
+        ]
+    },
     process: function(config, done) {
 
         var script = config.script;
@@ -8,7 +21,7 @@ include.exports = {
         }
 
         if (!script) {
-            done('Custom script not defined - via cli: $ includejs custom name.js, via config: define script property');
+            done('Custom script not defined - via cli: $ atma custom name.js, via config: define script property');
             return;
         }
 

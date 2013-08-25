@@ -20,7 +20,7 @@
                 cwd: this.dir
             }, function(error, stdout, stderr) {
                 if (error) {
-                    console.log('error', error, stderr);
+                    logger.error('<git:clone>', error, stderr);
                     return;
                 }
 
@@ -40,30 +40,24 @@
     });
 
     var RoutesJob = Class({
-        Construct: function(libjsDir) {
-            if (libjsDir[libjsDir.length - 1] != '/') {
-                libjsDir = libjsDir + '/';
+        Construct: function(atmaDir) {
+            if (atmaDir[atmaDir.length - 1] != '/') {
+                atmaDir = atmaDir + '/';
             }
 
-            var file = new io.File(new net.Uri(io.env.applicationDir).combine('globals/projects.txt'));
-            var globals = {
-                projects: {
-                    libjs: {
-                        path: "file:///" + libjsDir
-                    }
-                },
-                defaultRoutes: {
-                    lib: "{libjs}/{0}/lib/{1}.js",
-                    ruqq: "{libjs}/ruqq/lib/{0}.js",
-                    compo: "{libjs}/compos/{0}/lib/{1}.js"
-                }
-            }
+            var file = new io.File(io.env.applicationDir.combine('globals/projects.txt')),
+                globals = app.config.globals;
+            
+            globals.projects['atma'] = {
+                path: "file:///" + atmaDir
+            };
+            
             
             try {
                 file.write(JSON.stringify(globals, null, 4));   
             } catch(e) {
-                console.error('Access failed to projects.txt - please run "ijs globals" and specify correct \
-                              just installed libjs path.', libjsDir);
+                var msg = 'Access Denied - run "$ atma globals" and specify correct just installed atma path.'
+                logger.error(msg, atmaDir);
             }
             
         }
@@ -73,30 +67,30 @@
         clone: function(done) {
             var dir = new io.Directory(io.env.currentDir);
 
-            dir.uri = dir.uri.combine('libjs/');
+            dir.uri = dir.uri.combine('atma/');
             if (dir.exists()) {
-                done('LibJS Directory Already Exists');
+                done('Atma Directory Already Exists');
                 return;
             }
             dir.ensure();
 
             var list = [{
-                path: 'git://github.com/tenbits/ClassJS.git',
+                path: 'git://github.com/atmajs/ClassJS.git',
                 name: 'class'
             }, {
-                path: 'git://github.com/tenbits/IncludeJS.git',
+                path: 'git://github.com/atmajs/IncludeJS.git',
                 name: 'include'
             }, {
-                path: 'git://github.com/tenbits/MaskJS.git',
+                path: 'git://github.com/atmajs/MaskJS.git',
                 name: 'mask'
             }, {
-                path: 'git://github.com/tenbits/RuqqJS.git',
+                path: 'git://github.com/atmajs/RuqqJS.git',
                 name: 'ruqq'
             },{
-                path: 'git://github.com/tenbits/mask-animation.git',
+                path: 'git://github.com/atmajs/mask-animation.git',
                 name: 'mask.animation'
             }, {
-                path: 'git://github.com/tenbits/Compos.git',
+                path: 'git://github.com/atmajs/Compos.git',
                 name: 'compos'
             }];
 

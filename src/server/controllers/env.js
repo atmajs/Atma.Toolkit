@@ -1,15 +1,10 @@
 include
-.js({
-	libjs: 'mask.node::Mask',
-	helper: 'globals'
-})
 .load('./template/env.mask')
 .done(function(resp) {
 
 	var File = io.File,
-		mask = resp.Mask,
 		resource = include,
-		globals = resp.globals;
+		globals = app.config.globals;
 		
 	
 	
@@ -26,12 +21,13 @@ include
 				
 				if (Env == null || Env.process == null) {
 					var msg = 'Environment Handler should expose process function';
-					console.error(msg);
+					logger
+						.error(msg);
+					
 					response.writeHeader(500, {
 						'Content-Type': 'text/plain'
 					});
-					response.write(msg);
-					response.end();
+					response.end(msg);
 					return;
 				}
 				
@@ -61,17 +57,17 @@ include
 
 
 	function env_resolveFromRequest(path, callback) {
-		var environments = resp.globals.environments,
+		var environments = app.config.environments,
 			match = /\?debug=(\w+)/.exec(path),
 			env = match && match[1];
 		
 		if (env && environments[env] == null) {
-			console.warn('Requested environment is not defined', env, '(fallback to default "libjs")');
+			console.warn('Requested environment is not defined', env, '(fallback to default "atma")');
 			env = null;
 		}
 		
 		if (env == null) {
-			env = 'libjs';
+			env = 'atma';
 		}
 		
 		var src = environments[env];
