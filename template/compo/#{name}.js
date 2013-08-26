@@ -1,34 +1,34 @@
-include //
-.load('#{name}.mask::Template') //
-.css('#{name}.css') //
-.done(function(resp){
+include 
+	.load('#{name}.mask::Template') 
+	.css('#{name}.less') //
+	.done(function(resp){
 
-	mask.registerHandler(':#{name}', Compo({
-		template: resp.load.Template,
+		mask.registerHandler(':#{name}', Compo({
+			template: resp.load.Template,
 
-		//compos: {
-		//
-		//},
-		//events: {
-		//
-		//},
-		//slots: {
-		//
-		//},
-		//pipes: {
-		//
-		//},
-		//constructor: function(){
-		//
-		//},
+			//compos: {
+			//
+			//},
+			//events: {
+			//
+			//},
+			//slots: {
+			//
+			//},
+			//pipes: {
+			//
+			//},
+			//constructor: function(){
+			//
+			//},
 
-        onRenderStart: function(model, cntx, container){
-            // ..
-        },
-        onRenderEnd: function(elements, cntx, container){
-            // ..
-        }
-	}));
+	        onRenderStart: function(model, cntx, container){
+	            // ..
+	        },
+	        onRenderEnd: function(elements, cntx, container){
+	            // ..
+	        }
+		}));
 
 
-});
+	});
