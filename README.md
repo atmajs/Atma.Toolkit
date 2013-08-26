@@ -1,28 +1,21 @@
-## Deprecated
 
-**Use atma package instead**
 
-```bash
-$ npm install atma -g
-```
-
-### IncludeJS Build Tool / nodejs "bash" scripts
+### Atma.js Toolkit
 
 
 
-@see [IncludeJS Project](http://libjs.it/#includeBuilder)
+@see [Atma.js Project](http://atmajs.com/#atma.toolkit)
 
 
 ```bash
-> npm install includejs -g
+> npm install atma -g
 # ...
-> ijs -help
+> atma --help
 ```
 
 ```bash
-> ijs [action] [arg] [...] -KEY VALUE [...]
-> ijs [*.html] -minify -KEY VALUE
-> ijs [*.config | *.js]
+> atma [action] [arg] [...] -KEY VALUE [...]
+> atma [*.json | *.js | *.yml]
 # Load Config and process
 #   .config - JSON
 #   .js - javascript should set config object to globals
@@ -45,9 +38,9 @@ global.config = {
     //? defaults: ['groupName']
 }
 
-/* normally, if you run "ijs config.js" then all grouped actions will be started,
+/* normally, if you run "atma config.js" then all grouped actions will be started,
    but if 'defaults' property is used, then only that groups will be activated.
-   Also you can run any group with: 'ijs config.js groupName'
+   Also you can run any group with: 'atma config.js groupName'
 */
 
 ```
@@ -138,7 +131,7 @@ Execuate shell commands
 Run any javascript
 
 ```bash
-> ijs custom scriptPath
+> atma custom scriptPath
 ```
 
 Custom script should export process(config, done){} function
@@ -193,9 +186,9 @@ Start integrated server in a current working directory.
 
 To start the server direct from command line, use cli action pattern
 
-```ijs [action] -KEY VALUE```
+```atma [action] -KEY VALUE```
 ```bash
-> ijs server -port 5500
+> atma server -port 5500
 ```
 
 ### Reference (Symbolic Links)
@@ -209,7 +202,7 @@ To start the server direct from command line, use cli action pattern
 ```
 
 ```bash
-> ijs reference libjs
+> atma reference libjs
 ```
 
 Creates symbolic link in "%current directory%/.reference" folder
@@ -223,13 +216,13 @@ Creates symbolic link in "%current directory%/.reference" folder
 }
 ```
 ```bash
-> ijs template [name]
+> atma template [name]
 ```
 
 Templates:
 
 - starter - MaskJS/mask.bindings/jmask/mask.compo/IncludeJS/Ruqq/jQuery
-- compo - creates component template *.js/*.css/*.mask : ```> ijs template compo desiredName"
+- compo - creates component template *.js/*.css/*.mask : ```> atma template compo desiredName"
 
 - todoapp - creates todomvc sample application
 
@@ -239,13 +232,13 @@ You can create any other templates - just put the files to:
 ### Clone LibJS Libraries
 
 ```bash
-> ijs git-clone
+> atma git-clone
 ```
 
 ### Global Projects and default routes:
 
 ```bash
-> ijs globals
+> atma globals
 ```
 
 Sample:
