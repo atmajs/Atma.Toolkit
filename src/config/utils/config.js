@@ -172,7 +172,7 @@ function getCurrentGroups(config){
         });
     }
 
-    delete config.defaults;
+    //-delete config.defaults;
 
     if (!groups.length)
         groups = Object.keys(config);

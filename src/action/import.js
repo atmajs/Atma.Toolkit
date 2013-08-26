@@ -106,7 +106,13 @@
                 logger.log('Done - ', file.uri.file);
             });
 
-            done && done();
+            
+            io
+                .File
+                .getHookHandler()
+                .unregister('read', 'importer');
+                
+            done();
         }
     };
 
