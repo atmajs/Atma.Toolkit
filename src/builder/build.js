@@ -99,16 +99,22 @@ include
 					
                     if (resource.ast == null)
                         return;
+					
+					if (includeIndex === -1){
+						includeIndex = -2;
+						embedInfo();
+					}
 
 					resp.JS.reduceIncludes(resource);
 
                     var setCurrentInclude = defineCurrentInclude(i, resource);
-					if (setCurrentInclude) {
-						var code = "include.setCurrent({ id: '#{id}', namespace: '#{namespace}', url: '#{url}'});".format({
-							id: resource.appuri,
-							namespace: resource.namespace || '',
-							url: resource.appuri
-						}),
+					if (setCurrentInclude && resource.appuri) {
+						var code = "include.setCurrent({ id: '#{id}', namespace: '#{namespace}', url: '#{url}'});"
+							.format({
+								id: resource.appuri,
+								namespace: resource.namespace || '',
+								url: resource.appuri
+							}),
 							body = UglifyJS.parse(code).body;
 
 						ast.body = ast.body.concat(body);
@@ -119,7 +125,7 @@ include
 					ast.body = ast.body.concat(resource.ast.body);
 					ast.body = ast.body.concat(UglifyJS.parse(';').body);
 
-					if (setCurrentInclude) {
+					if (setCurrentInclude && resource.appuri) {
 						var code = "include.getResource('%1', 'js').readystatechanged(3);".format(resource.appuri),
 							body = UglifyJS.parse(code).body;
 

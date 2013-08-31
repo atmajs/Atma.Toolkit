@@ -27,8 +27,6 @@ include.js({
                 this.appuri = path_resolveAppUri(_url, _parentAppUri);
 
 
-                console.log('R:', this.appuri);
-
                 if (__cache[this.appuri])
                     return __cache[this.appuri];
                 
@@ -62,11 +60,19 @@ include.js({
                 
                 
                 if (file.exists() === false){
-                    console.log('404 - '.red.bold, this.uri.toLocalFile());
+                    logger.error('<file> 404 - ', this.uri.toLocalFile());
                     return this;
                 }
     
                 this.content = file.read();
+                
+                if (this.content) {
+                    
+                    logger.log('<resource>', this.type, this.uri.file.bold.green);
+                }else{
+                    
+                    logger.warn('<file:empty>', this.uri.file);
+                }
             }
             
             var that = this,
@@ -131,11 +137,15 @@ include.js({
             fromMany: function(resources){
                 
                 
-                var array = resources.map(function(x){
-                    var res = new Resource(x);
-                    
-                    return res;
-                });
+                var array = ruqq.arr(resources)
+                    .remove(function(x){
+                        return !x.url && !x.content;
+                    })
+                    .map(function(x){
+                        return new Resource(x);
+                    })
+                    .items;
+            
                 
                 return {
                     includes: array,

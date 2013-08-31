@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "source.kit@gmail.com"
   },
-  "version": "0.9.52",
+  "version": "0.9.53",
   "bin": {
     "atma": "atma"
   },

@@ -8,16 +8,15 @@ include
 	.js({
 		script: [ 
 			'solution/solution',
-			'builder/build'
+			'builder/build',
+			'io/files/style'
 		],
 		
 		parser: [
 			'js',
 			'css',
 			'html'
-		],
-		io: 'files/style'
-		//
+		]
 		
 	})
 	.done(function(resp) {

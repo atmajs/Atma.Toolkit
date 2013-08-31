@@ -11,13 +11,17 @@ include.js('SocketConnection.js').done(function(resp) {
 		},
 		listen: function(httpServer) {
 			
-			console.log('WebSocket server started');
+			logger.log('WebSocket server started');
             
-            
+			// socket.io bug workaround
+            var _io = global.io;
+			delete global.io;
             
             var io = require('socket.io').listen(httpServer,{
 				'log level': 2
 			});
+			
+			global.io = _io;
         
 			function listen(namespace, Handler) {
 				return function(socket){
@@ -26,7 +30,9 @@ include.js('SocketConnection.js').done(function(resp) {
 			}
 		
 			for (var key in SocketListeners) {
-				io.of(key).on('connection', listen(key, SocketListeners[key]));
+				io
+					.of(key)
+					.on('connection', listen(key, SocketListeners[key]));
 			}
 		},
 		

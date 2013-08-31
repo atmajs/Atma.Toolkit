@@ -13,17 +13,19 @@ include.exports = {
 				console.error('NOT MATCHED', match);
 			}
 			
-
-			var base = href[0] === '/' ? baseuri : uri,
-				imguri = new net.Uri(href[0] === '/' ? href.substring(1) : href);
-			
-
-			imgbin.push({
-				mimeType: 'image/png',
-				href: href,
-				uri: base.combine(imguri),
-				baseuri: uri
-			});
+			if (isAbsolute(href) === false) { 
+					
+				var base = href[0] === '/' ? baseuri : uri,
+					imguri = new net.Uri(href[0] === '/' ? href.substring(1) : href);
+				
+	
+				imgbin.push({
+					mimeType: 'image/png',
+					href: href,
+					uri: base.combine(imguri),
+					baseuri: uri
+				});
+			}
 
 			match = regexp.exec(content);
 		}
@@ -41,4 +43,9 @@ include.exports = {
 		}
 		return source;
 	}
+};
+
+
+function isAbsolute(href) {
+	return /^[\w]{1,8}:\/\//.exec(href) != null;
 }
