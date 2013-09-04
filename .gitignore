@@ -1,0 +1,5 @@
+/build.config
+/tools/install.js
+
+*.komodoproject
+npm-debug.log

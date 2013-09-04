@@ -11,13 +11,19 @@ include.js('controllers/static.js::Statics').done(function(resp) {
 
 				staticHandler.on('filechange', this.fileChanged);
 			},
-			fileChanged: function(path, root) {
-                path = path.replace(root, '');
-				
-                console.log('changed path', path);
-				this.socket.emit('filechange', path);
-			},
+			
 			Self: {
+				fileChanged: function(path, root) {
+					path = path.replace(root, '');
+					
+					if (this.socket == null) {
+						console.error('File changed %s, but socket is undefined', path);
+						return;
+					}
+					
+					console.log('<file:change>'.green, path);
+					this.socket.emit('filechange', path);
+				},
 				disconnected: function(){
 					staticHandler.off('filechange', this.fileChanged);				
 				}

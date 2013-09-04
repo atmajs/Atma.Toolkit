@@ -1,6 +1,6 @@
 include.js({
 	atma_ruqq: ['dom/jquery', 'arr', 'routes'],
-	atma_lib: ['mask']
+	atma: ['mask']
 }).ready(function(){
 
     var App = Compo({
