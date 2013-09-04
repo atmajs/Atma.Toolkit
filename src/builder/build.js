@@ -7,6 +7,17 @@ include
 .done(function(resp) {
 
 	var UglifyJS = global.UglifyJS || require('uglify-js');
+	
+	function ast_getBody(code) {
+		
+		return typeof code === 'string'
+			? UglifyJS.parse(code).body
+			: code;
+	}
+	
+	function ast_append(ast, code) {
+		ast.body = ast.body.concat(ast_getBody(code));
+	}
 		
 	var BuilderHelper = {
 			jsRaw: function(solution, stack, output) {
@@ -65,18 +76,19 @@ include
 						var arr = [];
 
 						function appendInfo(method, object) {
-							arr.push(String.format('include.%1(%2);', method, JSON.stringify(object)));
+							arr.push('include.%1(%2);'.format(
+								method,
+								object ? JSON.stringify(object) : ''));
 						}
 
+						appendInfo('pauseStack');
 						appendInfo('register', solution.bin);
-						
 						appendInfo('routes', resp.includeMock.toJsonRoutes());
 						
 						return arr.join(io.env.newLine);
 					}());
 
-
-					ast.body = ast.body.concat(UglifyJS.parse(info).body);
+					ast_append(ast, info);
 				}
 				
 				
@@ -114,30 +126,32 @@ include
 								id: resource.appuri,
 								namespace: resource.namespace || '',
 								url: resource.appuri
-							}),
-							body = UglifyJS.parse(code).body;
+							});
 
-						ast.body = ast.body.concat(body);
+						ast_append(ast, code);
 					}
 
+					
+					ast_append(ast, resource.ast.body);
+					ast_append(ast, ';');
 
-
-					ast.body = ast.body.concat(resource.ast.body);
-					ast.body = ast.body.concat(UglifyJS.parse(';').body);
+					
 
 					if (setCurrentInclude && resource.appuri) {
-						var code = "include.getResource('%1', 'js').readystatechanged(3);".format(resource.appuri),
-							body = UglifyJS.parse(code).body;
-
-						ast.body = ast.body.concat(body);
+						var code = "include.getResource('%1', 'js').readystatechanged(3);"
+							.format(resource.appuri);
+						
+						ast_append(ast, code);
 					}
 
 					if (i == includeIndex) {
 						embedInfo();
 					}
 				});
+				
+				ast_append(ast, 'include.resumeStack();');
 
-
+				
 				return (output.js = ast);
 			},
 			js: function() {
