@@ -11,7 +11,9 @@ function initialize(app) {
 	include.cfg({
 		path: io.env.applicationDir.toString() + '/',
 		loader: {
-			coffee: '/node_modules/atma-libs/include/loader/coffee/loader.js'
+			coffee: '/node_modules/atma-libs/include/loader/coffee/loader.js',
+			less: '/node_modules/atma-libs/include/loader/less/loader.js',
+			yml: '/node_modules/atma-libs/include/loader/yml/yml.js'
 		}
 	}).routes({
 		
