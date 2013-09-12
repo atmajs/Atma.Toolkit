@@ -13,8 +13,12 @@ include.exports = {
         ]
     },
     process: function(config, done) {
-
         var script = config.script;
+
+        if (script && typeof script.process === 'function'){
+            script.process(config, done);
+            return;
+        }
 
         if (config.args && !script) {
             script = config.args[0];

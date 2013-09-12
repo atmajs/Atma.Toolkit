@@ -25,11 +25,11 @@ var Worker = Class({
                 }
                     
                 resp.Cfg(app, function(obj) {
-    
+                    
                     cfgObj_extend(app.config, obj);
                     self.resolve();
                 }); 
-        });
+            });
             
         return self;
     }

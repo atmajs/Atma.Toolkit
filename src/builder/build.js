@@ -66,9 +66,11 @@ include
 				return (output.js = output.js.join(io.env.newLine + ';'));
 			},
 			jsAst: function(solution, stack, output) {
+				var fileName_IncludeJS = solution.config.includejsFile || 'include.js';
+				
 				var ast = UglifyJS.parse(''),
 					includeIndex = ruqq.arr.indexOf(stack, function(x) {
-						return x.url.indexOf('include.js') !== -1;
+						return x.url.indexOf(fileName_IncludeJS) !== -1;
 					});
 					
 				function embedInfo() {
