@@ -9,9 +9,10 @@ include.exports = {
 		while (match && match.length > 1 && match[2]) {
 			href = match[2].trim();
 			
-			if (!href) {
-				console.error('NOT MATCHED', match);
-			}
+			if (!href) 
+				logger.error('NOT MATCHED', match);
+			
+			
 			
 			if (isAbsolute(href) === false) { 
 					
@@ -47,5 +48,11 @@ include.exports = {
 
 
 function isAbsolute(href) {
+	if (href == null) 
+		return true;
+	
+	if (/^\s*data:/.test(href)) 
+		return true;
+	
 	return /^[\w]{1,8}:\/\//.exec(href) != null;
 }

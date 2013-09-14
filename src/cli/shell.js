@@ -30,7 +30,7 @@
 					index = j;
 					for (;j < x.length; j++) {
 						if (x[j][x[j].length - 1] === c) {
-							debugger;
+							
 							var str = x.splice(index, j - index + 1).join(' ');
 							
 							x.splice(index, 0, str.substring(1, str.length - 1));
@@ -53,7 +53,7 @@
 			var command = this.commands.shift(),
 				that = this;
 
-			if (!command) {
+			if (command == null) {
 				this.done();
                 return;
 			}
@@ -80,7 +80,7 @@
 			}catch(error){
 
 				logger
-					.error('Could not run command');
+					.error('Could not run the command', command);
 
 				this.process();
 			}

@@ -66,7 +66,8 @@ include
 				return (output.js = output.js.join(io.env.newLine + ';'));
 			},
 			jsAst: function(solution, stack, output) {
-				var fileName_IncludeJS = solution.config.includejsFile || 'include.js';
+				var cfg = solution.config,
+					fileName_IncludeJS = cfg && cfg.includejsFile || 'include.js';
 				
 				var ast = UglifyJS.parse(''),
 					includeIndex = ruqq.arr.indexOf(stack, function(x) {
