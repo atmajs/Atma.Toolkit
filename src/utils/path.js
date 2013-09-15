@@ -23,9 +23,11 @@ function path_resolveUri(url, parentLocation, base) {
 		url = url.substring(1);
 	}
 	
+	
+	
 	var uri = new net.Uri(url);
 	
-	return uri.isRelative() ? (new net.Uri(parentLocation)).combine(uri) : uri;            
+	return uri.isRelative() ? (new net.Uri(parentLocation)).combine(uri) : uri;
 }
 
 function path_resolveAppUri(url, parentPath) {
@@ -41,7 +43,15 @@ function path_resolveAppUri(url, parentPath) {
 	
 
 	var index = parentPath.lastIndexOf('/');
-	return (index == -1 ? '/' : (parentPath.substring(index + 1, -index))) + url;
+	
+	url = (index == -1 ? '/' : (parentPath.substring(index + 1, -index))) + url;
+	
+	var reg_subFolder = /([^\/]+\/)?\.\.\//;
+	while (url.indexOf('../') !== -1) {
+		url = url.replace(reg_subFolder, '');
+	}
+	
+	return url;
 }
 
 function path_ensureTrailingSlash(path) {

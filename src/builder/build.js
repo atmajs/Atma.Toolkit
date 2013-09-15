@@ -181,10 +181,17 @@ include
 					template = "<script type='include/#{type}' id='includejs-#{id}' data-appuri='#{appuri}'> #{content} </script>";
 				
 				stack.forEach(function(resource, i){
+					
+					var content = resource.content;
+					if (content && typeof content !=='string') {
+						content = JSON.stringify(content);
+					}
+					
+					
 					stream.push(template.format({
 						type: type,
 						appuri: resource.namespace || resource.appuri,
-						content: resource.content,
+						content: content,
 						id: resource.id.replace(/\W/g, '')
 					}));
 				});
