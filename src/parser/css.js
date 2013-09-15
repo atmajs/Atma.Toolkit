@@ -1,5 +1,5 @@
 include.exports = {
-	extractImages: function(baseuri, uri, content) {
+	extractResources: function(baseuri, uri, content) {
 
 		var regexp = new RegExp(/url[\s]*\(('|")?([^)'"]+)('|")?\)/gi),
 		    imgbin = [],

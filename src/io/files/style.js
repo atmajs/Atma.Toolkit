@@ -13,11 +13,11 @@ include.js({
 	global.io.File.getFactory().registerHandler([/\.css$/, /\.less$/], Class({
 		Base: io.File,
 		read: function() {
-            if (this.images && this.content){
+            if (this.resources && this.content){
                 return this.content;
             }
 			this.content = io.File.prototype.read.call(this);
-            this.images = CssParser.extractImages(global.solution.uri, this.uri, this.content);
+            this.resources = CssParser.extractResources(global.solution.uri, this.uri, this.content);
             
 			return this.content;
 		},
@@ -45,13 +45,16 @@ include.js({
 	function copyImages(cssFile, targetUri) {
 
 		var solutionUri = global.solution.uri,
-			isSubDir = path_isSubDir(solutionUri.toString(), cssFile.uri.toString()),
-			images = cssFile.images,
-			dir = net.Uri.combine(targetUri.toLocalDir(), 'images/');
+			cssFilePath = cssFile.uri.toString(),
+			isSubDir = cssFilePath.indexOf('.reference/') === -1
+				? path_isSubDir(solutionUri.toString(), cssFilePath)
+				: true,
+			resources = cssFile.resources,
+			dir = net.Uri.combine(targetUri.toLocalDir(), 'resources/');
 
-
-		for (var i = 0, x, length = images.length; x = images[i], i < length; i++) {
-
+		
+		resources.forEach(function(x){
+			
 			if (isSubDir == false) {
 				var uri = new net.Uri(net.Uri.combine(dir, x.uri.file));
 
@@ -59,12 +62,13 @@ include.js({
 				x.replaceWith = getRewritenPath(uri, x.href, targetUri.toLocalDir());
 
 			} else {
+				
 				x.replaceWith = getRewritenPath(x.uri, x.href, targetUri.toLocalDir());
 			}
 
 			if (x.replaceWith) {
 				cssFile.content = CssParser.replace(cssFile.content, x.href, x.replaceWith);
 			}
-		}
+		});
 	}
 });

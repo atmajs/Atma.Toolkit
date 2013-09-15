@@ -1,11 +1,13 @@
 include
 .js(
 	'static-reference.js::RefPath',
+	'videostreamer.js',
 	'../proxy.js'
 )
 .done(function(resp) {
 
-	var File = io.File;
+	var File = io.File,
+		Videostreamer = resp.videostreamer;
 
 	var path = app.current.file || net.Uri.combine(process.cwd(), 'temp.del'),	
 		uri = new net.Uri(path),
@@ -36,8 +38,16 @@ include
 			
 			if (file.exists() === true) {
 				
-				var mimeType = MimeTypes[file.uri.extension] || 'text/plain',
-					content = file.read('binary');
+				var mimeType = MimeTypes[file.uri.extension] || 'text/plain';
+				
+				
+				if (mimeType.indexOf('video/') === 0) {
+					
+					Videostreamer(file.uri.toLocalFile(), request, response);
+					return;
+				}
+				
+				var content = file.read('binary');
 
 					
 				response.writeHeader(200, {
@@ -57,9 +67,9 @@ include
 			
 			
 			response.writeHeader(404, {
-				"Content-Type": "text/plain"
+				'Content-Type': 'text/plain'
 			});
-			response.end("404 Not Found - " + file.uri.toLocalFile());
+			response.end('404 Not Found - ' + file.uri.toLocalFile());
 		
 		},
 
@@ -81,6 +91,16 @@ include
 	set('image/jpeg', 'jpeg', 'jpg');
 	set('image/gif', 'gif');
 	set('image/png', 'png');
+	set('image/svg+xml', 'svg');
+	
+	set('video/mp4', 'mp4', 'f4v', 'f4p');
+	set('video/ogg', 'ogv');
+	set('video/webm', 'webm');
+	set('video/x-flv', 'flv');
+	set('video/mov', '/quicktime')
+	set('video/x-flv', 'flv')
+	
+	set('application/x-shockwave-flash', 'swf');
 
 
 
