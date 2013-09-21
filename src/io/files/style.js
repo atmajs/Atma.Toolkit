@@ -23,52 +23,71 @@ include.js({
 		},
 		copyTo: function(uri) {
             
-            this.copyImagesTo(uri);
+            this.copyResourcesTo(uri);
             
 			
 			new io.File(uri).write(this.content);
             
 			return this;
 		},
-        copyImagesTo: function(uri){
+        copyResourcesTo: function(uri){
             if (this.content == null){
                 this.read();
             }
-            copyImages(this, uri);
+            copyResources(this, uri);
             return this;
         }
 	}));
 
+	
+	var path_REF = '.reference/';
 
 
-
-	function copyImages(cssFile, targetUri) {
+	function copyResources(cssFile, targetUri) {
 
 		var solutionUri = global.solution.uri,
 			cssFilePath = cssFile.uri.toString(),
-			isSubDir = cssFilePath.indexOf('.reference/') === -1
-				? path_isSubDir(solutionUri.toString(), cssFilePath)
-				: true,
+			solutionPath = solutionUri.toString(),
 			resources = cssFile.resources,
 			dir = net.Uri.combine(targetUri.toLocalDir(), 'resources/');
 
 		
 		resources.forEach(function(x){
 			
-			if (isSubDir == false) {
-				var uri = new net.Uri(net.Uri.combine(dir, x.uri.file));
-
+			if (isSubDir(solutionPath, x.uri.toString()) === false) {
+				var uri = getTargetUri(dir, x.uri);
+				
 				new io.File(x.uri).copyTo(uri);
+				
 				x.replaceWith = getRewritenPath(uri, x.href, targetUri.toLocalDir());
-
 			} else {
 				
 				x.replaceWith = getRewritenPath(x.uri, x.href, targetUri.toLocalDir());
 			}
 
-			if (x.replaceWith) {
+			if (x.replaceWith) 
 				cssFile.content = CssParser.replace(cssFile.content, x.href, x.replaceWith);
-			}
+			
 		});
+	}
+	
+	function isSubDir(solutionPath, resourcePath) {
+		if (resourcePath.indexOf(path_REF) !== -1)
+			return false;
+		
+		return path_isSubDir(solutionPath, resourcePath);
+	}
+	
+	function getTargetUri(outputDir, fileUri) {
+		var path = fileUri.toString();
+		if (path.indexOf(path_REF) === -1) {
+			
+			return new net.Ur(net.Uri.combine(outputDir, fileUri.uri.file));
+		}
+		
+		
+		var relPath = path.substring(path.lastIndexOf(path_REF) + path_REF.length);
+		
+		return new net.Uri(net.Uri.combine(outputDir, relPath));
 	}
 });

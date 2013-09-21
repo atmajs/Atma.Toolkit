@@ -14,11 +14,11 @@ include.js({
 			
             var file = new io.File(resource.uri);
             
-            if (file.copyImagesTo == null){
-                console.error('Error: Not implemented copyImagesTo', resource.uri.toLocalFile());
+            if (file.copyResourcesTo == null){
+                console.error('Error: Not implemented copyResourcesTo', resource.uri.toLocalFile());
             }
             
-            resource.content = file.copyImagesTo(outputDirectoryUri).content;
+            resource.content = file.copyResourcesTo(outputDirectoryUri).content;
 		}
 	});
 
