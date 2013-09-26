@@ -49,6 +49,16 @@ include
 				
 				var content = file.read('binary');
 
+				if (content == null)
+					content = '<undefined>';
+
+				if (typeof content === 'object' && content instanceof Buffer === false){
+					try {
+						content = JSON.stringify(content);
+					}catch(error){
+						content = '<json:stringify>' + error.toString();
+					}
+				}
 					
 				response.writeHeader(200, {
 					'Content-Type': mimeType
@@ -87,6 +97,7 @@ include
 	set('text/plain', 'txt', 'mask');
 
 	set('application/x-javascript', 'js', 'coffee');
+	set('application/json', 'json', 'yml');
 
 	set('image/jpeg', 'jpeg', 'jpg');
 	set('image/gif', 'gif');
