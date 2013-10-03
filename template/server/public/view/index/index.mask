@@ -1,0 +1,10 @@
+
+layout:view master='default' {
+
+    @content #content {
+        
+        'Atma.js'
+        
+    }
+
+}

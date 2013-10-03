@@ -141,6 +141,8 @@
 	// source ../src/server/SocketListener.js
 	var SocketListener = (function(){
 		
+		var wait_COUNT = 10,
+			wait_DURATION = 1000;
 		
 		var Pipe = function(socket, event) {
 			var slice = Array.prototype.slice,
@@ -182,36 +184,11 @@
 				console.log('\tNode Client Connected'.green);
 				
 				this.socket = socket
-		
-				.on('disconnect', this.disconnected)
-				.on('client:utest', function(config, done) {
-		
-					var clients = io.of('/utest-browser').clients();
-		
-					if (clients.length === 0) {
-						var message = 'No Slaves Captured - navigate to http://localhost:%1/utest/'.format(port || 5777)
-						socket.emit('server:error', message);
-						return;
-					}
-		
-					var utest = new ServerUTest(clients, new Logger(socket));
-		
-					utest
-						.on('slave:start', Pipe(socket, 'slave:start'))
-						.on('slave:end', Pipe(socket, 'slave:end'))
-						.on('slave:error', Pipe(socket, 'slave:error'))
-						.on('server:utest:end', Pipe(socket, 'server:utest:end'))
-						.on('browser:utest:script', Pipe(socket, 'slave:utest:script'))
-		
-						.on('browser:assert:failure', Pipe(socket, 'slave:assert:failure'))
-						.on('browser:assert:success', Pipe(socket, 'slave:assert:success'))
+					.on('disconnect', this.disconnected)
+					.on('client:utest', function(config, done) {
 						
-					;
-		
-					__config = config;
-					utest.run(config, done);
-		
-				});
+						client_tryTest(io, socket, config, done, port, 0);
+					});
 			},
 			
 			disconnected: function() {
@@ -225,6 +202,59 @@
 			}
 		});
 	
+		function client_tryTest(io, socket, config, done, port, retryCount){
+			var clients = io.of('/utest-browser').clients(),
+				message;
+			
+			if (clients.length === 0) {
+				logger
+					.log(retryCount, wait_COUNT)
+					.log('');
+					
+				if (++retryCount <= wait_COUNT) {
+					
+					message = 'Waiting for some slaves: %1/%2'
+						.format(retryCount, wait_COUNT);
+					
+					socket.emit('server:log', 'warn', [message]);
+					
+					setTimeout(function(){
+						
+						client_tryTest(io, socket, config, done, port, retryCount);
+					}, wait_DURATION);
+					
+					return;
+				}
+				
+				message = 'No Slaves Captured - navigate to http://localhost:%1/utest/'
+					.format(port || 5777);
+					
+				socket.emit('server:error', message);
+				return;
+			}
+	
+			client_doTest(clients, socket, config, done);
+		}
+		
+		function client_doTest(clients, socket, config, done){
+			
+			var utest = new ServerUTest(clients, new Logger(socket));
+	
+			utest
+				.on('slave:start', Pipe(socket, 'slave:start'))
+				.on('slave:end', Pipe(socket, 'slave:end'))
+				.on('slave:error', Pipe(socket, 'slave:error'))
+				.on('server:utest:end', Pipe(socket, 'server:utest:end'))
+				.on('browser:utest:script', Pipe(socket, 'slave:utest:script'))
+	
+				.on('browser:assert:failure', Pipe(socket, 'slave:assert:failure'))
+				.on('browser:assert:success', Pipe(socket, 'slave:assert:success'))
+				
+			;
+	
+			__config = config;
+			utest.run(config, done);
+		}
 		
 	}());
 	

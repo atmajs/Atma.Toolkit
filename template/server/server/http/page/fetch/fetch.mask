@@ -1,0 +1,6 @@
+layout:view master='default' {
+    @content #body {
+        
+        '~[title]'
+    }
+}

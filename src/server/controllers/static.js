@@ -111,6 +111,9 @@ include
 	set('video/mov', '/quicktime')
 	set('video/x-flv', 'flv')
 	
+	set('audio/mpeg', 'mp3');
+	set('audio/ogg', 'ogg');
+
 	set('application/x-shockwave-flash', 'swf');
 
 

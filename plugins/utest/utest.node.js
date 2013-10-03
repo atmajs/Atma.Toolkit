@@ -669,7 +669,7 @@
 		
 		/** GLOBALS */
 		global.eq = assert.equal;
-		global.notEq = assert.equal;
+		global.notEq = assert.netEqual;
 		global.deepEq = assert.deepEqual;
 		global.notDeepEq = assert.notDeepEqual;
 		global.strictEq = assert.strictEqual;
@@ -1270,20 +1270,19 @@
 						
 						if ('actual' in data || 'expected' in data) {
 							var msg = '%s bold<red<↔>> %s';
-								//actual = typeof data.actual === 'object'
-								//			? JSON.stringify(data.actual)
-								//			: data.actual,
-								//			
-								//expected = typeof data.expected === 'object'
-								//			? JSON.stringify(data.expected)
-								//			: data.expected;
 											
 							logger.log(msg.color, data.actual, data.expected);
 						}
 						
+						if (data.message) 
+							logger.log(' :: '.red.bold + data.message.yellow);
+							
 						logger
 							.log('  bold<%1>:%2'.color.format(data.file, data.line + 1))
-							.log('  bold<cyan< → >> bold<red< %1 >>'.color.format(code));
+							.log('  bold<cyan< → >> bold<red< %1 >>'.color.format(code))
+							.log('');
+						
+						
 						return;
 					}
 						

@@ -1,0 +1,6 @@
+passport:
+	
+	github:
+		id: null
+		secret: null
+		callback: null
