@@ -3,10 +3,6 @@
 ### Atma.js Toolkit
 
 
-
-@see [Atma.js Project](http://atmajs.com/#atma.toolkit)
-
-
 ```bash
 > npm install atma -g
 # ...
@@ -202,7 +198,7 @@ To start the server direct from command line, use cli action pattern
 ```
 
 ```bash
-> atma reference libjs
+> atma reference atmajs
 ```
 
 Creates symbolic link in "%current directory%/.reference" folder
@@ -223,16 +219,17 @@ Templates:
 
 - starter - MaskJS/mask.bindings/jmask/mask.compo/IncludeJS/Ruqq/jQuery
 - compo - creates component template *.js/*.css/*.mask : ```> atma template compo desiredName"
-
+- server - create node.js bootstrap project
 - todoapp - creates todomvc sample application
+
 
 You can create any other templates - just put the files to:
 ```%npm-global-directory%/node_modules/includejs/template/%YourTemplateName%```
 
-### Clone LibJS Libraries
+### Clone Atma Libraries
 
 ```bash
-> atma git-clone
+> atma git-clone atma
 ```
 
 ### Global Projects and default routes:
@@ -245,14 +242,14 @@ Sample:
 ```javascript
 {
 	"projects":{
-		"libjs" : {
-			"path": "file:///c:/Development/libjs/"
+		"atma" : {
+			"path": "file:///c:/Development/atmajs/"
 		}
 	},
 	"defaultRoutes":{
-		"lib": 			"{libjs}/{0}/lib/{1}.js",
-        "ruqq": 		"{libjs}/ruqq/lib/{0}.js",
-		"compo": 		"{libjs}/compos/{0}/lib/{1}.js"
+		"atma_lib": 		"{atma}/{0}/lib/{1}.js",
+        "atma_ruqq": 		"{atma}/ruqq/lib/{0}.js",
+		"atma_compo": 		"{atma}/compos/{0}/lib/{1}.js"
 	}
 }
 ```
