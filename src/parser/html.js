@@ -59,7 +59,7 @@ include.js({
 				}
 			}
 
-			resource.content = "<!DOCTYPE html>" + sys.newLine + doc.documentElement.innerHTML;
+			resource.content = "<!DOCTYPE html>" + io.env.newLine + doc.documentElement.innerHTML;
 		},
 		extractIncludes: function(htmlSource, directory) {
 			var doc = new resp.Document(htmlSource),

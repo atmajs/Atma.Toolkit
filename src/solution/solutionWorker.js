@@ -8,30 +8,44 @@ include.js({
 	include.exports = {
 		process: function(config, done) {
 
-            if (config.uri instanceof net.Uri === false){
-                done('File is not defined ' + config.file);
-                return;
-            }
+            if (config.uri instanceof net.Uri === false)
+				return done('Project HTML file is not defined');
+			
 
-			if (new io.File(config.uri.toLocalFile()).exists() == false) {
-				done('File doesnt exists (404) ' + config.uri.toLocalFile());
-				return;
+			if (new io.File(config.uri.toLocalFile()).exists() == false) 
+				return done('File doesnt exists (404) ' + config.uri.toLocalFile());
+			
+			
+			if (!config.type) 
+				return done('Unknown solution type ' + config.type);
+			
+			
+			var action = config.action;
+
+			switch(action){
+				case 'project-import':
+				case 'project-reference':
+					io
+						.File
+						.getHookHandler()
+						.clear();
+					break;
 			}
-			if (!config.type) {
-				done('Unknown solution type ' + config.type);
-				return;
-			}
-
-
+			
+			
 			var solution = new Solution(config, function(solution) {
 				logger.log(' - resources loaded - ');
 				
 				switch (solution.config.action) {
 				case 'project-import':
 				case 'project-reference':
-					include.js('resourceSource.js').done(function(resp) {
-						resp.resourceSource.action(solution.config.action, done);
-					});
+					include
+						.js('/src/solution/resourceSource.js')
+						.done(function(resp) {
+							resp
+								.resourceSource
+								.action(solution.config.action, done);
+						});
 					break;
 				case 'build':
 					include.js({
@@ -45,6 +59,7 @@ include.js({
 					break;
 				}
 			});
+			
 			
 			solution.process();
 		}

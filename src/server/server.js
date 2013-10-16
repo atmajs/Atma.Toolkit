@@ -23,6 +23,11 @@
 					var server = http.createServer(function(request, response) {
 	
 						resp.Routes.resolve(request.url, function(error, Controller){
+							if (error) {
+								logger.error(error);
+								response.end(error);
+								return;
+							}
 							
 							Controller.request(request, response);
 							

@@ -13,6 +13,9 @@
 	var routes = [{
 			match: /\?debug/,
 			controller: 'env'
+		},{
+			match: /^\/\-\-compos/,
+			controller: 'compo-dev/index'
 		}];
 	
 	var Routes = Class({
@@ -50,7 +53,7 @@
 					controller: controller + '::Controller'
 				}).done(function(resp){
 					if (resp.Controller == null) {
-						callback(new Error('Controller not loaded: ' + controller));
+						callback('Controller not loaded: ' + controller);
 						return;
 					}
 					callback(null, resp.Controller);

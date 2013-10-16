@@ -108,7 +108,7 @@ include
 	set('video/ogg', 'ogv');
 	set('video/webm', 'webm');
 	set('video/x-flv', 'flv');
-	set('video/mov', '/quicktime')
+	set('video/mov', 'quicktime')
 	set('video/x-flv', 'flv')
 	
 	set('audio/mpeg', 'mp3');

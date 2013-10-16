@@ -5,7 +5,11 @@
 		},
 		"bootstrap": {
 			"path": "file:///d:/libjs/vendor/bootstrap/"
+		},
+		"vendor":{
+			"path": "file:///d:/libjs/vendor/"
 		}
+
 	},
 	"defaultRoutes": {
 		"atma": "{atma}/{0}/lib/{1}.js",
