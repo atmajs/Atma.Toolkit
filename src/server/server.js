@@ -21,7 +21,7 @@
 	
 	
 					var server = http.createServer(function(request, response) {
-	
+
 						resp.Routes.resolve(request.url, function(error, Controller){
 							if (error) {
 								logger.error(error);
@@ -30,7 +30,6 @@
 							}
 							
 							Controller.request(request, response);
-							
 						});
 						
 					});

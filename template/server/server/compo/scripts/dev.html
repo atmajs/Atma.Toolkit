@@ -2,15 +2,16 @@
 <script type='text/javascript' src='%INCLUDE%'></script>
 <script type='text/javascript'>
 	
+	window.DEBUG = true;
+
 	include
 		.cfg(%CFG%)
+		.routes(%ROUTES%)
 		.js(%SCRIPTS%)
 		.done(function(){
 			
 			var start = Date.now(),
-				App = Compo({
-					compos: {}
-				});
+				App = Compo({});
 				
 				
 			window.app = new App;

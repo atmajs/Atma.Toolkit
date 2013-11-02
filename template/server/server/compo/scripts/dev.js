@@ -28,7 +28,8 @@ include
 			return resp
 				.load
 				.dev
-				.replace('%CFG%', JSON.stringify(this.include.cfg))
+				.replace('%CFG%', JSON.stringify(this.include.cfg, null, 4))
+				.replace('%ROUTES%', JSON.stringify(this.include.routes, null, 4))
 				.replace('%INCLUDE%', this.include.src)
 				.replace('%SCRIPTS%', this.scripts);
 		}

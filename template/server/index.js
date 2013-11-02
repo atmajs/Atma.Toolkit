@@ -21,14 +21,18 @@ global.app = atma
 		var server = connect()
 			.use(connect.favicon())
 			
-			.use(connect.query())
-			.use(connect.cookieParser())
-			.use(connect.session({ secret: 'key' }))
-			.use(redirect())
-			.use(passport.initialize())
-			.use(passport.session())
-			
-			.use(app.responder())
+			.use(app.responder({
+				middleware: [
+					connect.query(),
+					connect.cookieParser(),
+					connect.urlencoded(),
+					connect.json(),
+					connect.session({ secret: 'key' }),
+					redirect(),
+					passport.initialize(),
+					passport.session(),
+				]
+			}))
 
 			.use(connect.static(__dirname))
 			.listen(port);

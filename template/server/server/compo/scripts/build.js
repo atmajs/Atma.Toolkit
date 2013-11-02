@@ -22,7 +22,9 @@ include
 					data = app.config.build[id],
 					that = this;
 				
-				this.model = {};
+				this.model = {
+					buildVersion: app.config.buildVersion
+				};
 				
 				if (data == null) {
 					logger.warn('No info about the page', id, 'Build could be faily');

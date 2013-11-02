@@ -3,4 +3,4 @@ handler:
 	location: '/server/http/handler/{0}.js'
 
 handlers:
-	'.less' : less
+	'(\.less)' : less

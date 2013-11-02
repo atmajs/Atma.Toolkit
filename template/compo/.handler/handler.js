@@ -5,7 +5,7 @@ include.exports = Class({
         var name = config.args[1];
 
         if (!name){
-            logger.error('Compo-name undefined. Usage > includejs template compo %NAME%');
+            logger.error('Compo-name undefined. Usage > atma template compo %NAME%');
             return;
         };
 

@@ -4,16 +4,16 @@
 		'~[load]'
 		
 		
-script src='/public/build/scripts.js' type='text/javascript';
+script src='/public/build/scripts.js?v=~[buildVersion]' type='text/javascript';
 
 % if=page >
-	script src='/public/build/~[page]/scripts.js' type='text/javascript';
+	script src='/public/build/~[page]/scripts.js?v=~[buildVersion]' type='text/javascript';
 
 
 script type='text/javascript' > :html > """
 	
 		include
-			.ready(function(){
+			.allDone(function(){
 				var start = Date.now(),
 					App = Compo({
 						compos: {}
