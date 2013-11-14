@@ -67,8 +67,8 @@ include
 				response.end(content);
 
 
-				io.File.watcher.watch(file, this.fileChanged.bind(this));
-
+				file.watch(this.fileChanged.bind(this));
+				
 				return;
 			}
 				

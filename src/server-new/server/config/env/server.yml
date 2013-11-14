@@ -1,0 +1,13 @@
+
+server:
+
+
+	routes:
+		server : '/server/{0}.js' 
+		server.lib : '/server/lib/{0}.js' 
+		server.compo : '/server/compo/{0}/{1}.js'
+
+	scripts:
+
+		server.compo:
+

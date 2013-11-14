@@ -13,6 +13,48 @@
 		return !array.length;
 	}
 	// end:source ../src/utils/array.js
+	// source ../src/utils/Await.js
+	Class.Await = Class({
+		Base: Class.Deferred,
+		
+		_wait: 0,
+		_timeout: null,
+		
+		
+		promise: function(){
+			
+			if (this._timeout) {
+				clearTimeout(this._timeout);
+			}
+			
+			this._resolved = null;
+			this._rejected = null;
+			this._wait++;
+			this._timeout = setTimeout(this.reject.bind(this), Class.Await.TIMEOUT);
+			
+			return this.listener;
+		},
+		
+		isBusy: function(){
+			return this._wait > 0;
+		},
+		Self: {
+			
+			listener: function(){
+				
+				if (--this._wait === 0) {
+					clearTimeout(this._timeout);
+					this.resolve();
+				}
+			}
+		},
+		
+		Static: {
+			
+			TIMEOUT: 2000
+		}
+	});
+	// end:source ../src/utils/Await.js
 	
 	// source ../src/UTest.js
 	(function(global){
@@ -24,7 +66,99 @@
 				timeout: 1500
 			},
 			_testsDone;
+		
+		var RESERVED = ['$before', '$after', '$teardown', '$config'];
+		
+		// source UTest.config.js
+		
+		var UTestConfiguration = (function(){
 			
+			
+			var Configurations = {
+				http: {
+					service: function(routes, done){
+						http_config('http.services', routes, done);
+					},
+					config: function(configDir, done) {
+						http_config('http.config', configDir, done);
+					},
+					include: function(pckg, done){
+						http_config('include', pckg, done);
+					}
+				}
+				
+			};
+			
+			function http_config(args){
+				var args = Array.prototype.slice.call(arguments);
+				
+				args.unshift('>server:utest:action');
+				
+				UTest
+					.getSocket(function(socket){
+						socket
+							.emit
+							.apply(socket, args)
+							;	
+					});
+			}
+			
+			function configurate(key, args, done) {
+				var fn = obj_getProperty(Configurations, key);
+				if (fn == null) {
+					logger.error('<utest:config> Undefined configuration', key);
+					
+					return done();
+				}
+				
+				fn(args, done)
+			}
+			
+			return {
+				
+				configurate: function(done){
+					
+					var cfg = this.suite.$config;
+					
+					if (cfg == null) 
+						return done();
+					
+					var await = new Class.Await();
+					
+					
+					for(var key in cfg){
+						
+						configurate(key, cfg[key], await.promise());
+					}
+					
+					await
+						.fail(function(error){
+							logger.error('<utest:configurate> ', error);
+						})
+						.always(done);
+				}
+			};
+				
+		}());
+		// end:source UTest.config.js
+		// source utils/object.js
+		
+		function obj_getProperty(obj, property) {
+			var chain = property.split('.'),
+				imax = chain.length,
+				i = -1;
+			
+			while(++i<imax) {
+				if (obj == null) 
+					return null;
+				
+				obj = obj[chain[i]];
+			}
+			return obj;
+		}
+		
+		
+		// end:source utils/object.js
 		
 		function nextUTest() {
 			if (++_index > _tests.length - 1) {
@@ -71,9 +205,7 @@
 					
 				if (typeof fn === 'function') {
 					if (case_isAsync(fn)) {
-						fn( //
-						async( //
-						teardownDelegate(teardown, done), key));
+						fn(async(teardownDelegate(teardown, done), key));
 						return;
 					}
 					
@@ -106,11 +238,23 @@
 				this.suite = suite;
 				this.processed = [];
 				
-				Class.bind(this, 'nextCase');
+				// @obsolete properties
+				['before', 'after', 'teardown', 'config']
+					.forEach(function(key){
+						if (suite[key] == null) 
+							return;
+						
+						console.warn('<UTest>', key, 'property is deprecated. Use: $' + key);
+						
+						suite['$' + key] = suite[key];
+						delete suite[key];
+					});
 				
 				_tests.push(this);
 				return this;
 			},
+			
+			configurate: UTestConfiguration.configurate,
 			
 			run: function(callback){
 				
@@ -124,7 +268,7 @@
 				this.onComplete = callback;
 				
 				this.handleBangs();
-				runCase(this.suite.before, this.nextCase);
+				this.configurate(this._start);
 			},
 			
 			handleBangs: function(){
@@ -137,7 +281,7 @@
 				
 				for (var key in this.suite) {
 					// reserved
-					if (['before','after','teardown'].indexOf(key) !== -1) {
+					if (RESERVED.indexOf(key) !== -1) {
 						continue;
 					}
 					
@@ -147,43 +291,47 @@
 				}
 			},
 			
-			nextCase: function(){
-				for (var key in this.suite) {
-					if (~this.processed.indexOf(key)) {
-						continue;
-					}
-					
-					// reserved
-					if (['before','after','teardown'].indexOf(key) !== -1) {
-						continue;
-					}
-					
-					if (key.substring(0,2) === '//') {
-						console.warn(key.substring(2), '(skipped)'.bold);
-						this.processed.push(key);
-						continue;
+			Self: {
+				_start: function(){
+					runCase(this.suite.$before, this._nextCase);	
+				},
+				_nextCase: function(){
+					for (var key in this.suite) {
+						if (~this.processed.indexOf(key)) {
+							continue;
+						}
 						
+						// reserved
+						if (RESERVED.indexOf(key) !== -1) {
+							continue;
+						}
+						
+						if (key.substring(0,2) === '//') {
+							console.warn(key.substring(2), '(skipped)'.bold);
+							this.processed.push(key);
+							continue;
+							
+						}
+						
+						if (typeof this.suite[key] !== 'function') {
+							continue;
+						}
+						
+						this.processed.push(key);
+						
+						console.print((' ' + key + ': ').bold);
+						runCase(this.suite[key], this._nextCase, this.suite.$teardown, key);
+						
+						return;
 					}
 					
-					if (typeof this.suite[key] !== 'function') {
-						continue;
-					}
-					
-					this.processed.push(key);
-					
-					console.print((' ' + key + ': ').bold);
-					runCase(this.suite[key], this.nextCase, this.suite.teardown, key);
-					
-					return;
+					var that = this;
+					runCase(this.suite.$after, function(){
+						UTest.trigger('complete', that);
+						that.onComplete();
+					});
 				}
-				
-				var that = this;
-				runCase(this.suite.after, function(){
-					UTest.trigger('complete', that);
-					that.onComplete();
-				});
 			},
-			
 			Static: {
 				stats: function(){
 					return {
@@ -777,6 +925,8 @@
 	// source ../src/node/action.js
 	(function() {
 		
+		var _suite;
+		
 		var TestSuite = global.UTest;
 			
 		include.exports = {
@@ -817,7 +967,7 @@
 					return done('No scripts to test');
 				
 				
-				return new RunnerSuite(configs, setts).run(function(){
+				return _suite = new RunnerSuite(configs, setts).run(function(){
 					logger.log('>> done', arguments);
 					done.apply(this, arguments);
 				});
@@ -826,7 +976,48 @@
 		
 		
 	
-		
+		// source utils/io.js
+		var io_connect = (function(){
+			
+			var dfr;
+			
+			
+			return function(config){
+				
+				if (dfr) 
+					return dfr;
+				
+				dfr = new Class.Deferred();
+				
+				//@ HACKY - io client workaround
+				var _io = global.io;
+				delete global.io;
+				
+				var port = config.port || 5777,
+					
+					io_client = require('socket.io-client'),
+					io_url = 'http://localhost:%1/node'.format(port),
+					
+					socket = io_client.connect(io_url, {
+						'connect timeout': 2000
+					});
+					
+				global.io = _io;
+				
+				socket
+					.on('connect', function() {
+						dfr.resolve(socket)
+					})
+			
+					.on('error', function(error) {
+						dfr.reject(error);
+					})
+					
+				
+				return dfr;
+			};
+		}());
+		// end:source utils/io.js
 		// source utils/cfg.js
 		function cfg_prepair(config, arg) {
 				
@@ -1079,8 +1270,8 @@
 				var file = new io.File(uri);
 				
 				if (file.exists()) {
-					io.File.watcher.watch(file, function(){
-						console.log(' - file changed - ', file.uri.file);
+					io.watcher.watch(file.uri.toLocalFile(), function(){
+						logger.log(' - file changed - '.green, file.uri.file.bold);
 						io.File.clearCache(file.uri.toLocalFile());
 						callback();
 					});
@@ -1304,85 +1495,79 @@
 		// source RunnerClient.js
 		var RunnerClient = Class({
 			Base: Runner,
-			Construct: function(){
-				
-			},
 			run: function(done) {
 				
 				this.run = this.runTests;
-				
-				//@ HACKY - io client workaround
-				var _io = global.io;
-				delete global.io;
+				this.status = status_connecting;
 				
 				var that = this,
 					config = this.config,
-					port = config.port || 5777,
-					util = require('util'),
-					io_client = require('socket.io-client'),
-					io_url = 'http://localhost:%1/node'.format(port),
-					socket = io_client.connect(io_url, {
-						'connect timeout': 2000
+					port = config.port || 5777
+					;
+					
+				
+				io_connect(this.config)
+				
+					.fail(function(error){
+						var msg = 'Test server connection error - http://localhost:%1/utest';
+						done(msg.format(port));
+					})
+					
+					.done(function(socket){
+						
+						that.socket = socket;
+						
+						
+						socket
+							.on('server:utest:end', function(){
+								that.onComplete.apply(that, arguments);
+							})
+					
+							.on('server:error', function(message) {
+								that.socket.socket.disconnectSync();
+								done(message);
+							})
+					
+							.on('server:log', function(type, args) {
+								var fn = logger[type] || logger.log;
+								fn.apply(logger, args);
+							})
+					
+							.on('slave:start', function(stats) {
+								var message = '#{browser.name} #{browser.version}'.bold;
+								logger
+									.log(message.format(stats.userAgent))
+									.log('');
+							})
+							.on('slave:end', function(stats) {
+								logger.log('Slave completed'[stats.failed ? 'red' : 'green']);
+							})
+					
+							.on('slave:error', function(error) {
+								logger.error(error);
+							})
+							
+							.on('slave:utest:script', function(info){
+								that.notifyTest(info.script);
+							})
+					
+							.on('slave:assert:failure', function(args) {
+								var data = args[0];
+								
+								that.onFailure(data);
+								
+							})
+					
+							.on('slave:assert:success', that.onSuccess.bind(that))
+							;
+						
+						
+						// RUN
+						
+						that.status = status_connected;
+						that.runTests();
 					});
 		
-				global.io = _io;
-					
-				this.socket = socket;
-				this.status = status_connecting;
-		
-				socket
-					.on('connect', function() {
-					logger(90).log('utest - connected to server - ');
-		
-					that.status = status_connected;
-					that.runTests();
-				})
-		
-				.on('error', function() {
-					var msg = 'Test server connection error - http://localhost:%1/utest';
-					done(msg.format(port));
-				})
-		
-				.on('server:utest:end', function(){
-					that.onComplete.apply(that, arguments);
-				})
-		
-				.on('server:error', function(message) {
-					that.socket.socket.disconnectSync();
-					done(message);
-				})
-		
-				.on('server:log', function(type, args) {
-					var fn = logger[type] || logger.log;
-					fn.apply(logger, args);
-				})
-		
-				.on('slave:start', function(stats) {
-					var message = '#{browser.name} #{browser.version}'.bold;
-					logger
-						.log(message.format(stats.userAgent))
-						.log('');
-				})
-				.on('slave:end', function(stats) {
-					logger.log('Slave completed'[stats.failed ? 'red' : 'green']);
-				})
-		
-				.on('slave:error', function(error) {
-					logger.error(error);
-				})
-				
-				.on('slave:utest:script', function(info){
-					that.notifyTest(info.script);
-				})
-		
-				.on('slave:assert:failure', function(args) {
-					var data = args[0];
-					
-					that.onFailure(data);
-					
-				})
-		
-				.on('slave:assert:success', that.onSuccess.bind(that));
 			},
 		
 			runTests: function() {
@@ -1612,28 +1797,6 @@
 				this.watch = settings.watch;
 				
 				logger(90).log('RunnerSuite:', configs, settings);
-				
-				Class.bind(this, 'onComplete', 'process', 'runTests');
-			},
-			
-			onComplete: function(){
-				
-				if (this.watch !== true) {
-					
-					this.closeSockets();
-					
-					var failed = this.getFailed();
-					
-					logger
-						.log('')
-						.log(failed === 0 ? 'Success'.green.bold : 'Failed'.red.bold);
-					
-					process.exit(failed);
-					
-				}
-				
-				watch(this.base, this.getResources(), this.runTests);
-				logger.log(' - watcher active'.yellow);
 			},
 			
 			closeSockets: function(){
@@ -1654,16 +1817,43 @@
 				});
 			},
 			
-			process: function(){
-				var runner = this.runners[++this.index];
+			Self: {
 				
-				if (runner == null) {
-					this.onComplete();
-					return;
-				}
-				runner.run(this.callback);
+				onComplete: function(){
+					
+					if (this.watch !== true) {
+						
+						this.closeSockets();
+						
+						var failed = this.getFailed();
+						
+						logger
+							.log('')
+							.log(failed === 0 ? 'Success'.green.bold : 'Failed'.red.bold);
+						
+						process.exit(failed);
+						
+					}
+					
+					watch(this.base, this.getResources(), this.runTests);
+					logger.log(' - watcher active'.yellow);
+				},
+				
+				process: function(){
+					var runner = this.runners[++this.index];
+					
+					if (runner == null) {
+						this.onComplete();
+						return;
+					}
+					runner.run(this.callback);
+				},
+				
+				runTests: function(){
+					this.index = -1;
+					this.process();
+				},
 			},
-			
 			run: function(done){
 				this.callback = done;
 				this.runners = [];
@@ -1682,10 +1872,7 @@
 				this.runTests();
 			},
 			
-			runTests: function(){
-				this.index = -1;
-				this.process();
-			},
+			
 			
 			handleConfig: function(mix) {
 				if (Array.isArray(mix)) {
@@ -1729,7 +1916,24 @@
 		}
 		// end:source Suite.js
 		
+		// source utest.extend.js
+		
+		
+		UTest.getSocket = function(callback){
 			
+			var cfg = _suite.cfgNode || _suite.cfgBrowser;
+			
+			io_connect(cfg)
+				.done(callback)
+				.reject(function(error){
+					
+					logger.error('<Exit> sockets could not be connected');
+					
+					callback();
+				})
+				;
+		};
+		// end:source utest.extend.js
 			
 	}());
 	// end:source ../src/node/action.js

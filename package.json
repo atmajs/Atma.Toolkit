@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.9.57",
+  "version": "0.9.58",
   "bin": {
     "atma": "atma"
   },
@@ -19,13 +19,14 @@
     "clean-css": "~0.9.0",
     "jshint": "~0.9.1",
     "coffee-script": ">0.0.0",
-    "less": ">0.0.0",
+    "less": "~1.5.0",
     "yamljs": ">0.0.0",
     "openurl": "~1.1.0",
     "socket.io-client": "~0.9.11",
     "atma-libs": ">0.0.0",
     "atma-logger": ">0.0.55",
     "atma-io": ">0.0.41",
+    "atma-server": ">0.0.0",
     "socket.io": "~0.9.16"
   },
   "repository": {

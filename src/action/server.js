@@ -22,16 +22,18 @@
                 config.open = config.args[0];
             }
 
-            include.js('/src/server/server.js').done(function(resp){
-
-                resp.server.start(config);
-
-                if (config.open){
-                    require('openurl').open(String.format('http://localhost:%1/%2', config.port || 5777, config.open));
-                }
-
-                done();
-            });
+            include
+                .js('/src/server-new/server.js')
+                .done(function(resp){
+    
+                    resp.server.start(config);
+    
+                    if (config.open){
+                        require('openurl').open(String.format('http://localhost:%1/%2', config.port || 5777, config.open));
+                    }
+    
+                    done();
+                });
         }
     }
 

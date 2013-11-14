@@ -22,12 +22,16 @@ include
 			//
 			//},
 
-	        onRenderStart: function(model, cntx, container){
-	            // ..
-	        },
-	        onRenderEnd: function(elements, cntx, container){
-	            // ..
-	        }
+			onRenderStart: function(model, ctx, container){
+				// ..
+			},
+			onRenderEnd: function(elements, model, ctx, container){
+				// ..
+			},
+	
+			//dispose: function(){
+			//
+			//}
 		}));
 
 

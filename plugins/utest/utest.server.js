@@ -18,6 +18,48 @@
 	}());
 	// end:source ../src/node/utils/logger.js
 	
+	// source ../src/server/actions.js
+	
+	var Actions = (function(){
+		
+		
+		var _actions = {
+		
+			registerService: function(route, handlersPath){
+				
+				logger(90)
+					.log('<utest> register service')
+					.log(route, handlersPath)
+					;
+				
+				atma
+					.server
+					.app
+					.handlers
+					.registerService(route, handlersPath)
+					;
+			}
+		};
+	
+		
+		return {
+			run: function(action){
+				var fn = _actions[action];
+				if (typeof fn !== 'function') {
+					logger.error('<utest:server> unknown action', action);
+					return;
+				}
+				
+				fn.apply(null, Array.prototype.slice.call(arguments, 1));
+			},
+			
+			register: function(action, worker){
+				_actions[action] = worker;
+			}
+		}
+	}());
+	
+	// end:source ../src/server/actions.js
 	// source ../src/server/BrowserTunnel.js
 	
 	var BrowserTunnel = Class({
@@ -28,22 +70,34 @@
 			this.socket = socket
 				.on('browser:log', function(type, args) {
 	
-				(logger[type] || logger.log).apply(logger, args);
-	
-			})
-	
-			.on('browser:utest:start', function(stats) {
-				that.trigger('start', stats);
-			})
-	
-			.on('browser:utest:end', function(result) {
-				that.result = result;
-				that.trigger('end', this, result);
-			})
-	
-			.on('browser:utest:script', this.pipe('browser:utest:script'))
-			.on('browser:assert:success', this.pipe('browser:assert:success'))
-			.on('browser:assert:failure', this.pipe('browser:assert:failure'));
+					(logger[type] || logger.log).apply(logger, args);
+		
+				})
+		
+				.on('browser:utest:start', function(stats) {
+					that.trigger('start', stats);
+				})
+		
+				.on('browser:utest:end', function(result) {
+					that.result = result;
+					that.trigger('end', this, result);
+				})
+				.on('>server:utest:action', function(){
+					var args = Array
+						.prototype
+						.slice
+						.call(arguments)
+						;
+					args
+						.unshift('action')
+						;
+					
+					that.trigger.apply(that, args);
+				})
+				.on('browser:utest:script', this.pipe('browser:utest:script'))
+				.on('browser:assert:success', this.pipe('browser:assert:success'))
+				.on('browser:assert:failure', this.pipe('browser:assert:failure'))
+				;
 			
 		},
 	
@@ -53,7 +107,7 @@
 				that = this;
 	
 			socket.emit('server:utest:handshake', function(stats) {
-				logger(90).log('UTest.tunnel - handshake - ', stats);
+				logger(90).log('UTest.tunnel - handshake - '.cyan.bold, stats);
 	
 				if (stats.ready === 1) {
 					socket.emit('server:utest', config);
@@ -85,12 +139,13 @@
 		Base: Class.EventEmitter,
 		Construct: function(sockets, logger) {
 			this.index = 0;
-			this.tunnels = ruqq.arr.map(sockets, function(x) {
+			this.tunnels = ruqq.arr.map(sockets, function(socket) {
 				
-				return new BrowserTunnel(x, logger)
+				return new BrowserTunnel(socket, logger)
 					.on('start', this.pipe('slave:start'))
-					.on('end', this.onEnd.bind(this))
-					.on('error', this.onError.bind(this))
+					.on('end', this.onEnd)
+					.on('error', this.onError)
+					.on('action', this.onAction)
 					.on('browser:assert:success', this.pipe('browser:assert:success'))
 					.on('browser:assert:failure', this.pipe('browser:assert:failure'))
 					.on('browser:utest:start', this.pipe('browser:utest:start'))
@@ -99,13 +154,18 @@
 					
 			}.bind(this));
 		},
-		onEnd: function(tunnel, result) {
-			this.trigger('slave:end', result);
-			this.process();
-		},
-		onError: function(that, error){
-			this.trigger('slave:error', { message: 'Slave error', slave: error });
-			this.process();
+		
+		Self: {
+			onEnd: function(tunnel, result) {
+				
+				this.trigger('slave:end', result);
+				this.process();
+			},
+			onError: function(that, error){
+				this.trigger('slave:error', { message: 'Slave error', slave: error });
+				this.process();
+			},
+			onAction: Actions.run
 		},
 		stats: function(){
 			return ruqq.arr.map(this.tunnels, function(x, index){
@@ -148,7 +208,7 @@
 			var slice = Array.prototype.slice,
 				args;
 			return function() {
-				logger(95).log('Socket.Pipe', event);
+				logger(90).log('Socket.Pipe'.green.bold, event);
 				args = slice.call(arguments);
 				args.unshift(event);
 				socket.emit.apply(socket, args);
@@ -181,14 +241,16 @@
 		return Class({
 			Construct: function(socket, io, port) {
 				
-				console.log('\tNode Client Connected'.green);
+				logger.log('\tNode Client Connected'.green);
 				
 				this.socket = socket
 					.on('disconnect', this.disconnected)
 					.on('client:utest', function(config, done) {
 						
 						client_tryTest(io, socket, config, done, port, 0);
-					});
+					})
+					.on('>server:utest:action', Actions.run)
+					;
 			},
 			
 			disconnected: function() {
@@ -207,10 +269,7 @@
 				message;
 			
 			if (clients.length === 0) {
-				logger
-					.log(retryCount, wait_COUNT)
-					.log('');
-					
+				
 				if (++retryCount <= wait_COUNT) {
 					
 					message = 'Waiting for some slaves: %1/%2'
@@ -253,6 +312,7 @@
 			;
 	
 			__config = config;
+			
 			utest.run(config, done);
 		}
 		

@@ -64,26 +64,18 @@ function cfg_extend(config, object) {
         var server = config.server || (config.server = {}),
             serverEx = object.server,
             
-            controllers = serverEx['controllers'],
+            handlers = serverEx['handlers'],
             websockets = serverEx['websockets'];
             
         
-        if (controllers) {
-            if (Array.isArray(controllers) === false) {
-                logger.error('Controllers should be defined in array', controllers)
-            }
+        if (handlers) {
             
-            ruqq.arr.each(controllers, function(x){
-                (server.controllers || (server.controllers = [])).push(x);
-            });
-                
-            
+            server.handlers = Object.extend(server.handlers, handlers);
         }
         
         if (websockets) {
             
             server.websockets = Object.extend(server.websockets, websockets);
-            
         }
     }
 }

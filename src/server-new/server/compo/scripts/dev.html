@@ -1,0 +1,23 @@
+
+<script type='text/javascript' src='%INCLUDE%'></script>
+<script type='text/javascript'>
+	
+	include
+		.cfg(%CFG%)
+		.js(%SCRIPTS%)
+		.done(function(){
+			
+			var start = Date.now(),
+				App = Compo({
+					compos: {}
+				});
+				
+				
+			window.app = new App;
+			
+			mask.Compo.bootstrap(document.body, app);
+			
+			console.log('Render - ', Date.now() - start);
+		});
+	
+</script>

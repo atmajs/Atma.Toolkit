@@ -59,10 +59,10 @@ include
 				var onFileChanged = this.onFileChanged.bind(this),
 					collection = new io.Directory().readFiles(files).files;
 	
-				ruqq.arr.each(collection, function(file) {
-					io.File.watcher.watch(file, onFileChanged);
+				collection.forEach(function(file){
+					io.watcher.watch(file.uri.toLocalFile(), onFileChanged);
 				});
-	
+				
 				logger.log('Listen %s files'.bold.green, collection.length);
 			},
 	

@@ -9,7 +9,9 @@ include.exports = {
 				test: getPath('/utest.node.js')
 			},
 			server: {
-				controllers: [getPath('env/controller.js')],
+				handlers: {
+					'^/utest' : getPath('env/HttpTestHandler.js')
+				},
 				websockets: {
 					'/node' : getPath('/utest.server.js'),
 					'/utest-browser' : function(){}
