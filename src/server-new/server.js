@@ -5,10 +5,9 @@ require('atma-server');
 
 var resource = include
 	.js(
-		'server/middleware/Middleware.js',
-		
-		'server/middleware/static.js',
-		'server/middleware/proxy.js'
+		'./server/middleware/Middleware.js',
+		'./server/middleware/static.js',
+		'./server/middleware/proxy.js'
 	)
 	
 	.done(function(resp){
@@ -63,9 +62,15 @@ var resource = include
 						
 						
 						var serverCfg = appConfig.server,
-							handlers = serverCfg && serverCfg.handlers,
-							websockets = serverCfg && serverCfg.websockets
-							;
+							
+							handlers, websockets, subapps;
+						
+						if (serverCfg) {
+							handlers = serverCfg.handlers,
+							websockets = serverCfg.websockets,
+							subapps = serverCfg.subapps;
+						}
+							
 						
 						handlers && app
 							.handlers
@@ -77,7 +82,11 @@ var resource = include
 							.registerWebsockets(websockets, app.config)
 							;
 						
-						
+						subapps && app
+							.handlers
+							.registerSubApps(subapps)
+							;
+							
 						app
 							.autoreload(server)
 							.getWatcher()

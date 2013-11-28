@@ -38,19 +38,67 @@
 					.handlers
 					.registerService(route, handlersPath)
 					;
+			},
+			
+			eval: function(source, done){
+				
+				var name = 'done',
+					handled,
+					result
+					;
+				
+				source = source.replace(/^function\s*\(\s*([\w\d_$]+)\s*\)\s*\{/, function(full, cbname){
+					name = cbname;
+					handled = true;
+					
+					return '';
+				});
+				
+				if (!handled) {
+					logger.error(
+						'Callback parameter`s name could not be extracted. Source %s...',
+						source.substring(0,20)
+					);
+					
+					done();
+				}
+				
+				source = source.replace(/\}\s*$/, '');
+				
+				try {
+					result = new(Function(name, source))(done);	
+				} catch(error) {
+					logger.error('<$config:eval error>', error);
+					
+					return done(error);
+				}
+				
+				return result;
 			}
 		};
 	
 		
 		return {
-			run: function(action){
+			run: function(action, config){
 				var fn = _actions[action];
 				if (typeof fn !== 'function') {
 					logger.error('<utest:server> unknown action', action);
+					
+					var done = arguments[arguments.length - 1];
+					if (typeof done === 'function') 
+						done();
+					
 					return;
 				}
 				
-				fn.apply(null, Array.prototype.slice.call(arguments, 1));
+				if (config) {
+					
+					if (config && config.base) 
+						include.cfg('path', config.base);
+					
+				}
+				
+				fn.apply(null, Array.prototype.slice.call(arguments, 2));
 			},
 			
 			register: function(action, worker){
@@ -73,7 +121,23 @@
 					(logger[type] || logger.log).apply(logger, args);
 		
 				})
-		
+				
+				.on('browser:utest:beforestart', function(data, done){
+					var config = data.config;
+					
+					atma
+						.server
+						.app
+						.handlers
+						.subapps
+						.get('/utest/')
+						.value
+						._app
+						.config = config
+						;
+						
+					done();
+				})
 				.on('browser:utest:start', function(stats) {
 					that.trigger('start', stats);
 				})
@@ -139,7 +203,7 @@
 		Base: Class.EventEmitter,
 		Construct: function(sockets, logger) {
 			this.index = 0;
-			this.tunnels = ruqq.arr.map(sockets, function(socket) {
+			this.tunnels = sockets.map(function(socket) {
 				
 				return new BrowserTunnel(socket, logger)
 					.on('start', this.pipe('slave:start'))
@@ -152,7 +216,7 @@
 					.on('browser:utest:script', this.pipe('browser:utest:script'))
 					;
 					
-			}.bind(this));
+			}, this);
 		},
 		
 		Self: {
@@ -241,7 +305,13 @@
 		return Class({
 			Construct: function(socket, io, port) {
 				
-				logger.log('\tNode Client Connected'.green);
+				if (__config) {
+					socket.emit('server:error', 'Server is busy');
+					socket.disconnect();
+					return;
+				}
+				
+				logger.log('<Node Client Connected>'.green);
 				
 				this.socket = socket
 					.on('disconnect', this.disconnected)
@@ -264,36 +334,41 @@
 			}
 		});
 	
-		function client_tryTest(io, socket, config, done, port, retryCount){
+		function client_tryTest(io, socket, config, done, port, retryIndex){
+			__config = config;
+			
 			var clients = io.of('/utest-browser').clients(),
 				message;
 			
 			if (clients.length === 0) {
 				
-				if (++retryCount <= wait_COUNT) {
+				if (++retryIndex <= wait_COUNT) {
 					
 					message = 'Waiting for some slaves: %1/%2'
-						.format(retryCount, wait_COUNT);
+						.format(retryIndex, wait_COUNT);
 					
 					socket.emit('server:log', 'warn', [message]);
 					
 					setTimeout(function(){
 						
-						client_tryTest(io, socket, config, done, port, retryCount);
+						client_tryTest(io, socket, config, done, port, retryIndex);
 					}, wait_DURATION);
 					
 					return;
 				}
 				
+				__config = null;
+				
 				message = 'No Slaves Captured - navigate to http://localhost:%1/utest/'
 					.format(port || 5777);
-					
 				socket.emit('server:error', message);
+				socket.disconnect();
 				return;
 			}
-	
+			
 			client_doTest(clients, socket, config, done);
 		}
+		
 		
 		function client_doTest(clients, socket, config, done){
 			

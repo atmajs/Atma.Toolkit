@@ -40,7 +40,16 @@ include
 				resource = match && match[1];
 			
 			if (resource) {
-				var webSockets = atma.server.app.webSockets,
+				var app = atma.server.app;
+				if (app.handlers.has(resource)) {
+					
+					req.url = resource;
+					app.respond(req, res);
+					
+					return this;
+				}
+				
+				var webSockets = app.webSockets,
 					SocketHandler = webSockets.getHandler('/node'),
 					config = SocketHandler.getCurrentConfig();
 				

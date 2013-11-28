@@ -8,15 +8,12 @@ function write(message, indent) {
         
     indent += tab;
     
-    var _ = '';
+    var pref = '';
     
-    for (var i = 0; i < indent; i++) {
-        _ += '   ';
-    }
+    while (--indent > -1) 
+        pref += '   ';
 
-    
-    
-    logger.log(_ + message.color.white);
+    logger.log(pref + message.color.white);
 }
 
 function newLine() {
@@ -73,11 +70,11 @@ function help_generic() {
     newLine();
     
     write('To get more help for each action enter:', 1)
-    write('$ atma [action] -help'.cyan, 2);
+    write('$ atma [action] --help'.cyan, 2);
     
     newLine();
     
-    write('In case of any issue, please contact green<bold<alex.kit@atmajs.com>>');
+    write('In case of any issue, please contact green<bold<team@atmajs.com>>');
     write('You can also attach a log output:');
     write('$ atma [arguments] --level 99 --no-color > output.log'.cyan, 1);
     
@@ -89,14 +86,14 @@ function help_action(action) {
     
     if (action in app.config.actions === false) {
         logger.error('Action not found: ', action);
-        logger.log('$ atma -help'.bold);
+        logger.log('$ atma --help'.bold);
         return;
     }
     
     logger.log(' Action: bold<%s>'.color.white, action);
     
     app
-        .getAction(action)
+        .findAction(action)
         .done(function(handler){
             
             if (handler.help == null) {

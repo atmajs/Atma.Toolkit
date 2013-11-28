@@ -65,18 +65,24 @@ function cfg_extend(config, object) {
             serverEx = object.server,
             
             handlers = serverEx['handlers'],
-            websockets = serverEx['websockets'];
+            websockets = serverEx['websockets'],
+            subapps = serverEx['subapps']
+            ;
             
         
-        if (handlers) {
-            
-            server.handlers = Object.extend(server.handlers, handlers);
-        }
         
-        if (websockets) {
+        handlers &&
+            (server.handlers = Object.extend(server.handlers, handlers))
+            ;
             
-            server.websockets = Object.extend(server.websockets, websockets);
-        }
+        websockets &&
+            (server.websockets = Object.extend(server.websockets, websockets))
+            ;
+            
+        subapps &&
+            (server.subapps = Object.extend(server.subapps, subapps))
+            ;
+        
     }
 }
 

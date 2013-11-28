@@ -13,48 +13,6 @@
 		return !array.length;
 	}
 	// end:source ../src/utils/array.js
-	// source ../src/utils/Await.js
-	Class.Await = Class({
-		Base: Class.Deferred,
-		
-		_wait: 0,
-		_timeout: null,
-		
-		
-		promise: function(){
-			
-			if (this._timeout) {
-				clearTimeout(this._timeout);
-			}
-			
-			this._resolved = null;
-			this._rejected = null;
-			this._wait++;
-			this._timeout = setTimeout(this.reject.bind(this), Class.Await.TIMEOUT);
-			
-			return this.listener;
-		},
-		
-		isBusy: function(){
-			return this._wait > 0;
-		},
-		Self: {
-			
-			listener: function(){
-				
-				if (--this._wait === 0) {
-					clearTimeout(this._timeout);
-					this.resolve();
-				}
-			}
-		},
-		
-		Static: {
-			
-			TIMEOUT: 2000
-		}
-	});
-	// end:source ../src/utils/Await.js
 	
 	// source ../src/UTest.js
 	(function(global){
@@ -77,13 +35,17 @@
 			var Configurations = {
 				http: {
 					service: function(routes, done){
-						http_config('http.services', routes, done);
+						http_config('http.service', routes, done);
 					},
 					config: function(configDir, done) {
 						http_config('http.config', configDir, done);
 					},
 					include: function(pckg, done){
 						http_config('include', pckg, done);
+					},
+					
+					eval: function(fn, done){
+						http_config('eval', fn.toString(), done);
 					}
 				}
 				
@@ -92,10 +54,15 @@
 			function http_config(args){
 				var args = Array.prototype.slice.call(arguments);
 				
+				
+				args.splice(1, 0, null); // populate later with current configuration
+				
 				args.unshift('>server:utest:action');
 				
 				UTest
-					.getSocket(function(socket){
+					.getSocket(function(socket, config){
+						
+						args[2] = config;
 						socket
 							.emit
 							.apply(socket, args)
@@ -106,9 +73,7 @@
 			function configurate(key, args, done) {
 				var fn = obj_getProperty(Configurations, key);
 				if (fn == null) {
-					logger.error('<utest:config> Undefined configuration', key);
-					
-					return done();
+					return done('<utest:config> Undefined configuration' + key);
 				}
 				
 				fn(args, done)
@@ -116,19 +81,17 @@
 			
 			return {
 				
-				configurate: function(done){
-					
-					var cfg = this.suite.$config;
+				configurate: function(cfg, done){
 					
 					if (cfg == null) 
 						return done();
 					
-					var await = new Class.Await();
+					var await = new Class.Await;
 					
 					
 					for(var key in cfg){
 						
-						configurate(key, cfg[key], await.promise());
+						configurate(key, cfg[key], await.delegate());
 					}
 					
 					await
@@ -254,7 +217,9 @@
 				return this;
 			},
 			
-			configurate: UTestConfiguration.configurate,
+			configurate: function(done){
+				UTestConfiguration.configurate(this.suite.$config, done);
+			},
 			
 			run: function(callback){
 				
@@ -380,6 +345,10 @@
 					for (var key in options) {
 						_options[key] = options[key];
 					}
+				},
+				
+				configurate: function($config, done){
+					UTestConfiguration.configurate($config, done);
 				}
 			}
 		});
@@ -817,7 +786,7 @@
 		
 		/** GLOBALS */
 		global.eq = assert.equal;
-		global.notEq = assert.netEqual;
+		global.notEq = assert.notEqual;
 		global.deepEq = assert.deepEqual;
 		global.notDeepEq = assert.notDeepEqual;
 		global.strictEq = assert.strictEqual;
@@ -925,7 +894,9 @@
 	// source ../src/node/action.js
 	(function() {
 		
-		var _suite;
+		var _suite,
+			_configs
+			;
 		
 		var TestSuite = global.UTest;
 			
@@ -938,7 +909,7 @@
 				cfg_prepair(setts, arg);
 				
 				config = cfg_loadConfig(setts);
-				
+					
 				cfg_getEnv(setts, config);
 				
 				if (cfg_hasScripts(setts) === false) {
@@ -946,7 +917,7 @@
 					
 					
 					if (arg && !(config.suites && config.suites[arg])) 
-						return done('Argument is not resolved as script, nor as suite name: ' + arg);
+						return done('Argument is not resolved as a script, nor as a suite name: ' + arg);
 					
 					
 					if (arg) {
@@ -961,16 +932,33 @@
 				}
 				
 				
-				var configs = cfg_split(setts);
+				_configs = cfg_split(setts);
 				
-				if (configs.length === 0) 
+				if (_configs.length === 0) 
 					return done('No scripts to test');
 				
 				
-				return _suite = new RunnerSuite(configs, setts).run(function(){
-					logger.log('>> done', arguments);
-					done.apply(this, arguments);
-				});
+				var $before = config.$config && config.$config.$before,
+					$after = config.$config && config.$config.$after
+					;
+				
+				
+				
+				_suite = new RunnerSuite(_configs, setts);
+				
+				cfg_runConfigurationScript($before, function(){
+					
+					_suite.run(function(){
+						logger.log('>> completed'.cyan.bold, arguments);
+						
+						cfg_runConfigurationScript($after, function(){
+							done.apply(this, arguments);	
+						});
+					});	
+				})
+				
+			
+				
 			}
 		};
 		
@@ -1019,265 +1007,315 @@
 		}());
 		// end:source utils/io.js
 		// source utils/cfg.js
-		function cfg_prepair(config, arg) {
-				
-			var base = config.base;
-			if (base) {
-				base = new net.Uri(net.Uri.combine(base, '/'));
-				if (base.isRelative()){
-					base = io.env.currentDir.combine(base);
-				}
-			}else{
-				base = io.env.currentDir;
-			}
+		var cfg_prepair,
+			cfg_loadConfig,
+			cfg_runConfigurationScript,
+			cfg_hasScripts,
+			cfg_getScripts,
+			cfg_parseSuites,
+			cfg_getEnv,
+			cfg_split,
 			
-			config.base = net.Uri.combine(base.toDir(), '/');
-			config.nodeScripts = [];
-			config.domScripts = [];
+			watch
+			;
+		
+		(function(){
 			
-			
-			var script = arg;
-			if (script) {
-				if (/\.[\w]+$/.test(script) === false) {
-					script += '.test';
-				}
-				
-				var uri = new net.Uri(base).combine(script),
-					file = new io.File(uri);
-				if (file.exists() === false) {
+			cfg_prepair = function(config, arg) {
 					
-					if (/\/?test.?\//.test(script) === false) {
-						script = net.Uri.combine('test/', script);
-						file.uri = new net.Uri(base).combine(script);
-						
-						if (file.exists() === false) 
-							script = null;
-						
-					}else{
-						script = null;
+				var base = config.base;
+				if (base) {
+					base = new net.Uri(net.Uri.combine(base, '/'));
+					if (base.isRelative()){
+						base = io.env.currentDir.combine(base);
 					}
-					
+				}else{
+					base = io.env.currentDir;
 				}
 				
+				config.base = net.Uri.combine(base.toDir(), '/');
+				config.nodeScripts = [];
+				config.domScripts = [];
+				
+				
+				var script = arg;
 				if (script) {
-					
-					var nodeScripts = config.nodeScripts,
-						domScripts = config.domScripts,
-						executor = null;
-						
-					if (config.browser)
-						executor = 'dom';
-					
-					if (config.node)
-						executor = 'node';
-						
-					
-					cfg_addScript(script, config.base, nodeScripts, domScripts, executor);
-					
-					var ext = /\.\w{1,5}$/.exec(script)
-					if (ext && ext[0] === '.test') {
-						script = script.replace(/\.\w{1,5}$/, '.js');
-						if (new io.File(new net.Uri(base).combine(script)).exists()) {
-							(config.env || (config.env = [])).push(script);
-						}	
+					if (/\.[\w]+$/.test(script) === false) {
+						script += '.test';
 					}
 					
+					var uri = new net.Uri(base).combine(script),
+						file = new io.File(uri);
+					if (file.exists() === false) {
+						
+						if (/\/?test.?\//.test(script) === false) {
+							script = net.Uri.combine('test/', script);
+							file.uri = new net.Uri(base).combine(script);
+							
+							if (file.exists() === false) 
+								script = null;
+							
+						}else{
+							script = null;
+						}
+						
+					}
 					
+					if (script) {
+						
+						var nodeScripts = config.nodeScripts,
+							domScripts = config.domScripts,
+							executor = null;
+							
+						if (config.browser)
+							executor = 'dom';
+						
+						if (config.node)
+							executor = 'node';
+							
+						
+						cfg_addScript(script, config.base, nodeScripts, domScripts, executor);
+						
+						var ext = /\.\w{1,5}$/.exec(script)
+						if (ext && ext[0] === '.test') {
+							script = script.replace(/\.\w{1,5}$/, '.js');
+							if (new io.File(new net.Uri(base).combine(script)).exists()) {
+								(config.env || (config.env = [])).push(script);
+							}	
+						}
+						
+						
+					}
 				}
-			}
-			
-		}
-		
-		
-		/**
-		 * base: [String]
-		 * env: [String]
-		 * tests: String | [String]
-		 */
-		function cfg_loadConfig(baseConfig) {
-			
-			var path = baseConfig.config;
 				
-			if (path == null) {
-				path = /test.?[\\\/]?$/.test(baseConfig.base)
-					? 'config.js'
-					: 'test/config.js';
-					
-				path = net.Uri.combine(baseConfig.base, path);
-			}
-			
-			var file = new io.File(path);
-			
-			if (file.exists() === false) 
-				return {};
+			}; // cfg_prepair
 			
 			
-			return require(file.uri.toLocalFile());
-		}
-		
-		function cfg_getEnv(baseConfig, config) {
-			
-			if (typeof config.env === 'string')
-				config.env = [config.env];
-			
-			if (baseConfig.env == null)
-				baseConfig.env = [];
-			
-			if (Array.isArray(config.env)) 
-				baseConfig.env = ruqq.arr.distinct(baseConfig.env.concat(config.env));
-		}
-		
-		function cfg_getScripts(baseConfig, config) {
-			
-			if (config.tests) {
+			cfg_runConfigurationScript = function($script, done){
+				if ($script == null) 
+					return done();
 				
-				var tests = config.tests,
-					base = baseConfig.base,
-					nodeScripts = baseConfig.nodeScripts,
-					domScripts = baseConfig.domScripts,
-					executor = baseConfig.exec;
+				if (typeof $script === 'function') 
+					return $script(done);
+				
+				if (typeof $script === 'string') {
 					
-				cfg_addScript(tests, base, nodeScripts, domScripts, executor);
+					include
+						.js($script + '::Script')
+						.done(function(resp){
+							
+							if (!(resp && resp.Script && resp.Script.process)) {
+								logger
+									.error('<configuration script>', $script)
+									.error(' is not loaded or `process` function not implemented')
+									;
+								
+								done();
+							}
+							resp.Script.process(done);
+						});
+						
+					return;
+				}
+				
+				logger.error('Invalid configuration script', $config);
+				done();
 			}
 			
-			baseConfig.suites = cfg_parseSuites(config.suites, baseConfig.base);
-		}
-		
-		function cfg_hasScripts(config) {
-			if (!config)
+			
+			/**
+			 * base: [String]
+			 * env: [String]
+			 * tests: String | [String]
+			 */
+			cfg_loadConfig = function(baseConfig) {
+				
+				var path = baseConfig.config;
+					
+				if (path == null) {
+					path = /test.?[\\\/]?$/.test(baseConfig.base)
+						? 'config.js'
+						: 'test/config.js';
+						
+					path = net.Uri.combine(baseConfig.base, path);
+				}
+				
+				var file = new io.File(path);
+				
+				if (file.exists() === false) 
+					return {};
+				
+				
+				return require(file.uri.toLocalFile());
+			}
+			
+			cfg_getScripts = function(baseConfig, config) {
+				
+				if (config.tests) {
+					
+					var tests = config.tests,
+						base = baseConfig.base,
+						nodeScripts = baseConfig.nodeScripts,
+						domScripts = baseConfig.domScripts,
+						executor = baseConfig.exec;
+						
+					cfg_addScript(tests, base, nodeScripts, domScripts, executor);
+				}
+				
+				baseConfig.suites = cfg_parseSuites(config.suites, baseConfig.base);
+			};
+			
+			cfg_hasScripts = function(config) {
+				if (!config)
+					return false;
+				
+				if (arr_isEmpty(config.nodeScripts) === false)
+					return true;
+				
+				if (arr_isEmpty(config.domScripts) === false)
+					return true;
+				
+				
 				return false;
+			};
 			
-			if (arr_isEmpty(config.nodeScripts) === false)
-				return true;
-			
-			if (arr_isEmpty(config.domScripts) === false)
-				return true;
-			
-			
-			return false;
-		}
-		
-		function cfg_parseSuites(suites, base) {
-			var array = [],
-				key, x, config;
-			
-			for (key in suites) {
-				x = suites[key];
+			cfg_parseSuites = function(suites, base) {
+				var array = [],
+					key, x, config;
 				
-				config = {
-					base: x.base || base,
-					exec: x.exec,
-					env: x.env,
-					nodeScripts: [],
-					domScripts: []
-				};
-				
-				
-				cfg_addScript(x.tests, config.base, config.nodeScripts, config.domScripts, config.exec);
-				
-				
-				array.push(config);
-			}
-			return array;
-		}
-		
-		function cfg_addScript(path, base, nodeScripts, domScripts, executor, forceAsPath) {
-			
-			if (Array.isArray(path)) {
-				ruqq.arr.each(path, function(x){
-					cfg_addScript(x, base, nodeScripts, domScripts, executor, forceAsPath);
-				});
-				return;
-			}
-			
-			if (forceAsPath !== true && ~path.indexOf('*')) {
-				// asPath here is actually to prevent recursion in case if
-				// file, which is resolved by globbing, contains '*'
-				new io.Directory(base).readFiles(path).files.forEach(function(file){
-					path = file.uri.toRelativeString(base);
+				for (key in suites) {
+					x = suites[key];
 					
-					cfg_addScript(path, base, nodeScripts, domScripts, executor, true);
-				});
-				return;
-			}
-			
-			if (executor == null)
-				executor = path_isForBrowser(path) ? 'dom' : 'node';
-			
-			
-			if ('dom' === executor)
-				domScripts.push(path);
-				
-			if ('node' === executor)
-				nodeScripts.push(path);
-		}
-		
-		function path_isForNode(path) {
-			return /\-node\.[\w]+$/.test(path) || /\/node\//.test(path);
-		}
-		function path_isForBrowser(path) {
-			return /\-dom\.[\w]+$/.test(path) || /\/dom\//.test(path);
-		}
-		
-		
-		function cfg_split(config) {
-			// split config per executor
-			var configs = [];
-			if (!arr_isEmpty(config.domScripts) && !config.node) {
-				configs.push({
-					exec: 'browser',
-					env: config.env,
-					scripts: config.domScripts,
-					base: config.base,
-				});
-			}
-			
-			if (!arr_isEmpty(config.nodeScripts) && !config.browser) {
-				configs.push({
-					exec: 'node',
-					env: config.env,
-					scripts: config.nodeScripts,
-					base: config.base,
-				});
-			}
-			
-			if (config.suites) {
-				
-				ruqq.arr.each(config.suites, function(suite){
-					configs = configs.concat(cfg_split(suite));
-				});
-				
-			}
-			
-			
-			
-			return configs;
-		}
-		
-		
-			
-		function watch(base, resources, callback) {
-			watch = function(){};
-			
-			
-			base = new net.Uri(base);
-			ruqq.arr.each(resources, function(url){
-				
-				var uri = new net.Uri(url);
-				if (uri.isRelative()) {
-					uri = base.combine(uri);
+					config = {
+						base: x.base || base,
+						exec: x.exec,
+						env: x.env,
+						nodeScripts: [],
+						domScripts: []
+					};
+					
+					
+					cfg_addScript(x.tests, config.base, config.nodeScripts, config.domScripts, config.exec);
+					
+					
+					array.push(config);
 				}
-				var file = new io.File(uri);
+				return array;
+			};
+			
+			cfg_getEnv = function(baseConfig, config) {
 				
-				if (file.exists()) {
-					io.watcher.watch(file.uri.toLocalFile(), function(){
-						logger.log(' - file changed - '.green, file.uri.file.bold);
-						io.File.clearCache(file.uri.toLocalFile());
-						callback();
+				if (typeof config.env === 'string')
+					config.env = [config.env];
+				
+				if (baseConfig.env == null)
+					baseConfig.env = [];
+				
+				if (Array.isArray(config.env)) 
+					baseConfig.env = ruqq.arr.distinct(baseConfig.env.concat(config.env));
+			};
+			
+			
+			cfg_split = function(config) {
+				// split config per executor
+				var configs = [];
+				if (!arr_isEmpty(config.domScripts) && !config.node) {
+					configs.push({
+						exec: 'browser',
+						env: config.env,
+						scripts: config.domScripts,
+						base: config.base,
 					});
 				}
-			});
-		}
+				
+				if (!arr_isEmpty(config.nodeScripts) && !config.browser) {
+					configs.push({
+						exec: 'node',
+						env: config.env,
+						scripts: config.nodeScripts,
+						base: config.base,
+					});
+				}
+				
+				if (config.suites) {
+					
+					ruqq.arr.each(config.suites, function(suite){
+						configs = configs.concat(cfg_split(suite));
+					});
+					
+				}
+				
+				return configs;
+			}
+			
+			
+				
+			watch = function(base, resources, callback) {
+				watch = function(){};
+				
+				
+				base = new net.Uri(base);
+				ruqq.arr.each(resources, function(url){
+					
+					var uri = new net.Uri(url);
+					if (uri.isRelative()) {
+						uri = base.combine(uri);
+					}
+					var file = new io.File(uri);
+					
+					if (file.exists()) {
+						io.watcher.watch(file.uri.toLocalFile(), function(){
+							logger.log(' - file changed - '.green, file.uri.file.bold);
+							io.File.clearCache(file.uri.toLocalFile());
+							callback();
+						});
+					}
+				});
+			};
+			
+			//= private
+			
+			function cfg_addScript(path, base, nodeScripts, domScripts, executor, forceAsPath) {
+				
+				if (Array.isArray(path)) {
+					ruqq.arr.each(path, function(x){
+						cfg_addScript(x, base, nodeScripts, domScripts, executor, forceAsPath);
+					});
+					return;
+				}
+				
+				if (forceAsPath !== true && ~path.indexOf('*')) {
+					// asPath here is actually to prevent recursion in case if
+					// file, which is resolved by globbing, contains '*'
+					new io.Directory(base).readFiles(path).files.forEach(function(file){
+						path = file.uri.toRelativeString(base);
+						
+						cfg_addScript(path, base, nodeScripts, domScripts, executor, true);
+					});
+					return;
+				}
+				
+				if (executor == null)
+					executor = path_isForBrowser(path) ? 'dom' : 'node';
+				
+				
+				if ('dom' === executor)
+					domScripts.push(path);
+					
+				if ('node' === executor)
+					nodeScripts.push(path);
+			}
+			
+			function path_isForNode(path) {
+				return /\-node\.[\w]+$/.test(path) || /\/node\//.test(path);
+			}
+			
+			function path_isForBrowser(path) {
+				return /\-dom\.[\w]+$/.test(path) || /\/dom\//.test(path);
+			}
+			
+			
+		}());
 		// end:source utils/cfg.js
 		// source utils/logger.js
 		(function(){
@@ -1447,14 +1485,16 @@
 						return;
 					}
 					
-					data = assert.resolveData(data, this.config.base);
+					var base = this.suites[0].base || '';
+					
+					data = assert.resolveData(data, base);
 					
 					logger.log('');
 					
 					if (data.file && data.line != null) {
 						
 						var path = data.file.replace(/(\/)?utest\//i, '$1'),
-							uri = new net.Uri(this.config.base).combine(path),
+							uri = new net.Uri(base).combine(path),
 							source = new io.File(uri).read().split(/\r\n|\r|\n/g),
 							line = source[data.line - 1],
 							code = line && line.trim();
@@ -1924,14 +1964,17 @@
 			var cfg = _suite.cfgNode || _suite.cfgBrowser;
 			
 			io_connect(cfg)
-				.done(callback)
-				.reject(function(error){
+				.done(function(socket){
 					
-					logger.error('<Exit> sockets could not be connected');
-					
-					callback();
+					callback(socket, cfg);
 				})
-				;
+				.fail(function(error){
+					
+					logger
+						.error('<Exit> server connection is not established.', error)
+						.log('Executed `atma server`?'.bold)
+						;
+				});
 		};
 		// end:source utest.extend.js
 			

@@ -25,7 +25,7 @@ include.exports = Class.Collection(Function, {
 					'Content-Type': 'text/plain'
 				});
 				
-				res.end('404');
+				res.end('404 ' + (req.filePath || ''));
 				return;
 			}
 			

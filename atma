@@ -8,22 +8,26 @@ require('./src/app.js').done(initialize);
 
 function initialize(app) {
 	
+	var base = io.env.applicationDir.toString();
+	
+	logger.log('BASE', base);
+	
 	include.cfg({
-		path: io.env.applicationDir.toString() + '/',
+		path: base,
 		loader: {
-			coffee: '/node_modules/atma-libs/include/loader/coffee/loader.js',
-			less: '/node_modules/atma-libs/include/loader/less/loader.js',
-			yml: '/node_modules/atma-libs/include/loader/yml/yml.js'
+			coffee: base + 'node_modules/atma-libs/include/loader/coffee/loader.js',
+			less: base + 'node_modules/atma-libs/include/loader/less/loader.js',
+			yml: base + 'node_modules/atma-libs/include/loader/yml/yml.js'
 		}
 	}).routes({
 		
-		handler: '/src/handler/{0}.js',
-		parser: '/src/parser/{0}.js',
-		action: '/src/action/{0}.js',
-		script: '/src/{0}.js',
-		helper: '/src/helper/{0}.js',
-		server: '/src/server/{0}.js',
-		atma: '/{0}.js'
+		handler: base + 'src/handler/{0}.js',
+		parser:  base + 'src/parser/{0}.js',
+		action:  base + 'src/action/{0}.js',
+		script:  base + 'src/{0}.js',
+		helper:  base + 'src/helper/{0}.js',
+		server:  base + 'src/server/{0}.js',
+		atma:    base + '{0}.js'
 	}).js({
 		atma: [
 			'src/utils/exports'
@@ -37,8 +41,8 @@ function initialize(app) {
 	}).done(function(resp) {
 		
 		logger(99)
-			.log('> process:', process)
-			.log('> config:', app.config);
+			.log('> process:'.cyan, process)
+			.log('> config:'.cyan, app.config);
 		
 
 		if (app.config.tasks == null) {
