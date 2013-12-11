@@ -45,12 +45,13 @@ include.js({
 
 	function copyResources(cssFile, targetUri) {
 
-		var solutionUri = global.solution.uri,
+		var solutionUri = global.solution.uris.outputMain, // -global.solution.uri,
 			cssFilePath = cssFile.uri.toString(),
 			solutionPath = solutionUri.toString(),
 			resources = cssFile.resources,
 			dir = net.Uri.combine(targetUri.toLocalDir(), 'resources/');
 
+		
 		
 		resources.forEach(function(x){
 			
@@ -82,7 +83,7 @@ include.js({
 		var path = fileUri.toString();
 		if (path.indexOf(path_REF) === -1) {
 			
-			return new net.Ur(net.Uri.combine(outputDir, fileUri.uri.file));
+			return new net.Uri(net.Uri.combine(outputDir, fileUri.file));
 		}
 		
 		
