@@ -25,7 +25,7 @@ include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(fu
         if (getPropertySetter('exports', ast) != null) {
 			_info.hasExports = true;
 		}
-
+		
         return _info;
 	}
 
@@ -68,6 +68,7 @@ include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(fu
 			case 'promise':
 			case 'client':
 			case 'server':
+			case 'use':
 				break;
 			default:
 				console.log('getIncludes: Unknown expression', node.expression);

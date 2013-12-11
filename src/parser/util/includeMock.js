@@ -5,18 +5,24 @@
 	include.exports = Class({
 		Construct: function(resource) {
 			
+			var that = this;
+			
 			this.url = resource.url;
 			this.location = resource.location;
 			this.includes = [];
 			
-			ruqq.arr.each(['js', 'css', 'load', 'lazy'], function(x) {
+			['js', 'css', 'load', 'lazy'].forEach(function(x) {
+				
 				this[x] = function(pckg) {
-
+					
 					if (typeof pckg === 'string' && arguments.length > 1) {
 						pckg = Array.prototype.slice.call(arguments);
 					}
-				
+					
+					
+					
 					Routes.each(x, pckg, function(namespace, route) {
+						
 						this.includes.push({
 							type: x,
 							url: route.path,
@@ -24,9 +30,11 @@
 							namespace: namespace
 						});
 					}.bind(this));
+					
 					return this;
-				}
-			}.bind(this));
+				};
+				
+			}, this);
 		},
 		cfg: function() {
 			return this;

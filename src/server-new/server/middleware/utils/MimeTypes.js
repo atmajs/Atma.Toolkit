@@ -5,7 +5,7 @@ set('text/html', 'html', 'htm');
 set('text/css', 'css', 'less');
 set('text/plain', 'txt', 'mask');
 
-set('application/x-javascript', 'js', 'coffee');
+set('application/x-javascript', 'js', 'coffee', 'jsnext');
 set('application/json', 'json', 'yml');
 
 set('image/jpeg', 'jpeg', 'jpg');

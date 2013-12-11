@@ -20,6 +20,7 @@ include.js({
             this.type = _type;
             this.namespace = _namespace;
             this.content = includeData.content;
+            this.parent = parent;
             
 
             if (_url) {

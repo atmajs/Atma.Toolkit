@@ -12,12 +12,21 @@ function initialize(app) {
 	
 	logger.log('BASE', base);
 	
+	function loaderPath(name) {
+		return base
+			+ 'node_modules/atma-libs/include/loader/'
+			+ name
+			+ '/loader.js'
+			;
+	}
+	
 	include.cfg({
 		path: base,
 		loader: {
-			coffee: base + 'node_modules/atma-libs/include/loader/coffee/loader.js',
-			less: base + 'node_modules/atma-libs/include/loader/less/loader.js',
-			yml: base + 'node_modules/atma-libs/include/loader/yml/yml.js'
+			coffee: loaderPath('coffee'),
+			less: loaderPath('less'),
+			yml: loaderPath('yml'),
+			jsnext: loaderPath('traceur'),
 		}
 	}).routes({
 		

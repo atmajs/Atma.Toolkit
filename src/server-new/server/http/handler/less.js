@@ -1,4 +1,4 @@
-
+console.log('WWWWW'.red.bold)
 include.exports = Class({
 	Extends: atma.server.IHttpHandler,
 	

@@ -133,6 +133,16 @@ include
 
 						ast_append(ast, code);
 					}
+					
+					// define state of all resources that are before include.js as loaded
+					if (setCurrentInclude === false) {
+						var info = ruqq.arr.first(solution.bin.js, function(info){
+							return info.id === resource.id
+						});
+						
+						if (info) 
+							info.state = 4;
+					}
 
 					
 					ast_append(ast, resource.ast.body);
@@ -213,9 +223,17 @@ include
 				return;
 			}
 
-			solution.bin[type] = ruqq.arr.select(stack, ['id', 'url', 'namespace']);
+			//-solution.bin[type] = ruqq.arr.select(stack, ['id', 'url', 'namespace']);
+			solution.bin[type] = stack.map(function(res){
+				
+				return {
+					id: res.id,
+					url: res.url,
+					namespace: res.namespace,
+					parent: res.parent && res.parent.url
+				};
+			});
 			solution.output[type] = [];
-
 
 			BuilderHelper[type](solution, stack, solution.output);
 		},
@@ -246,19 +264,26 @@ include
 	var includesStack = (function() {
 
 		function build(type, includes) {
-			if (!includes && !includes.length) return null;
+			if (!(includes && includes.length))
+				return null;
+			
 			var arr = [];
 			for (var i = 0; i < includes.length; i++) {
 
 				var resource = includes[i];
+				
+				if (resource.type == type) {
+					arr.push(resource);
+				}
+				
 				var stack = build(type, resource.includes);
 				if (stack && stack.length) {
 					arr = arr.concat(stack);
 				}
 
-				if (resource.type == type) {
-					arr.push(resource);
-				}
+				//if (resource.type == type) {
+				//	arr.push(resource);
+				//}
 			}
 			return arr;
 		}
