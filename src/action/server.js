@@ -23,7 +23,7 @@
             }
 
             include
-                .js('/src/server-new/server.js')
+                .js('/src/server/server.js')
                 .done(function(resp){
     
                     resp.server.start(config);

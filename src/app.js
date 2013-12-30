@@ -1,7 +1,7 @@
 
 
-var Configs = require('./config/WorkerCollection.js'),
-    Deferred = Class({Extends: Class.Deferred});
+var Configs = require('./config/WorkerCollection.js')
+	;
     
 include
     .cfg({
@@ -44,7 +44,7 @@ var Application = Class({
     
     run: function(taskConfigs){
         
-        app.worker = new Deferred();
+        app.worker = new Class.Deferred();
         app.errors = [];
         
         if (taskConfigs != null) {
@@ -113,7 +113,7 @@ var Application = Class({
     },
     
     findAction: function(action){
-        var dfr = new Deferred(),
+        var dfr = new Class.Deferred(),
             path = this.config.actions[action];
             
         if (path == null) 

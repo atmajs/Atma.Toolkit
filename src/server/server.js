@@ -1,115 +1,108 @@
-(function() {
 
-	var resource = include;
 
-	include
-		.js('routes.js::Routes', 'websocket.js::WebSocket', 'proxy.js')
-		.done(function(resp) {
-			
-			var appConfig = app.config,
-				routes = resp.Routes,
-				sockets = resp.WebSocket;
-			
-			include.exports = {
-				start: function(config) {
-					var http = require("http"),
-						port = config.port || 5777;
+require('atma-server');
+
+
+var resource = include
+	.js(
+		'./server/middleware/Middleware.js',
+		'./server/middleware/static.js',
+		'./server/middleware/proxy.js'
+	)
+	
+	.done(function(resp){
+		
+		var appConfig = app.config;
+		
+		resource.exports = {
+		
+			start: function(config) {
+				
+				var port = config.port || 5777,
+					proxyPath = config.proxy;
+				
+				
+				var configs = new net
+					.Uri(resource.location)
+					.combine('server/config/')
+					.toString()
+					;
+					
+				resource.cfg({
+					path: io
+						.env
+						.applicationDir
+						.combine('src/server/')
+						.toString()
+				})
+				
+				atma.server.app = atma
+					.server
+					.Application({
+						configs: configs,
+						args: {
+							debug: true
+						}
+					})
+					.done(function(app) {
 						
-					if (config.proxy) {
-						resp.proxy.set(config.proxy);
-					}
-	
-	
-					var server = http.createServer(function(request, response) {
-
-						resp.Routes.resolve(request.url, function(error, Controller){
-							if (error) {
-								logger.error(error);
-								response.end(error);
-								return;
-							}
+						mask.cfg('allowCache', false);
+						
+						var server,
+							middleware = new resp.Middleware()
+								.add(app.responder())
+								.add(resp.static())
+								.add(resp.proxy(proxyPath))
+								;
+						
+						server =  require('http')
+							.createServer(middleware.listener);
+						server
+							.listen(port);
+						
+						
+						var serverCfg = appConfig.server,
 							
-							Controller.request(request, response);
-						});
+							handlers, websockets, subapps;
 						
-					});
-	
-					resp.WebSocket.listen(server);
-					
-					server.listen(port);
-					
-					logger.log('Server Running on bold<green<%s>>'.color, port);
-	
-				}
-			};
-			
-			if (appConfig.server) {
-				// Extend Controllers
-				
-				
-				var controllers = appConfig.server.controllers;
-				if (controllers) {
-					var attachToRoutes = function(controller, src) {
-						if (!controller || !controller.attach) {
-							logger.error([ 
-								'Defined controller has no attach function,'
-								, 'that defines routes.'
-								, src
-							].join(' '));
-							return;
+						if (serverCfg) {
+							handlers = serverCfg.handlers,
+							websockets = serverCfg.websockets,
+							subapps = serverCfg.subapps;
 						}
+							
 						
-						controller.attach(routes);
-					}
-					
-					ruqq.arr.each(controllers, function(x){
+						handlers && app
+							.handlers
+							.registerHandlers(handlers, app.config.handler)
+							;	
 						
-						if (typeof x === 'string') {
-							include.js(x + '::Controller').done(function(resp){
-								attachToRoutes(resp.Controller, x);
-							});
-							return;
-						}
+						websockets && app
+							.handlers
+							.registerWebsockets(websockets, app.config)
+							;
 						
-						// assume this is already an instance
-						attachToRoutes(x);
-					});
-					
-				}
-				
-				// Extend websockets
-				
-				var websockets = appConfig.server.websockets;
-				if (websockets) {
-					var attachSocketListener= function(namespace, handler){
-						if (typeof handler !== 'function') {
-							logger.error('WebSocket Listener - should be a class function')
-							logger.error('\t', namespace, handler);
-							return;
-						}
+						subapps && app
+							.handlers
+							.registerSubApps(subapps)
+							;
+							
+						app
+							.autoreload(server)
+							.getWatcher()
+							.on('fileChange', function(path){
+								
+								io.File.clearCache(path);
+							})
+							;
 						
-						sockets.register(namespace, handler);
-					};
-					
-					var createListener = function(namespace, handler){
-						if (typeof handler === 'string') {
-							include.js(handler + '::Listener').done(function(resp){
-								attachSocketListener(namespace, resp.Listener);
-							});
-							return;
-						}
 						
-						attachSocketListener(namespace, handler)
-					};
-					
-					
-					for (var key in websockets) {
-						createListener(key, websockets[key]);
-					}
-				}
+						
+						
+						logger.log('Listen %s'.green.bold, port);
+					});	
 			}
+		};
+		
+	});
 	
-		});
-
-
-}());
