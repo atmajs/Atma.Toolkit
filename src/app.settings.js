@@ -1,6 +1,7 @@
 (function(global) {
 
 
+
 	global.Settings = {
 		initialize: function(setts) {
 			if (setts) {

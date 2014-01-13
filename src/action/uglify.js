@@ -40,7 +40,12 @@
 					.File
 					.middleware
 					.uglify(file, config);
-
+					
+				io
+					.File
+					.middleware
+					.condcomments(file, config);
+					
                 new io.File(file.uri.combine(file.uri.getName() + '.min.' + file.uri.extension)).write(file.content);
             });
 
