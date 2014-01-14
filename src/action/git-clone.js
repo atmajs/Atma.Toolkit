@@ -45,7 +45,7 @@
                 atmaDir = atmaDir + '/';
             }
 
-            var file = new io.File(io.env.applicationDir.combine('globals/projects.txt')),
+            var file = new io.File(io.env.appdataDir.combine('config.yml')),
                 globals = app.config.globals;
             
             globals.projects['atma'] = {
@@ -54,7 +54,7 @@
             
             
             try {
-                file.write(JSON.stringify(globals, null, 4));   
+                file.write(globals);   
             } catch(e) {
                 var msg = 'Access Denied - run "$ atma globals" and specify correct just installed atma path.'
                 logger.error(msg, atmaDir);

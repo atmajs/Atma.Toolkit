@@ -23,6 +23,9 @@ function newLine() {
 include.exports = {
     process: function(){
         
+        logger.cfg('logCaller', false);
+        
+        
         var actions = app.config.actions,
             args = app.config.cli.args,
             action = args[0];

@@ -3,13 +3,6 @@
 var Configs = require('./config/WorkerCollection.js')
 	;
     
-include
-    .cfg({
-		path: io.env.applicationDir.toString() + '/',
-		loader: {
-			coffee: '/node_modules/atma-libs/include/loader/coffee/loader.js'
-		}
-	})
 
 var Application = Class({
     Extends: [Class.EventEmitter, Class.Deferred],

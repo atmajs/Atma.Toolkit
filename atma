@@ -3,15 +3,10 @@
 require('atma-libs/globals-dev');
 require('atma-logger');
 require('atma-io');
-require('./src/app.js').done(initialize);
 
+var base = io.env.applicationDir.toString();
 
-function initialize(app) {
-	
-	var base = io.env.applicationDir.toString();
-	
-	logger.log('BASE', base);
-	
+(function(){
 	function loaderPath(name) {
 		return base
 			+ 'node_modules/atma-libs/include/loader/'
@@ -20,68 +15,89 @@ function initialize(app) {
 			;
 	}
 	
-	include.cfg({
-		path: base,
-		loader: {
-			coffee: loaderPath('coffee'),
-			less: loaderPath('less'),
-			yml: loaderPath('yml'),
-			jsnext: loaderPath('traceur'),
-		}
-	}).routes({
+	include
+		.cfg({
+			path: base,
+			loader: {
+				coffee: loaderPath('coffee'),
+				less: loaderPath('less'),
+				yml: loaderPath('yml'),
+				jsnext: loaderPath('traceur'),
+			}
+		})
+		.routes({
 		
-		handler: base + 'src/handler/{0}.js',
-		parser:  base + 'src/parser/{0}.js',
-		action:  base + 'src/action/{0}.js',
-		script:  base + 'src/{0}.js',
-		helper:  base + 'src/helper/{0}.js',
-		server:  base + 'src/server/{0}.js',
-		atma:    base + '{0}.js'
-	}).js({
-		atma: [
-			'src/utils/exports'
-		],
-		settings: '/src/app.settings.js',
-		
-		script: [ 
-			'helper/extensions', 
-		],
-		
-	}).done(function(resp) {
-		
-		logger(99)
-			.log('> process:'.cyan, process)
-			.log('> config:'.cyan, app.config);
-		
+			handler: base + 'src/handler/{0}.js',
+			parser:  base + 'src/parser/{0}.js',
+			action:  base + 'src/action/{0}.js',
+			script:  base + 'src/{0}.js',
+			helper:  base + 'src/helper/{0}.js',
+			server:  base + 'src/server/{0}.js',
+			atma:    base + '{0}.js'
+		})
+		.js({
+			atma: [
+				'src/utils/exports'
+			]
+		})
+		.done(function(){
+						
+			require('./src/app.js')
+				.done(initialize);
 
-		if (app.config.tasks == null) {
-			logger.error('Invalid Config', app.config)
-			return 0;
-		}
-
-		
-		app
-			.run()
-			.fail(function(error){
-				logger.error(error);
-				process.exit(1);
-			})
-			.always(function(){
-				if (app.errors.length) {
-					logger.error(app.errors);
-					
-					process.exit(1);
-				}
-				
-				logger.log(' // Done'.green);
-			});
-
-
-		return 1;
-
-	});
-
+			
+		})
 	
+}());
+
+
+function initialize(app) {
+	
+	
+	include
+		
+		.js({
+			
+			settings: '/src/app.settings.js',
+			
+			script: [ 
+				'helper/extensions', 
+			],
+			
+		})
+		.done(function(resp) {
+			
+			logger(99)
+				.log('> process:'.cyan, process)
+				.log('> config:'.cyan, app.config);
+			
+	
+			if (app.config.tasks == null) {
+				logger.error('Invalid Config', app.config)
+				return 0;
+			}
+	
+			
+			app
+				.run()
+				.fail(function(error){
+					logger.error(error);
+					process.exit(1);
+				})
+				.always(function(){
+					if (app.errors.length) {
+						logger.error(app.errors);
+						
+						process.exit(1);
+					}
+					
+					logger.log(' // Done'.green);
+				});
+	
+	
+			return 1;
+	
+		});
 }
 
 	

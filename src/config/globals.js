@@ -1,25 +1,30 @@
 
 var __path = io.env.applicationDir.toString() + '/',
-    __globals;
-
-include
-    .load('/globals/projects.txt')
-    .done(function(resp) {
-
-    __globals = JSON.parse(resp.load.projects);
-    __globals.resolvePathFromProject = resolvePathByProject;
     
-    include.exports = function(app, done) {
-        
-        prepairProjects(__globals);
-        prepairPlugins(__globals, app.config);
-    
+    f_defaults = new io.File(io.env.applicationDir.combine('globals/config.yml')),
+    f_profile = new io.File(io.env.appdataDir.combine('config.yml'))
+    ;
 
-        done({
-            globals: __globals
-        });
-    };
-});
+var _globals = f_defaults.read(),
+    _profile = f_profile.exists() && f_profile.read()
+    ;
+if (_profile) 
+    _globals = obj_deepExtend(_globals, _profile);
+
+
+_globals.resolvePathFromProject = resolvePathByProject;
+
+include.exports = function(app, done) {
+    
+    prepairProjects(_globals);
+    prepairPlugins(_globals, app.config);
+
+
+    done({
+        globals: _globals
+    });
+};
+
 
 
 function resolvePathByProject(path){
@@ -29,7 +34,7 @@ function resolvePathByProject(path){
     
     var match = /\{([\w]+)\}\//.exec(path),
         projectName = match && match[1],
-        project = __globals.projects[projectName],
+        project = _globals.projects[projectName],
         projectPath = project && project.path;
         
     if (!projectPath) {

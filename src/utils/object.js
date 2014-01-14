@@ -29,6 +29,56 @@ function obj_extend(target) {
 	return target;
 }
 
+function obj_deepExtend(target, source){
+		
+	if (source == null) 
+		return target;
+	
+	if (Array.isArray(target) && Array.isArray(source)) {
+		for (var i = 0, x, imax = source.length; i < imax; i++){
+			x = source[i];
+			if (target.indexOf(x) === -1) {
+				target.push(x);
+			}
+		}
+		return target;
+	}
+	
+	if (typeof source !== 'object' && typeof target !== 'object') {
+		logger.log('<cfg extend> not an object or type missmatch');
+		return target;
+	}
+	
+	var key, val;
+	for(key in source){
+		val = source[key];
+		
+		if (target[key] == null) {
+			target[key] = val;
+			continue;
+		}
+		
+		if (Array.isArray(val)) {
+			if (Array.isArray(target[key]) === false) {
+				logger.log('<cfg extend> type missmatch', key, val, target[key]);
+				
+				target[key] = val;
+				continue;
+			}
+			obj_deepExtend(target[key], val);
+			continue;
+		}
+		
+		if (typeof val === 'object' && typeof target[key] === 'object') {
+			target[key] = obj_deepExtend(target[key], val);
+			continue;
+		}
+		
+		target[key] = val;
+	}
+	
+	return target;
+}
 
 function obj_defaults(target) {
 	

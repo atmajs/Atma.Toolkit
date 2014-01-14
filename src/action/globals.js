@@ -5,13 +5,22 @@ include.exports = {
 	},
 	process: function(config, done) {
 		
-		var path =	io
-			.env
-			.applicationDir
-			.combine('globals/projects.txt')
-			.toString();
-			
-		require('openurl').open(path);
+		var file = new io.File(io
+				.env
+				.appdataDir
+				.combine('config.yml')
+			);
+		
+		if (!file.exists()) {
+			io
+				.env
+				.applicationDir
+				.combine('globals/config.yml')
+				.copyTo(file.uri.toLocalFile());
+		}
+		
+		
+		require('openurl').open(file.uri.toString());
 
 		done();
 	}
