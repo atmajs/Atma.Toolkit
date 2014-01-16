@@ -23,11 +23,22 @@
     "yamljs": ">0.0.0",
     "openurl": "~1.1.0",
     "socket.io-client": "~0.9.11",
+    "socket.io": "~0.9.16",
     "atma-libs": ">0.0.0",
     "atma-logger": ">0.0.55",
     "atma-io": ">0.0.41",
-    "atma-server": ">0.0.0",
-    "socket.io": "~0.9.16"
+    "atma-server": ">0.0.0"
+  },
+  "scripts": {
+    "postinstall": "atma install"
+  },
+  "atma": {
+    "plugins": [
+      "atma-less-loader",
+      "atma-coffee-loader",
+      "atma-yaml-loader",
+      "atma-traceur-loader"
+    ]
   },
   "repository": {
     "type": "git",

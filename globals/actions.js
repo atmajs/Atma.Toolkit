@@ -44,5 +44,7 @@ function defaultActions() {
 			paths['build'] = solution;
 	
 	
+	// aliases
+	paths['gen'] = paths['template'];
 	return paths;
 }

@@ -1,0 +1,17 @@
+{
+    "name": "#{name}",
+    "version": "0.0.1",
+    "description": "",
+    "main": "lib/#{name}.js",
+    "scripts": {
+        
+    },
+    "keywords": [
+        ""
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        
+    }
+}

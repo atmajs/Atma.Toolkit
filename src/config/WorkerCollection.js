@@ -47,9 +47,8 @@ function cfg_extend(config, object) {
      *	Actions = {action: String (path to handler)}
      */
     if ('actions' in object) {
-    
-        Object.extend(config.actions, object.actions);
         
+        Object.extend(config.actions, object.actions);
     }
     
     /**

@@ -17,12 +17,16 @@ _globals.resolvePathFromProject = resolvePathByProject;
 include.exports = function(app, done) {
     
     prepairProjects(_globals);
-    prepairPlugins(_globals, app.config);
+    
+    prepairPlugins(_globals, app.config)
+        .always(function(){
+            
+            done({
+                globals: _globals
+            });
+        })
 
-
-    done({
-        globals: _globals
-    });
+    
 };
 
 
@@ -49,13 +53,17 @@ function resolvePathByProject(path){
 
 function prepairPlugins(globals, config) {
     
-    if (globals.plugins == null) {
-        return;
-    }
-
-
+    var await = new Class.Await();
+    
+    if (globals.plugins == null) 
+        return await;
+    
     ruqq.arr.each(globals.plugins, function(plugin) {
-        var url = String.format('%1plugins/%2/%2-plugin.js', __path, plugin);
+        
+        var resolve = await.delegate(),
+            url = String.format('%1plugins/%2/%2-plugin.js', __path, plugin)
+            ;
+            
         include.js(url + '::Plugin')
             .done(function(resp) {
 
@@ -65,9 +73,12 @@ function prepairPlugins(globals, config) {
             }
 
             resp.Plugin.register(config);
+            
+            resolve();
         });
     });
 
+    return await;
 }
 
 
