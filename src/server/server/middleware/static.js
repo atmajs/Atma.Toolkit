@@ -53,10 +53,12 @@ include
 				return;
 			}
 			
-			var content = file.read('binary');
+			var content = file.read('buffer');
 
 			if (content == null)
 				content = '<undefined>';
+
+
 
 			if (typeof content === 'object' && content instanceof Buffer === false){
 				try {
@@ -70,6 +72,7 @@ include
 				'Content-Type': mimeType
 			});
 			
+
 			res.end(content);
 		}
 	});

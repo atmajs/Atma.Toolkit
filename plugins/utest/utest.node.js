@@ -159,16 +159,22 @@
 				callback();
 			}, _options.timeout);
 			
-			return fn;
+			return {
+				fn: fn,
+				id: timeout
+			};
 		}
 		
 		
 		function runCase(fn, done, teardown, key) {
+			
+			var asyncData;
 			try {
 					
 				if (typeof fn === 'function') {
 					if (case_isAsync(fn)) {
-						fn(async(teardownDelegate(teardown, done), key));
+						asyncData = async(teardownDelegate(teardown, done), key);
+						fn(asyncData.fn);
 						return;
 					}
 					
@@ -177,6 +183,10 @@
 				teardownDelegate(teardown, done)();	
 			
 			} catch(error){
+				
+				if (asyncData)
+					clearTimeout(asyncData.id);
+				
 				console.error(error.stack || error);
 				
 				this.errors++;
