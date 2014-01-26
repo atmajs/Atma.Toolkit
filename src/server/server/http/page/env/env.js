@@ -17,7 +17,7 @@ include.exports = Class({
 		add_source(scripts, '/.reference/atma/ruqq/lib/dom/jquery.js');
 		add_source(scripts, '/.reference/atma/mask/lib/mask.js');
 		
-		var routes = app.config.globals.defaultRoutes;
+		var routes = app.config.defaultRoutes;
 		if (routes) {
 			
 			add_script(scripts, 'include.routes(' + JSON.stringify(routes, null, 4) + ')');

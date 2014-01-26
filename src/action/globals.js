@@ -12,11 +12,9 @@ include.exports = {
 			);
 		
 		if (!file.exists()) {
-			io
-				.env
-				.applicationDir
-				.combine('globals/config.yml')
-				.copyTo(file.uri.toLocalFile());
+			
+			file
+				.write({ projects: {} });
 		}
 		
 		

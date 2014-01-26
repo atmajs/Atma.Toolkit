@@ -73,7 +73,7 @@ function initialize(app) {
 			
 	
 			if (app.config.tasks == null) {
-				logger.error('Invalid Config', app.config)
+				logger.error('Invalid Config', app.config.toJSON());
 				return 0;
 			}
 	

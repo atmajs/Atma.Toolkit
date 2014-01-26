@@ -41,24 +41,32 @@
 
     var RoutesJob = Class({
         Construct: function(atmaDir) {
-            if (atmaDir[atmaDir.length - 1] != '/') {
+            if (atmaDir[atmaDir.length - 1] != '/') 
                 atmaDir = atmaDir + '/';
-            }
+            
+            
+            app.config.$write({
+                projects: {
+                    atma: {
+                        path: "file:///" + atmaDir
+                    }
+                }
+            });
 
-            var file = new io.File(io.env.appdataDir.combine('config.yml')),
-                globals = app.config.globals;
-            
-            globals.projects['atma'] = {
-                path: "file:///" + atmaDir
-            };
-            
-            
-            try {
-                file.write(globals);   
-            } catch(e) {
-                var msg = 'Access Denied - run "$ atma globals" and specify correct just installed atma path.'
-                logger.error(msg, atmaDir);
-            }
+            ////////var file = new io.File(io.env.appdataDir.combine('config.yml')),
+            ////////    globals = app.config.globals;
+            ////////
+            ////////globals.projects['atma'] = {
+            ////////    path: "file:///" + atmaDir
+            ////////};
+            ////////
+            ////////
+            ////////try {
+            ////////    file.write(globals);   
+            ////////} catch(e) {
+            ////////    var msg = 'Access Denied - run "$ atma globals" and specify correct just installed atma path.'
+            ////////    logger.error(msg, atmaDir);
+            ////////}
             
         }
     })

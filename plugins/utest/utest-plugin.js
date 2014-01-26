@@ -2,9 +2,9 @@
 var uri = new net.Uri(include.url);
 
 include.exports = {
-	register: function(globals){
+	register: function(rootConfig){
 		
-		globals.extend({
+		rootConfig.$extend({
 			actions: {
 				test: getPath('/utest.node.js')
 			},

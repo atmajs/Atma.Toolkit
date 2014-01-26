@@ -913,7 +913,7 @@
 		include.exports = {
 			process: function(setts, done) {
 	
-				var arg = setts.script || app.config.cli.args[1],
+				var arg = setts.script || app.config.$cli.args[1],
 					config;
 			
 				cfg_prepair(setts, arg);

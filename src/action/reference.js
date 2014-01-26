@@ -22,7 +22,7 @@
 					var args = process.argv,
 						path = config.path || args[3],
 						name = config.name || args[4],
-						projects = app.config.globals.projects;
+						projects = app.config.projects;
 	
 	
 					if (!projects){

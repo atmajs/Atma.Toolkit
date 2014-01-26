@@ -1,8 +1,8 @@
 
-
-var Configs = require('./config/WorkerCollection.js')
+var AppCfg = require('appcfg'),
+	Config = require('./config/Config')
 	;
-    
+
 
 var Application = Class({
     Extends: [Class.EventEmitter, Class.Deferred],
@@ -14,24 +14,41 @@ var Application = Class({
         
         global.app = this;
         
-        
-        Configs
-            .push('cli')
-            .push('actions')
-            .push('globals')
-            .push('environment')
-            .push('tasks')
-            
-            .process(app)
-            .done(function(){
-                
-                if (app.config.cli.params.help) {
-                    app.run({action: 'help'});
+		this.config = AppCfg
+			.fetch([
+				Config.Utils,
+				{
+					path: '%APP%/globals/actions.js'
+				},
+				{
+					path: '%APP%/globals/config.yml'
+				},
+				{
+					path: '%APPDATA%/.atma/config.yml',
+					writable: true,
+					optional: true
+				},
+				{
+					path: 'package.json',
+					getterProperty: 'atma',
+					optional: true
+				},
+				Config.Projects,
+				Config.Plugins,
+				Config.Tasks
+			]);
+		
+		this
+			.config
+			.done(function(){
+				
+				if (app.config.$cli.params.help){
+					app.run({ action: 'help' });
                     return;
-                }
-                
-                app.resolve(app);
-            });
+				}
+				
+				app.resolve(app);
+			});
         
     },
     

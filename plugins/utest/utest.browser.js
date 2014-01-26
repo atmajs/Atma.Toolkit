@@ -1347,120 +1347,126 @@
 	// source /src/business/Deferred.js
 	function Deferred(){}
 	
-	Deferred.prototype = {
-		_isAsync: true,
-			
-		_done: null,
-		_fail: null,
-		_always: null,
-		_resolved: null,
-		_rejected: null,
+	(function(){
 		
-		defer: function(){
-			this._rejected = null;
-			this._resolved = null;
-		},
-		
-		resolve: function() {
-			this._fail = null;
-			this._resolved = arguments;
-	
-			var _done = this._done,
-				_always = this._always,
+		Deferred.prototype = {
+			_isAsync: true,
 				
-				imax, i;
+			_done: null,
+			_fail: null,
+			_always: null,
+			_resolved: null,
+			_rejected: null,
 			
-			this._done = null;
-			this._always = null;
+			defer: function(){
+				this._rejected = null;
+				this._resolved = null;
+			},
 			
-			if (_done != null) {
-				imax = _done.length;
-				i = -1;
-				while ( ++i < imax ) {
-					fn_apply(_done[i], this, arguments);
-				}
-				_done.length = 0;
+			resolve: function() {
+				var done = this._done,
+					always = this._always
+					;
+				
+				this._resolved = arguments;
+				
+				dfr_clearListeners(this);
+				arr_callOnce(done, this, arguments);
+				arr_callOnce(always, this, [ this ]);
+				
+				return this;
+			},
+			
+			reject: function() {
+				var fail = this._fail,
+					always = this._always
+					;
+				
+				this._rejected = arguments;
+				
+				dfr_clearListeners(this);
+				arr_callOnce(fail, this, arguments);
+				arr_callOnce(always, this, [ this ]);
+		
+				return this;
+			},
+			
+			resolveDelegate: function(){
+				return fn_proxy(this.resolve, this);
+			},
+			
+			rejectDelegate: function(){
+				return fn_proxy(this.reject, this);
+			},
+			
+			done: function(callback) {
+				
+				return dfr_bind(
+					this,
+					this._resolved,
+					this._done || (this._done = []),
+					callback
+				);
+			},
+			
+			fail: function(callback) {
+				
+				return dfr_bind(
+					this,
+					this._rejected,
+					this._fail || (this._fail = []),
+					callback
+				);
+			},
+			
+			always: function(callback) {
+				
+				return dfr_bind(
+					this,
+					this._rejected || this._resolved,
+					this._always || (this._always = []),
+					callback
+				);
+			},
+		};
+	
+		// PRIVATE
+		
+		function dfr_bind(dfr, arguments_, listeners, callback){
+			if (callback == null) 
+				return dfr;
+			
+			if ( arguments_ != null) 
+				fn_apply(callback, dfr, arguments_);
+			else 
+				listeners.push(callback);
+			
+			return dfr;
+		}
+		
+		function dfr_clearListeners(dfr) {
+			dfr._done = null;
+			dfr._fail = null;
+			dfr._always = null;
+		}
+		
+		function arr_callOnce(arr, ctx, args) {
+			if (arr == null) 
+				return;
+			
+			var imax = arr.length,
+				i = -1,
+				fn;
+			while ( ++i < imax ) {
+				fn = arr[i];
+				
+				if (fn) 
+					fn_apply(fn, ctx, args);
 			}
-	
-			if (_always != null) {
-				imax = _always.length;
-				i = -1;
-				while ( ++i < imax ) {
-					_always[i].call(this, this);
-				}
-			}
-	
-			return this;
-		},
+			arr.length = 0;
+		}
 		
-		reject: function() {
-			this._done = null;
-			this._rejected = arguments;
-			
-			var _fail = this._fail,
-				_always = this._always,
-				imax, i;
-			
-			this._fail = null;
-			this._always = null;
-	
-			if (_fail != null) {
-				imax = _fail.length;
-				i = -1;
-				while ( ++i < imax ) {
-					fn_apply(_fail[i], this, arguments);
-				}
-			}
-	
-			if (_always != null) {
-				imax = _always.length;
-				i = -1;
-				while ( ++i < imax ) {
-					_always[i].call(this, this);
-				}
-			}
-	
-			return this;
-		},
-		
-		resolveDelegate: function(){
-			return fn_proxy(this.resolve, this);
-		},
-		
-		rejectDelegate: function(){
-			return fn_proxy(this.reject, this);
-		},
-		
-		done: function(callback) {
-			if (this._resolved != null)
-				fn_apply(callback, this, this._resolved);
-			else
-				(this._done || (this._done = [])).push(callback);
-	
-			return this;
-		},
-		
-		fail: function(callback) {
-			
-			if (this._rejected != null)
-				fn_apply(callback, this, this._rejected);
-			else
-				(this._fail || (this._fail = [])).push(callback);
-	
-			return this;
-		},
-		
-		always: function(callback) {
-		
-			if (this._rejected != null || this._resolved != null)
-				callback.call(this, this);
-			else
-				(this._always || (this._always = [])).push(callback);
-	
-			return this;
-		},
-	};
-	
+	}());
 	// end:source /src/business/Deferred.js
 	// source /src/business/EventEmitter.js
 	var EventEmitter = (function(){
@@ -1808,7 +1814,7 @@
 			_wait: 0,
 			_timeout: null,
 			_result: null,
-			_resolved: true,
+			_resolved: [],
 			
 			delegate: function(name, errorable) {
 				return await_createDelegate(this, name, errorable);
@@ -2053,7 +2059,7 @@
 			return function(error, response, xhr){
 					
 					var header = xhr.getResponseHeader(str_CONTENT_TYPE),
-						isJSON = header != null &&  header.indexOf(str_JSON) !== -1
+						isJSON = header != null &&  header.toLowerCase().indexOf(str_JSON) !== -1
 						;
 						
 					if (isJSON) {
@@ -2073,8 +2079,23 @@
 					if (error) 
 						return reject(self, response, xhr);
 					
-					if ('save' === action) {
-						self.deserialize(response);
+					if ('save' === action && is_Object(response)) {
+						
+						if (is_Array(self)) {
+							
+							var imax = self.length,
+								jmax = response.length,
+								i = -1
+								;
+							
+							while ( ++i < imax && i < jmax){
+								
+								Serializable.deserialize(self[i], response[i]);
+							}
+							
+						} else {
+							self.deserialize(response);
+						}
 						
 						return self.resolve(self);
 					}
@@ -2575,6 +2596,17 @@
 					}
 					
 					return -1;
+				},
+				
+				map: function(fn){
+					
+					var arr = [],
+						imax = this.length,
+						i = -1;
+					while( ++i < imax ){
+						arr[i] = fn(this[i]);
+					}
+					return arr;
 				}
 			};
 			
@@ -4974,78 +5006,12 @@ function __eval(source, include) {
 		};
 	
 	// end:source /src/scope-vars.js
+    // source /src/util/is.js
+    function is_Function(x){
+        return typeof x === 'function';
+    }
+    // end:source /src/util/is.js
 	// source /src/util/util.js
-	function util_extend(target, source) {
-	
-		if (target == null) {
-			target = {};
-		}
-		for (var key in source) {
-	
-			target[key] = source[key];
-		}
-		return target;
-	}
-	
-	function util_getProperty(o, chain) {
-		if (chain === '.') {
-			return o;
-		}
-	
-		var value = o,
-			props = chain.split('.'),
-			i = -1,
-			imax = props.length;
-	
-		while (value != null && ++i < imax) {
-			value = value[props[i]];
-		}
-	
-		return value;
-	}
-	
-	function obj_toDictionary(obj){
-		var array = [], i = 0;
-		for(var key in obj){
-			array[i++] = {
-				key: key,
-				value: obj[key]
-			};
-		}
-		return array;
-	}
-	
-	function util_getPropertyEx(path, model, ctx, controller){
-		if (path === '.') 
-			return model;
-	
-		var props = path.split('.'),
-			value = model,
-			i = -1,
-			imax = props.length,
-			key = props[0]
-			;
-		
-		if ('$c' === key) {
-			value = controller;
-			i++;
-		}
-		
-		else if ('$a' === key) {
-			value = controller && controller.attr;
-			i++;
-		}
-		
-		else if ('$ctx' === key) {
-			value = ctx;
-			i++;
-		}
-		
-		while (value != null && ++i < imax) 
-			value = value[props[i]];
-		
-		return value;
-	}
 	
 	/**
 	 * - arr (Array) - array that was prepaired by parser -
@@ -5097,7 +5063,7 @@ function __eval(source, include) {
 				index = key.indexOf(':');
 	
 				if (index === -1) {
-					value = util_getPropertyEx(key,  model, ctx, controller);
+					value = obj_getPropertyEx(key,  model, ctx, controller);
 					
 				} else {
 					utility = index > 0
@@ -5110,11 +5076,7 @@ function __eval(source, include) {
 	
 					key = key.substring(index + 1);
 					handler = custom_Utils[utility];
-					
-					value = fn_isFunction(handler)
-						? handler(key, model, ctx, element, controller, name, type)
-						: handler.process(key, model, ctx, element, controller, name, type)
-						;
+					value = handler(key, model, ctx, element, controller, name, type);
 				}
 	
 				if (value != null){
@@ -5135,7 +5097,10 @@ function __eval(source, include) {
 			even = !even;
 		}
 	
-		return array == null ? string : array;
+		return array == null
+			? string
+			: array
+			;
 	}
 	
 	// end:source /src/util/util.js
@@ -5233,6 +5198,7 @@ function __eval(source, include) {
 	};
 	
 	// end:source /src/util/template.js
+    
 	// source /src/util/string.js
 	function str_trim(str) {
 	
@@ -5263,333 +5229,142 @@ function __eval(source, include) {
 			: str.substring(i, j + 1);
 	}
 	// end:source /src/util/string.js
+    // source /src/util/object.js
+    var obj_extend,
+        obj_getProperty,
+        obj_getPropertyEx,
+        obj_toDictionary
+        ;
+    
+    
+    (function(){
+        obj_extend = function(target, source) {
+        
+            if (target == null) {
+                target = {};
+            }
+            for (var key in source) {
+    
+                target[key] = source[key];
+            }
+            return target;
+        };
+        
+            
+        obj_getProperty = function(obj, path) {
+            if (path === '.') 
+                return o;
+            
+            var value = o,
+                props = path.split('.'),
+                i = -1,
+                imax = props.length;
+        
+            while (value != null && ++i < imax) {
+                value = value[props[i]];
+            }
+        
+            return value;
+        };
+            
+            
+        obj_getPropertyEx = function(path, model, ctx, controller){
+            if (path === '.') 
+                return model;
+        
+            var props = path.split('.'),
+                value = model,
+                i = -1,
+                imax = props.length,
+                key = props[0]
+                ;
+            
+            if ('$c' === key) {
+                value = controller;
+                i++;
+            }
+            
+            else if ('$a' === key) {
+                value = controller && controller.attr;
+                i++;
+            }
+            
+            else if ('$u' === key) {
+                value = customUtil_$utils;
+                i++;
+            }
+            
+            else if ('$ctx' === key) {
+                value = ctx;
+                i++;
+            }
+            
+            while (value != null && ++i < imax) 
+                value = value[props[i]];
+            
+            return value;
+        };
+        
+        
+        obj_toDictionary = function(obj){
+            var array = [],
+                i = 0,
+                key
+                ;
+            for(key in obj){
+                array[i++] = {
+                    key: key,
+                    value: obj[key]
+                };
+            }
+            return array;
+        };
+        
+    }());
+    
+    // end:source /src/util/object.js
 	// source /src/util/function.js
-	function fn_isFunction(x) {
-		return typeof x === 'function';
+	
+	function fn_proxy(fn, ctx) {
+	
+		return function() {
+			return fn_apply(fn, ctx, arguments);
+		};
+	}
+	
+	function fn_apply(fn, ctx, _arguments){
+		
+		switch (_arguments.length) {
+			case 0:
+				return fn.call(ctx);
+			case 1:
+				return fn.call(ctx, _arguments[0]);
+			case 2:
+				return fn.call(ctx,
+					_arguments[0],
+					_arguments[1]);
+			case 3:
+				return fn.call(ctx,
+					_arguments[0],
+					_arguments[1],
+					_arguments[2]);
+			case 4:
+				return fn.call(ctx,
+					_arguments[0],
+					_arguments[1],
+					_arguments[2],
+					_arguments[3]);
+		};
+		
+		return fn.apply(ctx, _arguments);
+	}
+	
+	
+	function fn_doNothing(){
+		
 	}
 	// end:source /src/util/function.js
-	// source /src/util/condition.js
-	/**
-	 *	ConditionUtil
-	 *
-	 *	Helper to work with conditional expressions
-	 **/
-	
-	var ConditionUtil = (function() {
-	
-		function parseDirective(T, currentChar) {
-			var c = currentChar,
-				start = T.index,
-				token;
-	
-			if (c == null) {
-				T.skipWhitespace();
-				start = T.index;
-				currentChar = c = T.template.charCodeAt(T.index);
-			}
-	
-			if (c === 34 /*"*/ || c === 39 /*'*/ ) {
-	
-				T.index++;
-				token = T.sliceToChar(c === 39 ? "'" : '"');
-				T.index++;
-	
-				return token;
-			}
-	
-	
-			do {
-				c = T.template.charCodeAt(++T.index);
-			} while (T.index < T.length && //
-			c !== 32 /* */ && //
-			c !== 33 /*!*/ && //
-			c !== 60 /*<*/ && //
-			c !== 61 /*=*/ && //
-			c !== 62 /*>*/ && //
-			c !== 40 /*(*/ && //
-			c !== 41 /*)*/ && //
-			c !== 38 /*&*/ && //
-			c !== 124 /*|*/ );
-	
-			token = T.template.substring(start, T.index);
-	
-			c = currentChar;
-	
-			if (c === 45 || (c > 47 && c < 58)) { /* [-] || [number] */
-				return token - 0;
-			}
-	
-			if (c === 116 /*t*/ && token === 'true') {
-				return true;
-			}
-	
-			if (c === 102 /*f*/ && token === 'false') {
-				return false;
-			}
-	
-			return {
-				value: token
-			};
-		}
-	
-	
-	
-		function parseAssertion(T, output) {
-			// use shadow class
-			var current = {
-				assertions: null,
-				join: null,
-				left: null,
-				right: null
-			},
-				c;
-	
-			if (output == null) {
-				output = [];
-			}
-	
-			if (typeof T === 'string') {
-				T = new Template(T);
-			}
-			outer: while(1) {
-				T.skipWhitespace();
-	
-				if (T.index >= T.length) {
-					break;
-				}
-	
-				c = T.template.charCodeAt(T.index);
-	
-				switch (c) {
-				case 61:
-					// <
-				case 60:
-					// >
-				case 62:
-					// !
-				case 33:
-					var start = T.index;
-					do {
-						c = T.template.charCodeAt(++T.index);
-					} while (T.index < T.length && (c === 60 || c === 61 || c === 62));
-	
-					current.sign = T.template.substring(start, T.index);
-					continue;
-					// &
-				case 38:
-					// |
-				case 124:
-					if (T.template.charCodeAt(++T.index) !== c) {
-						console.error('Unary operation not valid');
-					}
-	
-					current.join = c === 38 ? '&&' : '||';
-	
-					output.push(current);
-					current = {
-						assertions: null,
-						join: null,
-						left: null,
-						right: null
-					};
-	
-					++T.index;
-					continue;
-					// (
-				case 40:
-					T.index++;
-					parseAssertion(T, (current.assertions = []));
-					break;
-					// )
-				case 41:
-					T.index++;
-					break outer;
-				default:
-					current[current.left == null ? 'left' : 'right'] = parseDirective(T, c);
-					continue;
-				}
-			}
-	
-			if (current.left || current.assertions) {
-				output.push(current);
-			}
-			return output;
-		}
-	
-	
-		var _cache = [];
-	
-		function parseLinearCondition(line) {
-	
-			if (_cache[line] != null) {
-				return _cache[line];
-			}
-	
-			var length = line.length,
-				ternary = {
-					assertions: null,
-					case1: null,
-					case2: null
-				},
-				questionMark = line.indexOf('?'),
-				T = new Template(line);
-	
-	
-			if (questionMark !== -1) {
-				T.length = questionMark;
-			}
-	
-			ternary.assertions = parseAssertion(T);
-	
-			if (questionMark !== -1){
-				T.length = length;
-				T.index = questionMark + 1;
-	
-				ternary.case1 = parseDirective(T);
-				T.skipWhitespace();
-	
-				if (T.template.charCodeAt(T.index) === 58 /*:*/ ) {
-					T.index++; // skip ':'
-					ternary.case2 = parseDirective(T);
-				}
-			}
-	
-			return (_cache[line] = ternary);
-		}
-	
-		function isCondition(assertions, model) {
-			if (typeof assertions === 'string') {
-				assertions = parseLinearCondition(assertions).assertions;
-			}
-	
-			if (assertions.assertions != null) {
-				// backwards compatible, as argument was a full condition statement
-				assertions = assertions.assertions;
-			}
-	
-			var current = false,
-				a, value1, value2, i, length;
-	
-			for (i = 0, length = assertions.length; i < length; i++) {
-				a = assertions[i];
-	
-				if (a.assertions) {
-					current = isCondition(a.assertions, model);
-				} else {
-					value1 = typeof a.left === 'object' ? util_getProperty(model, a.left.value) : a.left;
-	
-					if (a.right == null) {
-						current = value1;
-						if (a.sign === '!') {
-							current = !current;
-						}
-	
-					} else {
-						value2 = typeof a.right === 'object' ? util_getProperty(model, a.right.value) : a.right;
-						switch (a.sign) {
-						case '<':
-							current = value1 < value2;
-							break;
-						case '<=':
-							current = value1 <= value2;
-							break;
-						case '>':
-							current = value1 > value2;
-							break;
-						case '>=':
-							current = value1 >= value2;
-							break;
-						case '!=':
-							current = value1 !== value2;
-							break;
-						case '==':
-							current = value1 === value2;
-							break;
-						}
-					}
-				}
-	
-				if (current) {
-					if (a.join === '&&') {
-						continue;
-					}
-	
-					break; // we are in OR and current is truthy
-				}
-	
-				if (a.join === '||') {
-					continue;
-				}
-	
-				if (a.join === '&&'){
-					// find OR in stack (false && false && false || true -> true)
-					for(++i; i<length; i++){
-						if (assertions[i].join === '||'){
-							break;
-						}
-					}
-				}
-			}
-			return current;
-		}
-	
-		return {
-			/**
-			 *	condition(ternary[, model]) -> result
-			 *	- ternary (String)
-			 *	- model (Object): Data Model
-			 *
-			 *	Ternary Operator is evaluated via ast parsing.
-			 *	All this expressions are valid:
-			 *		('name=="me"',{name: 'me'}) -> true
-			 *		('name=="me"?"yes"',{name: 'me'}) -> "yes"
-			 *		('name=="me"? surname',{name: 'me', surname: 'you'}) -> 'you'
-			 *		('name=="me" ? surname : "none"',{}) -> 'none'
-			 *
-			 **/
-			condition: function(line, model) {
-				var con = parseLinearCondition(line),
-					result = isCondition(con.assertions, model);
-	
-				if (con.case1 != null){
-					result =  result ? con.case1 : con.case2;
-				}
-	
-				if (result == null) {
-					return '';
-				}
-				if (typeof result === 'object' && result.value) {
-					return util_getProperty(model, result.value);
-				}
-	
-				return result;
-			},
-			/**
-			 *	isCondition(condition, model) -> Boolean
-			 * - condition (String)
-			 * - model (Object)
-			 *
-			 *	Evaluate condition via ast parsing using specified model data
-			 **/
-			isCondition: isCondition,
-	
-			/**
-			 *	parse(condition) -> Object
-			 * - condition (String)
-			 *
-			 *	Parse condition to an AstTree.
-			 **/
-			parse: parseLinearCondition,
-	
-			/* deprecated - moved to parent */
-			out: {
-				isCondition: isCondition,
-				parse: parseLinearCondition
-			}
-		};
-	}());
-	
-	// end:source /src/util/condition.js
+    
 	// source /src/expression/exports.js
 	/**
 	 * ExpressionUtil
@@ -5879,9 +5654,12 @@ function __eval(source, include) {
 					}
 				}
 				
-				
 				else if ('$a' === key) 
 					value = controller && controller.attr;
+				
+				else if ('$u' === key) 
+					value = customUtil_$utils;
+				
 				
 				else if ('$ctx' === key) 
 					value = ctx;
@@ -6241,8 +6019,19 @@ function __eval(source, include) {
 		
 					case punc_Comma:
 						if (state !== state_arguments) {
-							_throw('Unexpected punctuation, comma');
-							break outer;
+							
+							state = state_body;
+							do {
+								current = current.parent;
+							} while (current != null && current.type !== type_Body);
+							index++;
+							
+							if (current == null) {
+								_throw('Unexpected punctuation, comma');
+								break outer;	
+							}
+							
+							continue;
 						}
 						do {
 							current = current.parent;
@@ -6338,7 +6127,7 @@ function __eval(source, include) {
 					case go_number:
 						if (current.body != null && current.join == null) {
 							_throw('Directive Expected');
-							break;
+							break outer;
 						}
 						if (go_string === directive) {
 							index++;
@@ -6406,20 +6195,19 @@ function __eval(source, include) {
 		}
 		// end:source 5.parser.js
 		// source 6.eval.js
-		function expression_evaluate(mix, model, cntx, controller) {
+		function expression_evaluate(mix, model, ctx, controller) {
 		
 			var result, ast;
 		
-			if (mix == null){
+			if (mix == null)
 				return null;
-			}
+			
 		
 			if (typeof mix === 'string'){
-				if (cache.hasOwnProperty(mix) === true){
-					ast = cache[mix];
-				}else{
-					ast = (cache[mix] = expression_parse(mix));
-				}
+				ast = cache.hasOwnProperty(mix) === true
+					? (cache[mix])
+					: (cache[mix] = expression_parse(mix))
+					;
 			}else{
 				ast = mix;
 			}
@@ -6433,14 +6221,14 @@ function __eval(source, include) {
 				outer: for (i = 0, length = ast.body.length; i < length; i++) {
 					x = ast.body[i];
 		
-					value = expression_evaluate(x, model, cntx, controller);
+					value = expression_evaluate(x, model, ctx, controller);
 		
-					if (prev == null) {
+					if (prev == null || prev.join == null) {
 						prev = x;
 						result = value;
 						continue;
 					}
-		
+					
 					if (prev.join === op_LogicalAnd) {
 						if (!result) {
 							for (; i < length; i++) {
@@ -6504,7 +6292,7 @@ function __eval(source, include) {
 			}
 		
 			if (type_Statement === type) {
-				return expression_evaluate(ast.body, model, cntx, controller);
+				return expression_evaluate(ast.body, model, ctx, controller);
 			}
 		
 			if (type_Value === type) {
@@ -6512,11 +6300,11 @@ function __eval(source, include) {
 			}
 		
 			if (type_SymbolRef === type || type_FunctionRef === type) {
-				return util_resolveRef(ast, model, cntx, controller);
+				return util_resolveRef(ast, model, ctx, controller);
 			}
 			
 			if (type_UnaryPrefix === type) {
-				result = expression_evaluate(ast.body, model, cntx, controller);
+				result = expression_evaluate(ast.body, model, ctx, controller);
 				switch (ast.prefix) {
 				case op_Minus:
 					result = -result;
@@ -6528,8 +6316,8 @@ function __eval(source, include) {
 			}
 		
 			if (type_Ternary === type){
-				result = expression_evaluate(ast.body, model, cntx, controller);
-				result = expression_evaluate(result ? ast.case1 : ast.case2, model, cntx, controller);
+				result = expression_evaluate(ast.body, model, ctx, controller);
+				result = expression_evaluate(result ? ast.case1 : ast.case2, model, ctx, controller);
 		
 			}
 		
@@ -6766,8 +6554,81 @@ function __eval(source, include) {
 	
 	// end:source /src/expression/exports.js
 	// source /src/custom.js
+	// source custom.utils.js
+	var customUtil_register ,
+	    customUtil_get,
+	    
+	    customUtil_$utils = {}
+	    ;
+	
+	(function(){
+	    
+	    customUtil_register = function(name, mix){
+	        
+	        if (is_Function(mix)) {
+	            custom_Utils[name] = mix;
+	            return;
+	        }
+	        
+	        custom_Utils[name] = createUtil(mix);
+	        
+	        if (mix.arguments === 'parsed') 
+	            customUtil_$utils[name] = mix.process;
+	            
+	    };
+	    
+	    customUtil_get = function(name){
+	        return name != null
+					? custom_Utils[name]
+					: custom_Utils
+					;
+	    };
+	    
+	    
+	    function createUtil(obj){
+	        
+	        if (obj.arguments !== 'parsed') 
+	            return fn_proxy(obj.process || processRawFn, obj);
+	        
+	        return processParsedDelegate(obj.process);
+	    }
+	    
+	    
+	    function processRawFn(expr, model, ctx, element, controller, attrName, type){
+	         if ('node' === type) {
+	            
+	            this.nodeRenderStart(expr, model, ctx, element, controller);
+	            return this.node(expr, model, ctx, element, controller);
+	        }
+	        
+	        // asume 'attr'
+	        
+	        this.attrRenderStart(expr, model, ctx, element, controller, attrName);
+	        return this.attr(expr, model, ctx, element, controller, attrName);
+	    }
+	    
+	    
+	    function processParsedDelegate(fn){
+	        
+	        return function(expr, model, ctx, element, controller, attrName, type){
+	            
+	            var body = ExpressionUtil.parse(expr).body,
+	                args = [],
+	                imax = body.length,
+	                i = -1
+	                ;
+	            while( ++i < imax ){
+	                args[i] = ExpressionUtil.eval(body[i], model, ctx, controller);
+	            }
+	            
+	            return fn.apply(null, args);
+	        };
+	    }
+	    
+	}());
+	// end:source custom.utils.js
+	
 	var custom_Utils = {
-		condition: ConditionUtil.condition,
 		expression: function(value, model, cntx, element, controller){
 			return ExpressionUtil.eval(value, model, cntx, controller);
 		},
@@ -6780,8 +6641,10 @@ function __eval(source, include) {
 			type: null
 		},
 		custom_Tags = {
-			// Most common html tags
-			// http://jsperf.com/not-in-vs-null/3
+			/*
+			 * Most common html tags
+			 * http://jsperf.com/not-in-vs-null/3
+			 */
 			div: null,
 			span: null,
 			input: null,
@@ -7484,11 +7347,11 @@ function __eval(source, include) {
 					
 					attrFn = null;
 					
-					if (attrHandlers && fn_isFunction(attrHandlers[key])) {
+					if (attrHandlers && is_Function(attrHandlers[key])) {
 						attrFn = attrHandlers[key];
 					}
 					
-					if (attrFn == null && fn_isFunction(custom_Attributes[key])) {
+					if (attrFn == null && is_Function(custom_Attributes[key])) {
 						attrFn = custom_Attributes[key];
 					}
 					
@@ -7498,7 +7361,7 @@ function __eval(source, include) {
 				}
 			}
 			
-			if (fn_isFunction(controller.renderEnd)) {
+			if (is_Function(controller.renderEnd)) {
 				/* if !DEBUG
 				try{
 				*/
@@ -7537,7 +7400,7 @@ function __eval(source, include) {
 				var content = node.content;
 					
 				
-				if (fn_isFunction(content)) {
+				if (is_Function(content)) {
 				
 					var result = content('node', model, ctx, container, controller);
 				
@@ -7636,7 +7499,7 @@ function __eval(source, include) {
 					}
 					*/
 				
-					if (fn_isFunction(attr[key])) {
+					if (is_Function(attr[key])) {
 						value = attr[key]('attr', model, ctx, tag, controller, key);
 						if (value instanceof Array) {
 							value = value.join('');
@@ -7648,7 +7511,7 @@ function __eval(source, include) {
 				
 					// null or empty string will not be handled
 					if (value) {
-						if (fn_isFunction(custom_Attributes[key])) {
+						if (is_Function(custom_Attributes[key])) {
 							custom_Attributes[key](node, value, model, ctx, tag, controller, container);
 						} else {
 							tag.setAttribute(key, value);
@@ -7668,7 +7531,7 @@ function __eval(source, include) {
 		function build_compo(node, model, ctx, container, controller){
 			
 			var Handler = node.controller,
-				handler = fn_isFunction(Handler)
+				handler = is_Function(Handler)
 					? new Handler(model)
 					: Handler,
 				attr,
@@ -7685,7 +7548,7 @@ function __eval(source, include) {
 				handler.model = model;
 			
 				for (key in attr) {
-					if (fn_isFunction(attr[key])) {
+					if (is_Function(attr[key])) {
 						attr[key] = attr[key]('attr', model, ctx, container, controller, key);
 					}
 				}
@@ -7703,7 +7566,7 @@ function __eval(source, include) {
 					}
 				}
 			
-				if (fn_isFunction(handler.renderStart)) {
+				if (is_Function(handler.renderStart)) {
 					handler.renderStart(model, ctx, container);
 				}
 			
@@ -7867,7 +7730,7 @@ function __eval(source, include) {
 						
 						attrFn = null;
 						
-						if (attrHandlers != null && fn_isFunction(attrHandlers[key])) 
+						if (attrHandlers != null && is_Function(attrHandlers[key])) 
 							attrFn = attrHandlers[key];
 						
 						if (attrFn == null && custom_Attributes[key] != null) 
@@ -7878,7 +7741,7 @@ function __eval(source, include) {
 					}
 				}
 				
-				if (fn_isFunction(node.renderEnd)) {
+				if (is_Function(node.renderEnd)) {
 					/* if !DEBUG
 					try{
 					*/
@@ -7917,21 +7780,21 @@ function __eval(source, include) {
 		Mask = {
 	
 			/**
-			 *	mask.render(template[, model, cntx, container = DocumentFragment, controller]) -> container
+			 *	mask.render(template[, model, ctx, container = DocumentFragment, controller]) -> container
 			 * - template (String | MaskDOM): Mask String or Mask DOM Json template to render from.
 			 * - model (Object): template values
-			 * - cntx (Object): can store any additional information, that custom handler may need,
+			 * - ctx (Object): can store any additional information, that custom handler may need,
 			 * this object stays untouched and is passed to all custom handlers
 			 * - container (IAppendChild): container where template is rendered into
 			 * - controller (Object): instance of an controller that own this template
 			 *
 			 *	Create new Document Fragment from template or append rendered template to container
 			 **/
-			render: function (template, model, cntx, container, controller) {
+			render: function (template, model, ctx, container, controller) {
 	
 				// if DEBUG
 				if (container != null && typeof container.appendChild !== 'function'){
-					console.error('.render(template[, model, cntx, container, controller]', 'Container should implement .appendChild method');
+					console.error('.render(template[, model, ctx, container, controller]', 'Container should implement .appendChild method');
 					console.warn('Args:', arguments);
 				}
 				// endif
@@ -7946,11 +7809,11 @@ function __eval(source, include) {
 					}
 				}
 				
-				if (cntx == null) {
-					cntx = {};
+				if (ctx == null) {
+					ctx = {};
 				}
 				
-				return builder_build(template, model, cntx, container, controller);
+				return builder_build(template, model, ctx, container, controller);
 			},
 	
 			/* deprecated, renamed to parse */
@@ -7976,12 +7839,12 @@ function __eval(source, include) {
 			 *		.nodes(MaskDOM) - Template Object of this node
 			 *		.attr(Object) - Attributes of this node
 			 *	And calls
-			 *		.renderStart(model, cntx, container)
-			 *		.renderEnd(elements, model, cntx, container)
+			 *		.renderStart(model, ctx, container)
+			 *		.renderEnd(elements, model, ctx, container)
 			 *
 			 *	Custom Handler now can handle rendering of underlined nodes.
 			 *	The most simple example to continue rendering is:
-			 *	mask.render(this.nodes, model, container, cntx);
+			 *	mask.render(this.nodes, model, container, ctx);
 			 **/
 			registerHandler: function (tagName, TagHandler) {
 				custom_Tags[tagName] = TagHandler;
@@ -8006,7 +7869,7 @@ function __eval(source, include) {
 			 * - Handler (Function)
 			 *
 			 * Handler Interface, <i>(similar to Utility Interface)</i>
-			 * ``` customAttribute(maskNode, attributeValue, model, cntx, element, controller) ```
+			 * ``` customAttribute(maskNode, attributeValue, model, ctx, element, controller) ```
 			 *
 			 * You can change do any changes to maskNode's template, current element value,
 			 * controller, model.
@@ -8014,7 +7877,7 @@ function __eval(source, include) {
 			 * Note: Attribute wont be set to an element.
 			 **/
 			registerAttrHandler: function(attrName, mix, Handler){
-				if (fn_isFunction(mix)) {
+				if (is_Function(mix)) {
 					Handler = mix;
 				}
 				
@@ -8035,24 +7898,24 @@ function __eval(source, include) {
 			 *
 			 *	Function interface:
 			 *	```
-			 *	function(expr, model, cntx, element, controller, attrName, type);
+			 *	function(expr, model, ctx, element, controller, attrName, type);
 			 *	```
 			 *
 			 *	- value (String): string from interpolation part after util definition
 			 *	- model (Object): current Model
 			 *	- type (String): 'attr' or 'node' - tells if interpolation is in TEXTNODE value or Attribute
-			 *	- cntx (Object): Context Object
+			 *	- ctx (Object): Context Object
 			 *	- element (HTMLNode): current html node
 			 *	- name (String): If interpolation is in node attribute, then this will contain attribute name
 			 *
 			 *  Object interface:
 			 *  ```
 			 *  {
-			 *  	nodeRenderStart: function(expr, model, cntx, element, controller){}
-			 *  	node: function(expr, model, cntx, element, controller){}
+			 *  	nodeRenderStart: function(expr, model, ctx, element, controller){}
+			 *  	node: function(expr, model, ctx, element, controller){}
 			 *
-			 *  	attrRenderStart: function(expr, model, cntx, element, controller, attrName){}
-			 *  	attr: function(expr, model, cntx, element, controller, attrName){}
+			 *  	attrRenderStart: function(expr, model, ctx, element, controller, attrName){}
+			 *  	attr: function(expr, model, ctx, element, controller, attrName){}
 			 *  }
 			 *  ```
 			 *
@@ -8061,36 +7924,40 @@ function __eval(source, include) {
 			 *  
 			 **/
 			
-			registerUtil: function(utilName, mix){
-				if (typeof mix === 'function') {
-					custom_Utils[utilName] = mix;
-					return;
-				}
-				
-				if (typeof mix.process !== 'function') {
-					mix.process = function(expr, model, cntx, element, controller, attrName, type){
-						if ('node' === type) {
-							
-							this.nodeRenderStart(expr, model, cntx, element, controller);
-							return this.node(expr, model, cntx, element, controller);
-						}
-						
-						// asume 'attr'
-						
-						this.attrRenderStart(expr, model, cntx, element, controller, attrName);
-						return this.attr(expr, model, cntx, element, controller, attrName);
-					};
-				
-				}
-				
-				custom_Utils[utilName] = mix;
-			},
+			registerUtil: customUtil_register,
+			//////function(utilName, mix){
+			//////	if (typeof mix === 'function') {
+			//////		custom_Utils[utilName] = mix;
+			//////		return;
+			//////	}
+			//////	
+			//////	if (typeof mix.process !== 'function') {
+			//////		mix.process = function(expr, model, ctx, element, controller, attrName, type){
+			//////			if ('node' === type) {
+			//////				
+			//////				this.nodeRenderStart(expr, model, ctx, element, controller);
+			//////				return this.node(expr, model, ctx, element, controller);
+			//////			}
+			//////			
+			//////			// asume 'attr'
+			//////			
+			//////			this.attrRenderStart(expr, model, ctx, element, controller, attrName);
+			//////			return this.attr(expr, model, ctx, element, controller, attrName);
+			//////		};
+			//////	
+			//////	}
+			//////	
+			//////	custom_Utils[utilName] = mix;
+			//////},
 			
-			getUtil: function(util){
-				return util != null
-					? custom_Utils[util]
-					: custom_Utils;
-			},
+			getUtil: customUtil_get,
+			//////function(util){
+			//////	return util != null
+			//////		? custom_Utils[util]
+			//////		: custom_Utils;
+			//////},
+			
+			$utils: customUtil_$utils,
 			
 			registerUtility: function (utilityName, fn) {
 				// if DEBUG
@@ -8122,21 +7989,8 @@ function __eval(source, include) {
 					cache = {};
 				}
 			},
-			//- removed as needed interface can be implemented without this
-			//- ICustomTag: ICustomTag,
-	
-			/** deprecated
-			 *	mask.ValueUtils -> Object
-			 *
-			 *	see Utils.Condition Object instead
-			 **/
-			ValueUtils: {
-				condition: ConditionUtil.condition,
-				out: ConditionUtil
-			},
 	
 			Utils: {
-				Condition: ConditionUtil,
 				
 				/**
 				 * mask.Util.Expression -> ExpressionUtil
@@ -8155,7 +8009,7 @@ function __eval(source, include) {
 				 *	mask.render('span > ~[.]', 'Some string') // -> <span>Some string</span>
 				 *	```
 				 **/
-				getProperty: util_getProperty,
+				getProperty: obj_getProperty,
 				
 				ensureTmplFn: Parser.ensureTemplateFunction
 			},
@@ -8187,8 +8041,7 @@ function __eval(source, include) {
 			 **/
 			setInterpolationQuotes: Parser.setInterpolationQuotes,
 			
-			
-			compoIndex: function(index){
+			setCompoIndex: function(index){
 				_controllerID = index;
 			},
 			
@@ -8219,7 +8072,7 @@ function __eval(source, include) {
 	
 	
 	/**	deprecated
-	 *	mask.renderDom(template[, model, container, cntx]) -> container
+	 *	mask.renderDom(template[, model, container, ctx]) -> container
 	 *
 	 * Use [[mask.render]] instead
 	 * (to keep backwards compatiable)
@@ -8498,7 +8351,7 @@ function __eval(source, include) {
 				
 				if (attr['use'] != null) {
 					var use = attr['use'];
-					this.model = util_getProperty(model, use);
+					this.model = obj_getProperty(model, use);
 					this.modelRef = use;
 					return;
 				}
@@ -8518,7 +8371,7 @@ function __eval(source, include) {
 	
 				if (attr['log'] != null) {
 					var key = attr.log,
-						value = util_getProperty(model, key);
+						value = obj_getProperty(model, key);
 	
 					console.log('Key: %s, Value: %s', key, value);
 					return;
@@ -8542,7 +8395,7 @@ function __eval(source, include) {
 			
 	
 			var prop = compo.attr.each || compo.attr.foreach,
-				array = util_getPropertyEx(prop, model, ctx, compo),
+				array = obj_getPropertyEx(prop, model, ctx, compo),
 				nodes = compo.nodes
 				;
 			
@@ -8551,7 +8404,7 @@ function __eval(source, include) {
 			////if (array == null) {
 			////	var parent = compo;
 			////	while (parent != null && array == null) {
-			////		array = util_getProperty(parent, prop);
+			////		array = obj_getProperty(parent, prop);
 			////		parent = parent.parent;
 			////	}
 			////}
@@ -10064,7 +9917,11 @@ function __eval(source, include) {
 					 *	}
 					 */
 					setDOMLibrary: function(lib) {
+						if (domLib === lib) 
+							return;
+						
 						domLib = lib;
+						domLib_initialize();
 					},
 			
 			
@@ -10444,7 +10301,7 @@ function __eval(source, include) {
 			 *	Bind Closest Controller Handler Function to dom event(s)
 			 */
 		
-			mask.registerAttrHandler('x-signal', 'client', function(node, attrValue, model, cntx, element, controller) {
+			mask.registerAttrHandler('x-signal', 'client', function(node, attrValue, model, ctx, element, controller) {
 		
 				var arr = attrValue.split(';'),
 					signals = '',
@@ -10717,7 +10574,10 @@ function __eval(source, include) {
 		// end:source ../src/compo/signals.js
 	
 		// source ../src/jcompo/jCompo.js
-		(function(){
+		// try to initialize the dom lib, or is then called from setDOMLibrary
+		domLib_initialize();
+		
+		function domLib_initialize(){
 		
 			if (domLib == null || domLib.fn == null)
 				return;
@@ -10848,7 +10708,7 @@ function __eval(source, include) {
 				
 			}());
 		
-		}());
+		};
 		
 		// end:source ../src/jcompo/jCompo.js
 	
@@ -10905,7 +10765,7 @@ function __eval(source, include) {
 		// end:source ../src/scope-vars.js
 	
 		// source ../src/util/object.js
-		function util_extend(target, source){
+		function obj_extend(target, source){
 			if (target == null){
 				target = {};
 			}
@@ -11288,7 +11148,7 @@ function __eval(source, include) {
 			}
 		
 			if (node.attr){
-				clone.attr = util_extend({}, node.attr);
+				clone.attr = obj_extend({}, node.attr);
 			}
 		
 			var nodes = node.nodes;
@@ -11345,7 +11205,7 @@ function __eval(source, include) {
 		////////			if (typeof x.controller === 'function'){
 		////////				instance = new x.controller();
 		////////				instance.nodes = x.nodes;
-		////////				instance.attr = util_extend(instance.attr, x.attr);
+		////////				instance.attr = obj_extend(instance.attr, x.attr);
 		////////				instance.compoName = x.compoName;
 		////////				instance.parent = parent;
 		////////
@@ -11702,7 +11562,7 @@ function __eval(source, include) {
 				};
 			});
 		
-			util_extend(jMask.prototype, {
+			obj_extend(jMask.prototype, {
 				tag: function(arg) {
 					if (typeof arg === 'string') {
 						for (var i = 0, length = this.length; i < length; i++) {
@@ -11792,7 +11652,7 @@ function __eval(source, include) {
 		// source ../src/jmask/manip.dom.js
 		
 		
-		util_extend(jMask.prototype, {
+		obj_extend(jMask.prototype, {
 			clone: function(){
 				var result = [];
 				for(var i = 0, length = this.length; i < length; i++){
@@ -11875,7 +11735,7 @@ function __eval(source, include) {
 		
 		// end:source ../src/jmask/manip.dom.js
 		// source ../src/jmask/traverse.js
-		util_extend(jMask.prototype, {
+		obj_extend(jMask.prototype, {
 			each: function(fn, cntx) {
 				for (var i = 0; i < this.length; i++) {
 					fn.call(cntx || this, this[i], i)
@@ -14871,7 +14731,39 @@ function __eval(source, include) {
 				}
             }
             return array;
-        }
+        },
+		
+		groupBy: function(items, compareF){
+			var array = [],
+				imax = items.length,
+				i = -1,
+				
+				group, j, x, cache = {};
+			
+			while ( ++i < imax ){
+				if (cache[i] === true) 
+					continue;
+				
+				x = items[i];
+				
+				group = [x];
+				j = i;
+				
+				while( ++j < imax ){
+					if (cache[j] === true) 
+						continue;
+					
+					if (compareF(x, items[j])) {
+						cache[j] = true;
+						group.push(items[j]);
+					}
+				}
+				
+				array.push(group);
+			}
+			
+			return array;
+		}
     };
 
 	arr.each(['min','max'], function(x){

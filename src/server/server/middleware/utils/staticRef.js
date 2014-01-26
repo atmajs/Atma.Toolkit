@@ -10,7 +10,7 @@ include.exports = function(file){
 	var regexp = /\.reference\/([^\/]+)/,
 		match = regexp.exec(path),
 		project = match && match[1],
-		projects = app.config.globals.projects;
+		projects = app.config.projects;
 		
 	
 	if (projects == null)

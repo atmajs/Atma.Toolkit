@@ -13,46 +13,65 @@
 > atma [action] [arg] [...] -KEY VALUE [...]
 > atma [*.json | *.js | *.yml]
 # Load Config and process
-#   .config - JSON
-#   .js - javascript should set config object to globals
+#   .json - JSON
+#   .yml - yml
+#   .js - JS Module, that exports tasks(s)
 ```
+
+### Embedded Actions
+
+- [Build](build)
+- [Shell](shell)
+- [Run scripts](custom)
+- [HTTP Server](server)
+- [Reference](reference)
+- [Generate](gen)
+
+_... some more, just run atma -help_
+
+To get help from cli for a particular action run `$ atma actionName -help`
 
 ### Config
 
-Configuration object consists from any number of actions you want to run.
+Configuration object consists from any number of actions/tasks you want to run.
+
+_Javascript sample_
 ```javascript
 // Single action
-global.config = ActionObject;
+module.exports = ActionObject;
 
 // Multiple actions
-global.config = [ActionObject, ActionObject, /*..*/];
+module.exports = [ActionObject, ActionObject, /*..*/];
 
 // Grouped actions
-global.config = {
+module.exports = {
     groupName: ActionObject, // [ActionObject]
     otherGroup: ActionObject, // [ActionObject]
-    //? defaults: ['groupName']
+    
+    // optional    
+    defaults: ['groupName']
 }
 
-/* normally, if you run "atma config.js" then all grouped actions will be started,
-   but if 'defaults' property is used, then only that groups will be activated.
-   Also you can run any group with: 'atma config.js groupName'
+/*
+ * Normally, if you run `atma config.js` then all grouped actions will be started,
+ * but if `defaults` property is used, then only that groups will be activated.
+ * Also you can run any group with: 'atma config.js groupName'
 */
 
 ```
 
-### ActionObject
+#### ActionObject
 ```javascript
 {
     action: 'NAME',
-    // ... action settings
+    // ... action configuration
 }
 ```
 
 If ActionObject is in a group, and that groupname has the name of existed action,
 then you can ommit 'action' property
 ```javascript
-global.config = {
+module.exports = {
     copy: {
         // action: 'copy' - is not required
 		files: {
@@ -66,19 +85,42 @@ global.config = {
 ## Actions
 
 #### build
-It is actually the purpose this tool was created for - it combines all resources
-included with IncludeJS in your app to a single one-page app
+
+Application Builder for (IncludeJS)[http://atmajs.com/include]
+
+Features:
+
+- Combine **javascript** into a single file
+    - extract all scripts from main HTML file
+    - extract all nested scripts included with IncludeJS
+    - preprocess javascript if coffeescript or any other supported loader is used
+
+- Combine **style** into a single file
+    - extract all style links from main HTML file
+    - extract all nested styles included with IncludeJS
+    - copy images or fonts, when located not in a working directory (e.g. are referened)
+    - preprocess css if less or any other supported loader is used
+
+- Combine **templates** into resulted HTML file
+    - extract all nested IncludeJS `load`s and embed them into the HTML
+
 
 ```javascript
 {
     "action": "build"
-    "file": "index.dev.html" // — {String} - HTML input file
-    "minify": true, // — {Boolean} — run MinifyJS and clean-css
-    "uglify": {} // — {Object:optional} - UglifyJS compressor settings. @default {global_defs: {DEBUG: false}}
+    
+    // <String> — HTML input file
+    "file": "index.dev.html",
+    
+    // <Boolean> — run MinifyJS and clean-css
+    "minify": true,
+    
+    // <Object> - optional — UglifyJS compressor settings. @default {global_defs: {DEBUG: false}}
+    "uglify": {} 
     "jshint" : {
-        "options" : // —  {Object} - JSHINT options
-        "globals" : // —  {Object} - global variables. @default {"window": false, "document": false}
-        "ignore"  : // —  {Object} - file names to ignore
+        "options" : // <Object> - JSHINT options
+        "globals" : // <Object> - global variables. @default {"window": false, "document": false}
+        "ignore"  : // <Object> - file names to ignore
     }
     "outputMain": "index.html" — output name of a built html"
     "outputSources": "build/" — directory of combined/copied resources"
@@ -117,20 +159,20 @@ Switch back from "project-import" to resource referencing
 ```
 Execuate shell commands
 
-#### Custom Scripts - (bash scripts)
+#### custom
 ```javascript
 {
     action: "custom",
     script: "scriptPath.js"
 }
 ```
-Run any javascript
+Or from CLI
 
 ```bash
 > atma custom scriptPath
 ```
 
-Custom script should export process(config, done){} function
+Custom script should export `process(config, done)` function
 ````javascript
 // scriptPath.js
 
@@ -169,7 +211,7 @@ include.exports = {
 
 ````
 
-### Server
+### HTTP Server
 ```javascrit
 {
     action: 'server',
@@ -204,15 +246,18 @@ To start the server direct from command line, use cli action pattern
 Creates symbolic link in "%current directory%/.reference" folder
 
 
-### Template - Scaffolding
+### gen
+
+Scaffolding
+
 ```javascript
 {
-    action: "template",
+    action: "gen",
     name: "name"
 }
 ```
 ```bash
-> atma template [name]
+> atma gen [name]
 ```
 
 Templates:

@@ -27,7 +27,7 @@ include.exports = {
         
         
         var actions = app.config.actions,
-            args = app.config.cli.args,
+            args = app.config.$cli.args,
             action = args[0];
         
         newLine();

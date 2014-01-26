@@ -1,5 +1,5 @@
 var resume = include.pause(),
-	globals = app.config.globals
+	appConfig = app.config
 	;
 
 
@@ -66,7 +66,7 @@ function scripts_resolve(scripts) {
 	add_source(scripts, '/socket.io/socket.io.js');
 	add_source(scripts, '/.reference/atma.toolkit/plugins/utest/utest.browser.js');
 
-	var routes = globals.defaultRoutes;
+	var routes = appConfig.defaultRoutes;
 	if (routes) {
 		add_script(scripts, 'include.routes(' + JSON.stringify(routes, null, 4) + ')');
 	}

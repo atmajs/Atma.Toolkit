@@ -12,7 +12,7 @@ include
 	.done(function(resp) {
 
 	var File = io.File,
-		globals = app.config.globals,
+		appConfig = app.config,
 		resource = include,
 		
 		processStatic = resp.static(),
@@ -114,7 +114,7 @@ include
 		add_source(scripts, '/socket.io/socket.io.js');
 		add_source(scripts, '/.reference/atma.toolkit/plugins/utest/utest.browser.js');
 
-		var routes = globals.defaultRoutes;
+		var routes = appConfig.defaultRoutes;
 		if (routes) {
 			add_script(scripts, 'include.routes(' + JSON.stringify(routes, null, 4) + ')');
 		}

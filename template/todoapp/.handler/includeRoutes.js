@@ -9,15 +9,15 @@
 			Base: io.File,
 			copyTo: function(uri){
 				var source = this.read(),
-					globals = app.config.globals,
+					appConfig = app.config,
 					referenceDir = uri.combine('.reference/');
 	
-				if (!globals || !globals.projects) {
+				if (!appConfig || !appConfig.projects) {
 					logger.warn('globals.txt errored - include.routes wont be copied');
 					return;
 				}
 					
-				var projects = globals.projects,
+				var projects = appConfig.projects,
 					key;
 	
 				for(key in projects){
@@ -42,7 +42,7 @@
 	
 				new io
 					.File(uri)
-					.write(source.replace('%ROUTES%', JSON.stringify(globals.defaultRoutes, null, 5)));
+					.write(source.replace('%ROUTES%', JSON.stringify(appConfig.defaultRoutes, null, 5)));
 			}
 		}));
 }());
