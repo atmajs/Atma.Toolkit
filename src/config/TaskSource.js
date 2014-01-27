@@ -9,10 +9,9 @@ module.exports = Class({
         
 		if (action != null) {
 			this.config = {
-				tasks: prepairTasks({
-					action: action
-				}, rootConfig)
+				tasks: [action]
 			};
+			
 			return this.resolve();
 		}
 		
@@ -60,12 +59,22 @@ function getFile($cli){
 }
 
 function getAction(rootConfig){
-	var action = rootConfig.$cli.args[0];
+	var cli = rootConfig.$cli,
+		action = cli.args[0];
 	
-	if (action in rootConfig.actions) 
-		return action;
+	if (action in rootConfig.actions === false) 
+		return null;
 	
-	return null;
+	var config = {
+		action: action,
+		args: cli.args.slice(1)
+	};
+	
+	for(var key in cli.params){
+		config[key] = cli.params[key];
+	}
+
+	return config;
 }
 
 

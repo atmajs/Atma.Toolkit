@@ -1,6 +1,8 @@
-include.js({
-	parser: 'css::CssParser'
-}).done(function(resp) {
+include
+	.js({
+		parser: 'css::CssParser'
+	})
+	.done(function(resp) {
 
 
 	var CssParser = resp.CssParser,
@@ -9,35 +11,41 @@ include.js({
 		};
 
 
-	
-	global.io.File.getFactory().registerHandler([/\.css$/, /\.less$/], Class({
-		Base: io.File,
-		read: function() {
-            if (this.resources && this.content){
-                return this.content;
-            }
-			this.content = io.File.prototype.read.call(this);
-            this.resources = CssParser.extractResources(global.solution.uri, this.uri, this.content);
-            
-			return this.content;
-		},
-		copyTo: function(uri) {
-            
-            this.copyResourcesTo(uri);
-            
+	io
+		.File
+		.getFactory()
+		.registerHandler([/\.css$/, /\.less$/], Class({
+			Base: io.File,
 			
-			new io.File(uri).write(this.content);
-            
-			return this;
-		},
-        copyResourcesTo: function(uri){
-            if (this.content == null){
-                this.read();
-            }
-            copyResources(this, uri);
-            return this;
-        }
-	}));
+			Override: {
+				read: function() {
+					if (this.resources && this.content){
+						return this.content;
+					}
+					this.content = this.super(arguments);
+					this.resources = CssParser.extractResources(global.solution.uri, this.uri, this.content);
+					
+					return this.content;
+				},
+			},
+			copyTo: function(uri) {
+				
+				this.copyResourcesTo(uri);
+				
+				new io
+					.File(uri)
+					.write(this.content);
+				
+				return this;
+			},
+			copyResourcesTo: function(uri){
+				if (this.content == null)
+					this.read();
+				
+				copyResources(this, uri);
+				return this;
+			}
+		}));
 
 	
 	var path_REF = '.reference/';

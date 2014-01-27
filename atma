@@ -73,7 +73,7 @@ function initialize(app) {
 			
 	
 			if (app.config.tasks == null) {
-				logger.error('Invalid Config', app.config.toJSON());
+				logger.error('<config:invalid> Tasks are not defined', app.config.toJSON());
 				return 0;
 			}
 	

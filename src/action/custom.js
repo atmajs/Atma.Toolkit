@@ -15,15 +15,19 @@ include.exports = {
     process: function(config, done) {
         var script = config.script;
 
+        
         if (script && typeof script.process === 'function'){
-            script.process(config, done);
+            
+            include
+                .instance(io.env.currentDir.toString());
+            script
+                .process(config, done);
             return;
         }
 
-        if (config.args && !script) {
+        if (config.args && !script) 
             script = config.args[0];
-        }
-
+        
         if (!script) {
             done('Custom script not defined - via cli: $ atma custom name.js, via config: define script property');
             return;

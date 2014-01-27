@@ -1,6 +1,6 @@
 include.js({
     parser: ['html::HTML', 'js.ast::JS'],
-    server: 'controllers/static-reference::RefPath'
+    server: 'server/middleware/utils/staticRef::RefPath'
 }).done(function(resp) {
 
 
