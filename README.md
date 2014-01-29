@@ -20,12 +20,12 @@
 
 ### Embedded Actions
 
-- [Build](build)
-- [Shell](shell)
-- [Run scripts](custom)
-- [HTTP Server](server)
-- [Reference](reference)
-- [Generate](gen)
+- [Build](#build)
+- [Shell](#shell)
+- [Run scripts](#custom)
+- [HTTP Server](#server)
+- [Reference](#reference)
+- [Generate](#gen)
 
 _... some more, just run atma -help_
 

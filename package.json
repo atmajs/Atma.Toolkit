@@ -6,13 +6,12 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.9.74",
+  "version": "0.9.76",
   "bin": {
     "atma": "atma"
   },
   "main": "module.js",
   "dependencies": {
-    "fs.extra": ">= 1.2.0",
     "uglify-js": "~2.2.2",
     "clean-css": "~0.9.0",
     "jshint": "~0.9.1",
