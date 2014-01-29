@@ -139,7 +139,11 @@ function prepairTasks(tasks, rootConfig) {
 }
 
 function parseFile(config) {
-	config.uri = new net.Uri(config.file);
+	var uri = new net.Uri(config.file);
+	if (uri.isRelative())
+		uri = new net.Uri(net.Uri.combine(process.cwd(), config.file));
+	
+	config.uri = uri;
 }
 
 function parseType(config) {

@@ -1,69 +1,37 @@
-include.js({
-	script: 'html/Document::Document'
-}).done(function(resp) {
+(function() {
 
 
-	var r = global.ruqq,
-		helper = {
-			rewriteResource: function(doc, resource) {
-
-				if (!resource.path) {
-                    return;
-                }
-
-				if (resource.type != 'css' && resource.type != 'js') {
-                    return;
-                }
-
-
-				var tagName = {
-					js: 'script',
-					css: 'link'
-				}[resource.type],
-
-					attr = {
-						js: 'src',
-						css: 'href'
-					}[resource.type];
-
-				var nodes = doc.getElementsByTagName(tagName),
-					url = resource.url.toLowerCase(),
-                    i = 0,
-                    length = nodes.length,
-                    x, value;
-
-				for (; i < length; i++) {
-                    x = nodes[i];
-					value = x.getAttribute(attr);
-
-					if (value.toLowerCase() == url) {
-						x.setAttribute(attr, resource.rewrite);
-					}
-				}
-			}
+	var createDoc = (function(){
+		
+		var _cheerio;
+		return function(html){
+			if (_cheerio == null) 
+				_cheerio = require('cheerio');
+				
+			return _cheerio.load(html);
 		};
-
-
+	}());
 
 
 	include.promise('parser').html = include.exports = {
 		rewriteUrls: function(resource, line1, line2) {
 			var json = {},
-				doc = new resp.Document(resource.content),
-				arr = doc.getElementsByTagName('script');
+				$ = createDoc(resource.content)
+				
+			$('script[src]').each(function(i, el){
+				var attr = el.attribs.src;
+				if (attr.indexOf(line1) === -1)
+					return;
+				
+				el.attribs.src = attr.replace(line1, line2);
+			})
 
-			for (var i = 0, x, length = arr.length; x = arr[i], i < length; i++) {
-				var src = x.getAttribute('src');
-				if (src && src.indexOf(line1) > -1) {
-					x.setAttribute('src', src.replace(line1, line2));
-				}
-			}
-
-			resource.content = "<!DOCTYPE html>" + io.env.newLine + doc.documentElement.innerHTML;
+			resource.content = $.html();
 		},
 		extractIncludes: function(htmlSource, directory) {
-			var doc = new resp.Document(htmlSource),
-				includes = [];
+			var $ = createDoc(htmlSource),
+				includes = []
+				;
 
 			directory = new net.Uri(directory);
 
@@ -84,48 +52,27 @@ include.js({
 					namespace: '',
 					appuri: appuri
 				});
+				
 			}
 
-			doc.getAllAttributes('script', 'src', function(x) {
-				return !x.getAttribute('ignore');
-			}).each(add.bind(this, 'js'));
+			$('script[src]')
+				.filter(function(i, x){
+					return x.attribs.ignore == null;
+				})
+				.each(function(i, x){
+					add('js', x.attribs.src);
+				});
+				
 
-			doc.getAllAttributes('link', 'href', function(x) {
-				return !x.getAttribute('ignore');
-			}).each(add.bind(this, 'css'));
-
-
-			var loaderIndex = r.arr.indexOf(includes, function(x) {
-				return x.url.indexOf('include.loader.js') > -1;
-			});
-
-			if (loaderIndex > -1) {
-				var $loader = r.arr.first(doc.getElementsByTagName('script'), function(x) {
-					var src = x.getAttribute('src');
-					return src && src.indexOf('include.loader.js') > -1;
-				}),
-					loaderUrl = $loader.getAttribute('src'),
-					loaderMain = $loader.getAttribute('main');
-
-
-				solution.loader = new global.parser.Loader(directory.combine(loaderUrl), loaderMain);
-
-
-				var arr = solution.loader.includes;
-
-
-				arr.unshift(1);
-				arr.unshift(loaderIndex);
-
-				includes.splice.apply(includes, arr);
-				//-includes.splice(loaderIndex, 1, arr);
-
-			}
+			$('link[href]')
+				.filter(function(i, x) {
+					return x.attribs.ignore == null;
+				})
+				.each(function(i, x){
+					add('css', x.attribs.href);
+				});
 
 			return includes;
 		}
 	};
-
-
-
-});
+}());

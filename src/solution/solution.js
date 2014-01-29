@@ -13,7 +13,8 @@ include
             global.solution = this;
             
             var uri = config.uri,
-                type = config.type;
+                type = config.type
+				;
                 
 			if (!uri || new io.File(uri).exists() == false) 
 				return done('File doesnt exists (404) ' + uri.toLocalFile());
@@ -26,7 +27,8 @@ include
             this.uri = uri;
             this.type = type;
             this.done = done;
-
+			
+			
             this.resource = new resp.Resource({
                 type: type,
                 url: '/',

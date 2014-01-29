@@ -56,11 +56,12 @@ include.js({
             if (this.content == null) {
                 var file = new io.File(this.uri);
                 
+                
                 if (!file.exists()) 
-                    file = new io.File(resp.RefPath(this.uri.toLocalFile()));
+                    file = resp.RefPath(this.uri.toLocalFile());
                 
                 
-                if (file.exists() === false){
+                if (file == null || file.exists() === false){
                     logger.error('<file> 404 - ', this.uri.toLocalFile());
                     return this;
                 }

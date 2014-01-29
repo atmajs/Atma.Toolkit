@@ -34,7 +34,8 @@ include
 				
 				new io
 					.File(uri)
-					.write(this.content);
+					.write(this.content)
+					;
 				
 				return this;
 			},
@@ -52,14 +53,13 @@ include
 
 
 	function copyResources(cssFile, targetUri) {
-
+		
 		var solutionUri = global.solution.uris.outputMain, // -global.solution.uri,
 			cssFilePath = cssFile.uri.toString(),
 			solutionPath = solutionUri.toString(),
 			resources = cssFile.resources,
 			dir = net.Uri.combine(targetUri.toLocalDir(), 'resources/');
 
-		
 		
 		resources.forEach(function(x){
 			
@@ -73,7 +73,8 @@ include
 				
 				x.replaceWith = getRewritenPath(x.uri, x.href, targetUri.toLocalDir());
 			}
-
+			
+			
 			if (x.replaceWith) 
 				cssFile.content = CssParser.replace(cssFile.content, x.href, x.replaceWith);
 			

@@ -1,7 +1,10 @@
 
 
 include.exports = function(file){
-	var path = file.uri.toLocalFile(),
+	var path = typeof file === 'string'
+			? file
+			: file.uri.toLocalFile()
+			,
 		ref_index = path.lastIndexOf('.reference/');
 		
 	if (ref_index === -1) 

@@ -84,7 +84,6 @@ var Application = Class({
     
     process: function(taskConfig){
         
-        
         var app = this;
         
         this.current = taskConfig;

@@ -1,31 +1,34 @@
-include.js({
-	script: 'html/Document'
-}).done(function(resp) {
-
+(function() {
+	
+	var createDoc = (function(){
+		
+		var _cheerio;
+		return function(html){
+			if (_cheerio == null) 
+				_cheerio = require('cheerio');
+				
+			return _cheerio.load(html);
+		};
+	}());
+	
 	include.exports = {
 		build: function(solution, builtOutput) {
-			var doc = new resp.Document(solution.resource.content);
+			var $ = createDoc(solution.resource.content);
 
-			ruqq
-				.arr(doc.getElementsByTagName('script')) 
-				.where(function(x) {
-					if (x.getAttribute('ignore')) {
-						return false;
-					}
-					return !!x.getAttribute('src');
-				}).each(function(x) {
-					x.parentNode.removeChild(x);
-				});
-
-
-			ruqq
-				.arr(doc.getElementsByTagName('link')) 
-				.where(function(x) {
-					return x.getAttribute('rel') == 'stylesheet';
-				}).each(function(x) {
-					x.parentNode.removeChild(x);
-				});
-
+			$('script[src]')
+				.filter(function(i, x){
+					return x.attribs.ignore == null;
+				})
+				.remove()
+				;
+			
+			$('link[href]')
+				.filter(function(i, x){
+					return x.attribs.ignore == null;
+				})
+				.remove()
+				;
+			
 
 			if (builtOutput.css) {
 				var href = solution
@@ -37,21 +40,24 @@ include.js({
 				if (solution.config.version) {
 					href += '?v=' + solution.config.version;
 				}
-				doc.appendResource('link', {
+				
+				$('head').append($('<link>').attr({
 					rel: 'stylesheet',
 					href: href
-				});
+				}));
 			}
 
 
 			if (builtOutput.lazy || builtOutput.load) {
-				var tag = doc.createTag('div', {
-					id: 'build.release.xhr',
-					style: 'display: none;',
-					hidden: 'hidden',
-					innerHTML: (builtOutput.lazy || '') + (builtOutput.load || '')
-				});
-				doc.first('body').appendChild(tag);
+				var $div = $('<div>')
+					.attr({
+						id: 'build.release.xhr',
+						style: 'display: none;',
+						hidden: 'hidden'
+					})
+					.html((builtOutput.lazy || '') + (builtOutput.load || ''))
+					;
+				$('body').append($div);
 			}
 
 			if (builtOutput.js) {
@@ -65,28 +71,28 @@ include.js({
 					src += '?v=' + solution.config.version;
 				}
                 
-				var tag = doc.createTag('script', {
+				var $div= $('<script>').attr({
 					type: 'text/javascript',
 					src: src
 				});
-				doc.first('body').appendChild(tag);
+				$('body').append($div);
 			}
+			//
+			//var doctype = $.doctype;
+			//if (doctype) {
+			//	doctype = "<!DOCTYPE "
+			//		+ doctype.name
+			//		+ (doctype.publicId ? ' PUBLIC "' + doctype.publicId + '"' : '')
+			//		+ (!doctype.publicId && doctype.systemId ? ' SYSTEM' : '')
+			//		+ (doctype.systemId ? ' "' + doctype.systemId + '"' : '') + '>';
+			//		
+			//} else {
+			//	doctype = "<!DOCTYPE html>";
+			//}
 
-			var doctype = doc.doctype;
-			if (doctype) {
-				doctype = "<!DOCTYPE "
-					+ doctype.name
-					+ (doctype.publicId ? ' PUBLIC "' + doctype.publicId + '"' : '')
-					+ (!doctype.publicId && doctype.systemId ? ' SYSTEM' : '')
-					+ (doctype.systemId ? ' "' + doctype.systemId + '"' : '') + '>';
-					
-			} else {
-				doctype = "<!DOCTYPE html>";
-			}
-
-			builtOutput.html = doctype + doc.documentElement.innerHTML;
+			builtOutput.html = $.html(); //doctype + $.documentElement.innerHTML;
 
 		}
 	};
 
-});
+}());

@@ -1,5 +1,8 @@
 (function() {
-	include.exports = {
+	
+	var resource = include;
+	
+	resource.exports = {
 		help: {
 			description: 'Run shell commands',
 			args: {
@@ -20,10 +23,13 @@
 				return;
             }
 
-			include
-				.js('/src/cli/shell.js')
+			resource
+				.js('/src/cli/shell.js::Shell')
 				.done(function(resp) {
-					new resp.shell(config.command, done).process();
+					
+					var shell = new resp.Shell(config.command, done);
+					
+					shell.process();
 				});
 
 		}

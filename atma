@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 require('atma-libs/globals-dev');
-require('atma-logger');
+require('atma-logger/lib/logger');
 require('atma-io');
 
 var base = io.env.applicationDir.toString();

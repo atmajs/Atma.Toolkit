@@ -5,7 +5,8 @@ include.exports = {
 		    imgbin = [],
 		    match = regexp.exec(content),
 			href;
-
+		
+		
 		while (match && match.length > 1 && match[2]) {
 			href = match[2].trim();
 			
