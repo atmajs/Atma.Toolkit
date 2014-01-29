@@ -118,12 +118,12 @@ Features:
     // <Object> - optional — UglifyJS compressor settings. @default {global_defs: {DEBUG: false}}
     "uglify": {} 
     "jshint" : {
-        "options" : // <Object> - JSHINT options
-        "globals" : // <Object> - global variables. @default {"window": false, "document": false}
-        "ignore"  : // <Object> - file names to ignore
+        "options" : Object // — JSHINT options
+        "globals" : Object // — global variables. @default {"window": false, "document": false}
+        "ignore"  : Object // — file names to ignore
     }
-    "outputMain": "index.html" — output name of a built html"
-    "outputSources": "build/" — directory of combined/copied resources"
+    "outputMain": "index.html" // — output name of a built html
+    "outputSources": "build/"  // — directory of combined/copied resources
 }
 ```
 
@@ -173,7 +173,7 @@ Or from CLI
 ```
 
 Custom script should export `process(config, done)` function
-````javascript
+```javascript
 // scriptPath.js
 
 include.exports = {
@@ -209,7 +209,7 @@ include.exports = {
     });
 */
 
-````
+```
 
 ### HTTP Server
 ```javascrit
@@ -268,8 +268,8 @@ Templates:
 - todoapp - creates todomvc sample application
 
 
-You can create any other templates - just put the files to:
-```%npm-global-directory%/node_modules/includejs/template/%YourTemplateName%```
+You can create any other templates - just put all required files to:
+``` %npm-global-directory%/node_modules/atma/template/%YourTemplateName% ```
 
 ### Clone Atma Libraries
 
@@ -284,17 +284,15 @@ You can create any other templates - just put the files to:
 ```
 
 Sample:
-```javascript
-{
-	"projects":{
-		"atma" : {
-			"path": "file:///c:/Development/atmajs/"
-		}
-	},
-	"defaultRoutes":{
-		"atma_lib": 		"{atma}/{0}/lib/{1}.js",
-        "atma_ruqq": 		"{atma}/ruqq/lib/{0}.js",
-		"atma_compo": 		"{atma}/compos/{0}/lib/{1}.js"
-	}
-}
+```yml
+
+projects:
+    atma: 
+        path: "file:///c:/Development/atmajs/"
+
+defaultRoutes:
+    atma_lib: 		"{atma}/{0}/lib/{1}.js"
+    atma_ruqq: 		"{atma}/ruqq/lib/{0}.js"
+    atma_compo: 	"{atma}/compos/{0}/lib/{1}.js"
+    
 ```
