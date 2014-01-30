@@ -18,6 +18,7 @@ function defaultActions() {
 		'uglify',
 		'watch',
 		
+		'bump',
 		'npm',
 		'reference',
 		'server',

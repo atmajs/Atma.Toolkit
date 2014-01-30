@@ -16,4 +16,4 @@ defaultRoutes:
 	bootstrap: "{bootstrap}/{0}.less"
 
 plugins: 
-	- 'utest'
+	- 'atma-utest'

@@ -17,7 +17,8 @@ module.exports = {
                 return this.resolve();
             
             var await = new Class.Await(),
-                base = io.env.applicationDir.toString() + '/';
+                base = io.env.applicationDir.toString() + '/'
+                ;
             
             plugins.forEach(function(plugin){
                 
@@ -25,7 +26,25 @@ module.exports = {
                     url = String.format('%1plugins/%2/%2-plugin.js', base, plugin)
                     ;
                     
+                if (new io.File(url).exists() === false) {
+                    url = String.format('%1node_modules/%2/index.js', base, plugin);
+                    
+                    if (new io.File(url).exists() === false) {
+                        url = io.env.currentDir.combine('node_modules/' + plugin + '/index.js');
+                        
+                        if (new io.File(url).exists() === false) {
+                            logger
+                                .error('<plugin 404>', plugin)
+                                .warn('Did you forget to run `npm install %plugin-name%`?')
+                                ;
+                            resolve();
+                            return;
+                        }
+                    }
+                }
+                    
                 include
+                    .instance(url)
                     .js(url + '::Plugin')
                     .done(function(resp) {
                     

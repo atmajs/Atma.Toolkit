@@ -24,19 +24,12 @@
     "atma-libs": ">0.0.0",
     "atma-logger": ">0.0.55",
     "atma-io": ">0.0.41",
+    "atma-utest": ">0.0.0",
     "atma-server": ">0.0.0",
     "appcfg": ">0.0.0",
     "cheerio": "~0.13.1"
   },
   "scripts": {},
-  "atma": {
-    "plugins": [
-      "atma-less-loader",
-      "atma-coffee-loader",
-      "atma-yaml-loader",
-      "atma-traceur-loader"
-    ]
-  },
   "repository": {
     "type": "git",
     "url": "git://github.com/atmajs/Atma.Toolkit.git"
