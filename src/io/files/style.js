@@ -54,7 +54,7 @@ include
 
 	function copyResources(cssFile, targetUri) {
 		
-		var solutionUri = global.solution.uris.outputMain, // -global.solution.uri,
+		var solutionUri = global.solution.uris.outputMain || global.solution.uri,
 			cssFilePath = cssFile.uri.toString(),
 			solutionPath = solutionUri.toString(),
 			resources = cssFile.resources,

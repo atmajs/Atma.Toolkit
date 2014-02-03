@@ -62,7 +62,12 @@
             io
                 .File
                 .getHookHandler()
-                .register(/./, 'read', 'importer');
+                .register({
+                    regexp: /./,
+                    method:'read',
+                    handler: 'importer',
+                    zIndex: 100
+                });
                 
             io
                 .File

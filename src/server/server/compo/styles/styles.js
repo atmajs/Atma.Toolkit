@@ -1,5 +1,5 @@
 
-var	isDebugMode = app.args.debug || app.config.app.debug;
+var	isDebugMode = true; //app.args.debug || app.config.app.debug;
 	
 
 

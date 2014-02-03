@@ -9,11 +9,13 @@
      */
 
     include.exports = {
-        description: 'Start local dev server in current working directory',
-        args: {
-            port: '<?number> port number, @default: 5777',
-            open: '<?string> open path in browser after server start',
-            proxy: '<?string> url to a proxy. Pipe request to proxy server if request cannot be handled'
+        help: {
+            description: 'Start local dev server in current working directory',
+            args: {
+                port: '<?number> port number, @default: 5777',
+                open: '<?string> open path in browser after server start',
+                proxy: '<?string> url to a proxy. Pipe request to proxy server if request cannot be handled'
+            }
         },
         process: function(config, done){
 

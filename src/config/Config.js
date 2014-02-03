@@ -26,13 +26,17 @@ module.exports = {
                     url = String.format('%1plugins/%2/%2-plugin.js', base, plugin)
                     ;
                     
-                if (new io.File(url).exists() === false) {
+                if (io.File.exists(url) === false) {
                     url = String.format('%1node_modules/%2/index.js', base, plugin);
                     
-                    if (new io.File(url).exists() === false) {
-                        url = io.env.currentDir.combine('node_modules/' + plugin + '/index.js');
-                        
-                        if (new io.File(url).exists() === false) {
+                    if (io.File.exists(url) === false) {
+                        url = io
+                            .env
+                            .currentDir
+                            .combine('node_modules/' + plugin + '/index.js')
+                            .toString()
+                            ;
+                        if (io.File.exists(url) === false) {
                             logger
                                 .error('<plugin 404>', plugin)
                                 .warn('Did you forget to run `npm install %plugin-name%`?')
@@ -42,7 +46,7 @@ module.exports = {
                         }
                     }
                 }
-                    
+                
                 include
                     .instance(url)
                     .js(url + '::Plugin')
@@ -100,6 +104,25 @@ module.exports = {
             };
             
             this.resolve();
+        },
+        
+        data: {
+            sync: true
+        }
+    }),
+    
+    Settings: Class({
+        Base: Class.Deferred,
+        
+        read: function(rootConfig){
+            this.resolve();
+            
+            if (rootConfig.settings == null) 
+                return;
+            
+            if (rootConfig.settings.io) 
+                io.settings(rootConfig.settings.io);
+            
         },
         
         data: {

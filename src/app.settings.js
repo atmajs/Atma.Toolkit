@@ -1,6 +1,7 @@
 (function(global) {
 
-
+	return;
+	// - remove file on next iteration
 
 	global.Settings = {
 		initialize: function(setts) {

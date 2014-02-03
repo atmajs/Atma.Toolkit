@@ -9,15 +9,13 @@ include
 		scripts: null,
 		renderStart: function(model, ctx){
 			
-			this.include = app
+			this.include = atma.server.app
 				.config
-				.page
-				.getInclude();
+				.$getInclude();
 			
-			this.scripts = app
+			this.scripts = atma.server.app
 				.config
-				.page
-				.getScripts(ctx.page.data.id)
+				.$getScripts(ctx.page.data.id)
 				.map(function(x, index){
 					return "'" + x + "'";
 				})

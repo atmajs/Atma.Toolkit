@@ -8,7 +8,6 @@ var Application = Class({
     Extends: [Class.EventEmitter, Class.Deferred],
     
     config: null,
-    settings: null,
     
     Construct: function(){
         
@@ -35,7 +34,8 @@ var Application = Class({
 				},
 				Config.Projects,
 				Config.Plugins,
-				Config.Tasks
+				Config.Tasks,
+				Config.Settings
 			]);
 		
 		this

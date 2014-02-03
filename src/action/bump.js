@@ -1,5 +1,8 @@
 include.exports = {
-	
+	help: {
+		description: 'Increase version in `package.json` from CWD. \n `00` pattern, e.g. `0.11.54`',
+		args: {},
+	},
 	process: function(config, done){
 		var file = new io.File('package.json'),
             pckg;
