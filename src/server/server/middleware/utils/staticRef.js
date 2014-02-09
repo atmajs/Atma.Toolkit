@@ -15,7 +15,6 @@ include.exports = function(file){
 		project = match && match[1],
 		projects = app.config.projects;
 		
-	
 	if (projects == null)
 		return null;
 	
@@ -23,7 +22,7 @@ include.exports = function(file){
 	
 	var projectPath = projects[project] && projects[project].path,
 		str = '.reference/' + project;
-		
+	
 	if (projectPath == null) {
 		logger
 			.error('No project in {atma}/globals/projects.txt - ', project)
@@ -32,6 +31,15 @@ include.exports = function(file){
 		return null;
 	}
 	
-	return new io.File(net.Uri.combine(projectPath + path.substring(ref_index + str.length)));
+	path = net.Uri.combine(projectPath + path.substring(ref_index + str.length));
+	file = new io.File(path);
+	
+	if (file.exists() === false) {
+		logger
+			.warn('<Referenced Project: %s> 404 - ', project, file.uri.toLocalFile())
+			;
+	}
+	
+	return file;
 };
 

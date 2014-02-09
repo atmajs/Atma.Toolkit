@@ -20,6 +20,8 @@ function defaultActions() {
 		
 		'bump',
 		'npm',
+		'plugin',
+		
 		'reference',
 		'server',
 		'shell',

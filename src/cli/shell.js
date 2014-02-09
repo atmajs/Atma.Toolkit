@@ -5,56 +5,91 @@
 
 	include.exports = Class({
 		Construct: function(command, done) {
-			this.commands = typeof command === 'string' 
-				? [command] 
-				: command
+			this.commands = Array.isArray(command)
+				?   command  
+				: [ command ]
 				;
 
-            for(var i = 0, x, length = this.commands.length; i<length; i++){
-				x = this 
-	                .commands[i] 
-	                .trim() 
-	                .split(/\s+/);
 				
-				// merge quotet arg, as: git commit -m "some value with spaces"
-				var c, index;
-				for (var j = 0; j < x.length; j++) {
-					if (x[j].length < 1) {
+			this.commands = this.commands.reduce(function(aggr, command, index){
+				
+				var exec, args, cwd;
+				
+				if (typeof command === 'string') {
+					exec = command;
+					cwd = process.cwd();
+				}
+				
+				else if (command != null) {
+					
+					exec = command.command;
+					cwd = command.cwd;
+				}
+				
+				if (!exec) {
+					logger.warn('Command Object is not valid');
+					return aggr;
+				}
+			
+				args = exec.trim().split(/\s+/);
+				
+				var imax = args.length,
+					i = -1,
+					c, arg;
+					
+				while ( ++i < imax ){
+					
+					arg = args[i];
+					if (arg.length === 0) 
 						continue;
-					}
-					c = x[j][0];
+					
+					c = arg[0];
 					
 					if (c !== '"' && c !== "'") 
 						continue;
 					
-					index = j;
-					for (;j < x.length; j++) {
-						if (x[j][x[j].length - 1] === c) {
+					
+					var start = i;
+					for( ; i < imax; i++ ){
+						
+						arg = args[i];
+						if (arg[arg.length - 1] === c) {
 							
-							var str = x.splice(index, j - index + 1).join(' ');
+							var str = args
+									.splice(start, i - start + 1)
+									.join(' ')
+									.slice(1,  -1)
+									;
 							
-							x.splice(index, 0, str.substring(1, str.length - 1));
+							args.splice(start, 0, str);
+							imax = args.length;
 							break;
 						}
 					}
 				}
-
-                this.commands[i] = {
-                    exec: x.shift(),
-                    args: x
-                };
-
-			}
+				
+				aggr.push({
+					exec: args.shift(),
+					args: args,
+					cwd: cwd
+				});
+				
+				return aggr;
+				
+			}, []);
+			
 
 			this.done = done;
 		},
+		
+		lastCode: 0,
 		process: function() {
 
 			var command = this.commands.shift(),
 				that = this;
 
 			if (command == null) {
-				this.done();
+				this.done(that.lastCode);
                 return;
 			}
 
@@ -73,7 +108,7 @@
 
 			try {
 				child = spawn(command.exec, command.args, {
-	                cwd: process.cwd(),
+	                cwd: command.cwd || process.cwd(),
 	                env: process.env,
 	                stdio: 'inherit'
 	            });
@@ -87,8 +122,9 @@
 
 			child
 				.on('exit', function(code) {
-					logger.log(command.exec + ' ' + command.args.join(' '), ' - exite with code ', code);
+					logger.log('>'.cyan, command.exec, command.args.join(' '), ', returned ', code);
 
+					that.lastCode = code;
 					that.process();
 				});
 		}

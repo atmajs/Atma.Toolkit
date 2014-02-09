@@ -8,45 +8,75 @@
 		},
 		process: function(config, done) {
 
-			if (config.files == null) {
+			if (config.files == null) 
 				config.files = config.args;
-			}
+			
 		
 			if (config.files == null) {
 				done('Set file(s) in config.files');
 				return;
 			}
 
-            if (typeof config.files === 'string'){
-                config.files = [config.files];
-            }
+			if (config.settings){
+				var ioSetts = config.settings.io;
+				if (ioSetts)
+					io.settings(ioSetts);
+			}
 
+
+			var _files = config.files,
+				_output = config.output
+				;
+
+            if (typeof _files === 'string')
+                _files = [_files];
+
+            if (typeof _output === 'string')
+            	_output = [_output];
+
+            
             config.minify = true;
 
-            var files = ruqq.arr.aggr(config.files, [], function(x, aggr){
-                var file = new io.File(x);
+            
 
-                if (file.exists() == false){
-                    console.error('File not found:', file.uri.toLocalFile());
-                    return;
-                }
-                aggr.push(file);
-            });
+            _files
+            	.map(function(x){
+	                var file = new io.File(x);
 
-            files.forEach(function(file){
+	                if (file.exists() == false){
+	                    console.error('File not found:', file.uri.toLocalFile());
+	                    return null;
+	                }
+
+	                return file;
+	            })
+	            .forEach(function(file, index){
+                
+                if (file == null)
+                	return;
+
                 file.read();
                 
 				io
 					.File
 					.middleware
-					.uglify(file, config);
-					
+					.condcomments(file, config);
+				
 				io
 					.File
 					.middleware
-					.condcomments(file, config);
+					.uglify(file, config);
 					
-                new io.File(file.uri.combine(file.uri.getName() + '.min.' + file.uri.extension)).write(file.content);
+					
+				var output = _output && _output[index];
+				if (output == null) {
+					output = file.uri.combine(file.uri.getName() + '.min.' + file.uri.extension); 
+				}
+				
+                new io
+                	.File(output)
+                	.write(file.content);
+
             });
 
             done();

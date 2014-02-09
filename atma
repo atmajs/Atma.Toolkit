@@ -21,8 +21,7 @@ var base = io.env.applicationDir.toString();
 			loader: {
 				coffee: loaderPath('coffee'),
 				less: loaderPath('less'),
-				yml: loaderPath('yml'),
-				jsnext: loaderPath('traceur'),
+				yml: loaderPath('yml')
 			}
 		})
 		.routes({

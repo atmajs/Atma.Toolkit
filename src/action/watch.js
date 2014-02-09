@@ -5,14 +5,13 @@
 include
 	.js({
 		script: [
-			'solution/resource::Resource',
-			'config/utils/config::configHelper'
+			'solution/resource::Resource'
 		]
 	})
 	.done(function(resp) {
 	
 		function prepairConfig(config) {
-			config = resp.configHelper.prepairConfig(config);
+			config = app.config.$prepairTasks(config);
 	
 			ruqq.arr.remove(config, function(x) {
 				return x.action === 'watch';

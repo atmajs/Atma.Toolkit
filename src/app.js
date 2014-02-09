@@ -1,6 +1,7 @@
 
 var AppCfg = require('appcfg'),
-	Config = require('./config/Config')
+	Config = require('./config/Config'),
+	ShellStrategy = require('./cli/ShellStrategy.js')
 	;
 
 
@@ -95,14 +96,36 @@ var Application = Class({
                 next();
             })
             .done(function(handler){
+				
+				if (handler.strategy) {
+					
+					var strategy = new ShellStrategy(handler.strategy),
+						path = process.argv.slice(3).join(' '),
+						cmd = ruta.$utils.pathFromCLI(path);
+					
+					strategy.process(cmd, taskConfig, callback);
+					return;
+				}
+				
+				if (handler.process) {
+					handler.process(taskConfig, callback);
+					return;
+				}
                 
-                handler.process(taskConfig, function(error){
+				
+				app.errors.push('<fail> '
+					+ taskConfig.action
+					+ ':'
+					+ ' No `strategy` object, no `process` function'
+				);
+                
+				
+				function callback(error){
                     
                     if (error) 
                         app.errors.push('<fail> ' + taskConfig.action + ':'+ error);
-                    
                     next();
-                });
+                }
             });
             
         function next() {

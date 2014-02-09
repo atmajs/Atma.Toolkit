@@ -4,7 +4,7 @@ module.exports = Class({
     read: function(rootConfig){
 		var file = getFile(rootConfig.$cli),
 			action = getAction(rootConfig),
-			config = this
+			that = this
 			;
         
 		if (action != null) {
@@ -25,11 +25,12 @@ module.exports = Class({
 			}])
 			.done(function(){
 				
-				config.config = {
-					tasks: prepairTasks(this.toJSON(), rootConfig)
+				that.config = {
+					tasks: prepairTasks(this.toJSON(), rootConfig),
+					$prepairTasks: prepairTasks
 				};
 				
-				config.resolve();
+				that.resolve();
 			});
     },
 	

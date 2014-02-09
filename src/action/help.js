@@ -98,12 +98,20 @@ function help_action(action) {
     app
         .findAction(action)
         .done(function(handler){
+            var help = handler.help;
             
-            if (handler.help == null) {
+            if (handler.strategy) {
+                if (help == null) 
+                    help = {};
+                    
+                help.routes = Object.keys(handler.strategy);
+            }
+            
+            if (help == null) {
                 logger.log('< no help information yet >');
                 return;
             }
             
-            logger.log(handler.help);
+            logger.log(help);
         })
 }
