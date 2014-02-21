@@ -1,6 +1,6 @@
 (function() {
 
-	var spawn = require('child_process').spawn,
+	var child_process = require('child_process'),
         ShellExec;
 
 	include.exports = Class({
@@ -13,7 +13,7 @@
 				
 			this.commands = this.commands.reduce(function(aggr, command, index){
 				
-				var exec, args, cwd;
+				var exec, args, cwd, detached;
 				
 				if (typeof command === 'string') {
 					exec = command;
@@ -24,6 +24,7 @@
 					
 					exec = command.command;
 					cwd = command.cwd;
+					detached = command.detached;
 				}
 				
 				if (!exec) {
@@ -71,7 +72,8 @@
 				aggr.push({
 					exec: args.shift(),
 					args: args,
-					cwd: cwd
+					cwd: cwd,
+					detached: detached
 				});
 				
 				return aggr;
@@ -93,7 +95,9 @@
                 return;
 			}
 
-			var child;
+			var detached = command.detached === true,
+				stdio = detached ? null : 'inherit',
+				child;
 
 			if (global.process.platform === 'win32'){
 				if (command.exec !== 'cmd'){
@@ -105,12 +109,14 @@
 					command.exec = 'cmd';
 				}
 			}
+			
 
 			try {
-				child = spawn(command.exec, command.args, {
+				child = child_process.spawn(command.exec, command.args, {
 	                cwd: command.cwd || process.cwd(),
 	                env: process.env,
-	                stdio: 'inherit'
+	                stdio: stdio,
+					detached: detached
 	            });
 			}catch(error){
 
@@ -119,7 +125,12 @@
 
 				this.process();
 			}
-
+			
+			if (detached) {
+				that.process();
+				return;
+			}
+			
 			child
 				.on('exit', function(code) {
 					logger.log('>'.cyan, command.exec, command.args.join(' '), ', returned ', code);

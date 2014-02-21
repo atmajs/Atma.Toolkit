@@ -37,11 +37,12 @@ include
 					ignore = _config.ignore;
 				
 				
-				if (!config && _config.actions && app.config.raw) {
+				
+				if (!config && _config.actions && app.config.tasksAll) {
 					var actions = _config.actions;
 					
 					actions.forEach(function(action, index){
-						actions[index] = app.config.raw[action];
+						actions[index] = app.config.tasksAll[action];
 					});
 					
 					config = actions.slice(0);

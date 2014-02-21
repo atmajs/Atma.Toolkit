@@ -26,6 +26,7 @@ module.exports = Class({
 			.done(function(){
 				
 				that.config = {
+					tasksAll: this.toJSON(),
 					tasks: prepairTasks(this.toJSON(), rootConfig),
 					$prepairTasks: prepairTasks
 				};

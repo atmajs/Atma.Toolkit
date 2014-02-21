@@ -167,6 +167,17 @@ var Application = Class({
             });
             
         return dfr;
+    },
+
+    runAction: function(action, config, done){
+        this
+            .findAction(action)
+            .done(function(action){
+                action.process(config, done);
+            })
+            .fail(function(){
+                done('<Atma.Toolkit::Action - 404> ' + action);
+            })
     }
 });
 

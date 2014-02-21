@@ -17,7 +17,8 @@ include
 				
 			return function(req, res, next, config){
 				var url = req.url,
-					base = (config && config.base) || _base;
+					base = (config && (config.static || config.base)) || _base
+					;
 				
 				if (url === '/') 
 					url = 'index.html';
