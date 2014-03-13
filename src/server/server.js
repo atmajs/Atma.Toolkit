@@ -27,14 +27,16 @@ var resource = include
 					.combine('server/config/')
 					.toString()
 					;
-					
-				resource.cfg({
-					path: io
+				
+				var base = io
 						.env
 						.applicationDir
 						.combine('src/server/')
-						.toString()
-				})
+						.toString();
+						
+				resource.cfg({
+					path: base
+				});
 				
 				atma.server.app = atma
 					.server
@@ -48,17 +50,24 @@ var resource = include
 						
 						mask.cfg('allowCache', false);
 						
-						var server,
-							middleware = new resp.Middleware()
-								.add(app.responder())
-								.add(resp.static())
-								.add(resp.proxy(proxyPath))
-								;
+						var connect = require('connect'),
+							port = process.env.PORT || 5777;
+					
+						var middleware = new resp.Middleware()
+							.add(connect.query())
+							.add(connect.urlencoded())
+							.add(connect.json())
+							.add(app.responder())
+							.add(resp.static())
+							.add(resp.proxy(proxyPath))
+							;
 						
-						server =  require('http')
-							.createServer(middleware.listener);
-						server
-							.listen(port);
+						
+						var server = connect()
+							.use(middleware.listener)
+							.listen(port)
+							;
+						
 						
 						
 						var serverCfg = appConfig.server,
