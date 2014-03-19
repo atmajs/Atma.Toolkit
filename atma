@@ -1,8 +1,15 @@
 #!/usr/bin/env node
 
+process
+	.mainModule
+	.paths
+	.push(process.cwd() + '/node_modules')
+	;
+
 require('atma-libs/globals-dev');
 require('atma-logger/lib/logger');
 require('atma-io');
+
 
 var base = io.env.applicationDir.toString();
 

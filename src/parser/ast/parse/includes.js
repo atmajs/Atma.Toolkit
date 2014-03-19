@@ -1,4 +1,7 @@
-include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(function(resp) {
+include.js(
+	'../util.js::AstUtil',
+	'../../util/includeMock.js::Include'
+).done(function(resp) {
 
 	var util = resp.AstUtil,
 		typeOf = util.is.type,
@@ -69,9 +72,12 @@ include.js(['../util.js::AstUtil','../../util/includeMock.js::Include']).done(fu
 			case 'client':
 			case 'server':
 			case 'use':
+			case 'getPending':
+			case 'apply':
 				break;
 			default:
-				console.log('getIncludes: Unknown expression', node.expression);
+				logger
+					.log('getIncludes: Unknown function call', node.expression);
 				break;
 			}
 		});

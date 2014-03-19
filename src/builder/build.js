@@ -264,10 +264,11 @@ include
 	var includesStack = (function() {
 
 		function build(type, includes) {
-			if (!(includes && includes.length))
-				return null;
-			
 			var arr = [];
+			
+			if (!(includes && includes.length))
+				return arr;
+			
 			for (var i = 0; i < includes.length; i++) {
 
 				var resource = includes[i];
