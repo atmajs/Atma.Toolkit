@@ -1,14 +1,16 @@
 
 
-var http = require('http'),
-	Url = require('url'),
+var http_ = require('http'),
+	https_ = require('https'),
+	url_ = require('url'),
+
 	proxyPath = null,
 	matcher = null;
 
 var Proxy = Class({
 	Static: {
 		set: function(path){
-			proxyPath = Url.parse(path);
+			proxyPath = path;
 		},
 		setMatcher: function(mix){
 			matcher = mix;
@@ -26,28 +28,21 @@ var Proxy = Class({
 					return false;
 			}
 			
-			logger(60).log(' - prox - ', req.url);
+			var headers = req.headers,
+				method = req.method,
+				url = url_.resolve(proxyPath, req.url)
+				;
+		
+			var options = {
+				method: method,
+				headers: extend({}, headers),
+				agent: false,
+			};
 			
-			var options = Object.extend({
-				headers: req.headers,
-				method: req.method
-			}, proxyPath);
-			
-			Object.extend(options, Url.parse(req.url));
-			
-			options.headers.host = proxyPath.host;
-			
-			var proxy = http.request(options, function(response){
-				res.writeHeader(response.statusCode, response.headers);
-				
-				response.pipe(res, {end: true});
-			});
-			
-			req.pipe(proxy, {end: true});
-			
-			
+			logger(60)
+				.log('<server:proxy>', url, method);
+			pipe(req, res, options, url);
 			return true;
-			
 		}
 	}
 });
@@ -65,3 +60,66 @@ include.exports = function(proxyPath){
 		Proxy.pipe(req, res);
 	}
 };
+
+
+function pipe(req, res, options_, remoteUrl, redirects) {
+	
+	if (redirects == null) 
+		redirects = 0;
+		
+	
+	if (redirects > 10) {
+		res.writeHead(500, {
+			'content-type': 'text/plain'
+		});
+		res.end('Too much redirects, last url: ' + remoteUrl);
+		return;
+	}
+	
+	var remote = url_.parse(remoteUrl),
+		options = {};
+		
+	extend(options, options_);
+	extend(options, remote);
+	options.headers.host = remote.host;
+	delete options.headers.connection;
+	
+	var client = remote.protocol === 'https:'
+		? https_
+		: http_;
+	
+	var request = client.request(options, function(response) {
+		
+		var code = response.statusCode;
+		if (code === 301 || code === 302) {
+			
+			var location = response.headers.location;
+			if (location) 
+				pipe(req, res, options_, location, ++redirects);
+			return;
+		}
+		
+		res.statusCode = code;
+		for(var key in response.headers)
+			res.setHeader(key, response.headers[key]);
+		
+		response.pipe(res, {
+			end: true
+		}); 
+	});
+	
+	// @TODO pipe post body to redirects
+	req.pipe(request, {
+		end: true
+	});
+}
+
+
+
+function extend(target, source){
+	for (var key in source)
+		if (source[key] != null) 
+			target[key] = source[key];
+	
+	return target;
+}

@@ -9,6 +9,5 @@ env:
 			server.compo : '/server/compo/{0}/{1}.js'
 	
 		scripts:
-	
 			server.compo:
 

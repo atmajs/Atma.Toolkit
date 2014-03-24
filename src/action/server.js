@@ -23,7 +23,8 @@
             if (config.args){
                 config.open = config.args[0];
             }
-
+            
+            logger.log(config);
             include
                 .js('/src/server/server.js')
                 .done(function(resp){

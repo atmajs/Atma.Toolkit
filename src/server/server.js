@@ -18,7 +18,7 @@ var resource = include
 		
 			start: function(config) {
 				
-				var port = config.port || 5777,
+				var port = config.port || process.env.PORT || 5777,
 					proxyPath = config.proxy;
 				
 				
@@ -50,14 +50,17 @@ var resource = include
 						
 						mask.cfg('allowCache', false);
 						
-						var connect = require('connect'),
-							port = process.env.PORT || 5777;
+						var connect = require('connect');
 					
 						var middleware = new resp.Middleware()
-							.add(connect.query())
-							.add(connect.urlencoded())
-							.add(connect.json())
-							.add(app.responder())
+							
+							.add(app.responder({
+								middleware: [
+									connect.query(),
+									connect.urlencoded(),
+									connect.json()
+								]
+							}))
 							.add(resp.static())
 							.add(resp.proxy(proxyPath))
 							;
