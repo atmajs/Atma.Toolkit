@@ -36,8 +36,8 @@ function increaseVersion(version) {
         return null;
     }
         
-    if (++parts[2] > 100) {
-        if (++parts[1] > 100) {
+    if (++parts[2] >= 100) {
+        if (++parts[1] >= 100) {
             ++parts[0];
             parts[1] = 0;
         }
