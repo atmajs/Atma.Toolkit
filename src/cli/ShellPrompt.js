@@ -2,6 +2,7 @@ var rl,
 	factory_;
 
 function initialize() {
+	
 	var readline = require('readline');
 	
 	rl = readline.createInterface({

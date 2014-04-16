@@ -43,10 +43,6 @@ include
 			}
 		};
 		
-		
-
-		
-				
 		function install_writeMetaLocal(pluginName){
 			
 			var file = new io.File('package.json'),
