@@ -101,8 +101,13 @@
             }
             
             return arr.map(function(name){
+                var folder;
+                if (/^[A-Z]\w+JS$/.test(name)) 
+                    folder = name.replace('JS','').toLowerCase();
+                
                 return {
-                    path: 'git://github.com/atmajs/' + name + '.git'
+                    path: 'git://github.com/atmajs/' + name + '.git',
+                    name: folder,
                 };
             });
         };
