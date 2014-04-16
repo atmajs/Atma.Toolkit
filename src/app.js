@@ -1,12 +1,13 @@
 
 var AppCfg = require('appcfg'),
 	Config = require('./config/Config'),
-	ShellStrategy = require('./cli/ShellStrategy.js')
+	ShellStrategy = require('./cli/ShellStrategy.js'),
+	ShellPrompt = require('./cli/ShellPrompt.js')
 	;
 
 
 var Application = Class({
-    Extends: [Class.EventEmitter, Class.Deferred],
+    Extends: [Class.EventEmitter, Class.Deferred, ShellPrompt],
     
     config: null,
     

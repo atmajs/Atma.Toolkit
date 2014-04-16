@@ -1,5 +1,6 @@
 (function() {
-    var exec = require('child_process').exec;
+    var exec = require('child_process').exec,
+        dir;
 
 
     var CloneFactory = Class({
@@ -20,7 +21,7 @@
             logger.log(
                 'Cloning.. %d/%d'.bold
                 , this.index + 1
-                , this.list
+                , this.list.length
                 , repo.path.yellow.bold
                 );
 
@@ -28,7 +29,8 @@
                 cwd: this.dir
             }, function(error, stdout, stderr) {
                 if (error) {
-                    logger.error('<git:clone>', error, stderr);
+                    logger.error('<git:clone>', error, 'skipped'.yellow.bold);
+                    this.process();
                     return;
                 }
 
@@ -64,7 +66,7 @@
         }
     });
     
-    var Repos = (function(){
+    var repos_get = (function(){
         var primary = [
             'ClassJS',
             'IncludeJS',
@@ -106,32 +108,47 @@
         };
     }());
 
-    var Git = {
-        clone: function(done, config) {
+    function git_clone(done, config) {
             
-            var dir = new io.Directory(io.env.currentDir);
-
-            dir.uri = dir.uri.combine('atma/');
-            if (dir.exists()) {
-                done('Atma Directory Already Exists');
-                return;
+        var repos = repos_get(config),
+            count = repos.length,
+            list = repos.map(function(x){
+                return x.path;
+            })
+            ;
+        
+        logger
+            .log('You are about to clone (%d):', count, list);
+        
+        app.confirm('Process? ', function(ready){
+            if (!ready) {
+                done('Canceled');
+                return
             }
-            dir.ensure();
-
-            var list = Repos(config);
-
-            new CloneFactory(dir.uri.toLocalDir(), list, {
-                resolve: function(){
-                    new RoutesJob(dir.uri.toLocalDir());
-                    done()
-                }
-            }).process();
-        }
+           
+            new CloneFactory(dir.uri.toLocalDir(), repos, {
+               resolve: function(){
+                   new RoutesJob(dir.uri.toLocalDir());
+                   done()
+               }
+           }).process(); 
+        });
     }
+    
+    function dir_ensure(callback){
+        dir = new io.Directory(io.env.currentDir.combine('atma/'));
+        dir.ensure();
+        callback();
+    }
+    
 
     include.exports = {
         process: function(config, done){
-            Git.clone(done, config);
+            
+            dir_ensure(function(){
+                git_clone(done, config);   
+            });
+            
         }
     }
 
