@@ -31,7 +31,7 @@ function defaultActions() {
 		'project-import',
 		'project-reference',
 		
-		'git-clone'
+		'atma-clone'
 	];
 	
 	var paths = {};

@@ -1,13 +1,13 @@
 
 projects:
 	atma: 
-		path: "file:///d:/libjs/"
+		path: "file:///d:/atma/"
 		
 	bootstrap:
-		path: "file:///d:/libjs/vendor/bootstrap/"
+		path: "file:///d:/vendor/bootstrap/"
 	
 	vendor:
-		path: "file:///d:/libjs/vendor/"
+		path: "file:///d:/vendor/"
 	
 defaultRoutes: 
 	atma: "{atma}/{0}/lib/{1}.js"
