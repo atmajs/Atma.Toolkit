@@ -72,6 +72,11 @@ include
 		}
 		
 		function install_writeMetaGlobal(pluginName) {
+			
+			var plugins = app.config.$get('plugins');
+			if (plugins && plugins.indexOf(pluginName) !== -1) 
+				return;
+			
 			app.config.$write({
 				plugins: [ pluginName ]
 			});

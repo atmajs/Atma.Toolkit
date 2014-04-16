@@ -271,10 +271,12 @@ Templates:
 You can create any other templates - just put all required files to:
 ``` %npm-global-directory%/node_modules/atma/template/%YourTemplateName% ```
 
-### Clone Atma Libraries
+### Download Atma Libraries
 
 ```bash
-> atma git-clone atma
+> atma atma-clone
+# only primary libraries are cloned from github, to clone all:
+> atma atma-clone --all
 ```
 
 ### Global Projects and default routes:
@@ -288,7 +290,7 @@ Sample:
 
 projects:
     atma: 
-        path: "file:///c:/Development/atmajs/"
+        path: "file:///c:/Development/atma/"
 
 defaultRoutes:
     atma_lib: 		"{atma}/{0}/lib/{1}.js"
