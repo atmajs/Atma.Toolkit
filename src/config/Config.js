@@ -30,13 +30,26 @@ module.exports = {
                     url = String.format('%1node_modules/%2/index.js', base, plugin);
                     
                     if (io.File.exists(url) === false) {
-                        url = io
-                            .env
-                            .currentDir
-                            .combine('node_modules/' + plugin + '/index.js')
-                            .toString()
-                            ;
-                        if (io.File.exists(url) === false) {
+                        var cwd = io.env.currentDir,
+                            uri = new net.Uri(cwd);
+                        
+                        while (true){
+                            url = uri
+                                .combine('node_modules/' + plugin + '/index.js')
+                                .toString();
+                            
+                            if (io.File.exists(url))
+                                break;
+                            
+                            if (!uri.path || uri.path === '/') {
+                                url = null;
+                                break;
+                            }
+                            
+                            uri = uri.combine('../')
+                        }
+                        
+                        if (url == null) {
                             logger
                                 .error('<plugin 404>', plugin)
                                 .warn('Did you forget to run `npm install %plugin-name%`?')
