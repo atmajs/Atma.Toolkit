@@ -13,8 +13,7 @@
 			extensions: {
 				'js': ['condcomments:read', 'hint:read', 'uglify:write'],
 				'css': ['cssmin:write'],
-				'coffee': ['coffee:read', 'hint:read', 'uglify:write'],
-				'less': ['less:read', 'cssmin:write']
+				'coffee': ['coffee:read', 'hint:read', 'uglify:write']
 			},
 			middleware: {
 				/** CUSTOM MIDDLEWARE:
