@@ -154,7 +154,7 @@ var Application = Class({
         
         
         include
-            .instance()
+            .instance(io.env.applicationDir.toString())
             .js(path + '::Action')
             .done(function(resp){
                 
