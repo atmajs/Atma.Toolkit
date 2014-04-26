@@ -24,7 +24,7 @@
             var files = ruqq.arr.aggr(config.files, [], function(x, aggr){
                 var file = new io.File(x);
                 if (file.exists() === false){
-                    logger.error('File not found:', file.uri.toLocalFile());
+                    logger.error('<action: jshint> File not found:', file.uri.toLocalFile());
                     return;
                 }
                 aggr.push(file);

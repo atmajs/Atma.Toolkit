@@ -32,7 +32,7 @@
             var output = ruqq.arr.aggr(files, [], function(x, aggr){
                 var file = new io.File(x);
                 if (file.exists() == false){
-                    console.error('File not exists - ', file.uri.toLocalFile());
+                    console.error('<file-concat: 404>', file.uri.toLocalFile());
                     return;
                 }
 

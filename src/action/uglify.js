@@ -44,7 +44,7 @@
 	                var file = new io.File(x);
 
 	                if (file.exists() == false){
-	                    console.error('File not found:', file.uri.toLocalFile());
+	                    console.error('<action: uglify> File not found:', file.uri.toLocalFile());
 	                    return null;
 	                }
 

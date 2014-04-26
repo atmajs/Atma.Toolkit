@@ -24,7 +24,7 @@
             }
 
 			resource
-				.js('/src/cli/Shell.js')
+				.js('/src/cli/shell.js::Shell')
 				.done(function(resp) {
 					
 					var shell = new resp.Shell(config.command, done);

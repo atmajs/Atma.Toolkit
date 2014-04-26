@@ -30,7 +30,8 @@
                     resp.server.start(config);
     
                     if (config.open){
-                        require('openurl').open(String.format('http://localhost:%1/%2', config.port || 5777, config.open));
+                        require('openurl').open(String.format(
+                            'http://localhost:%1/%2', config.port || 5777, config.open));
                     }
     
                     done();

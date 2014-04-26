@@ -38,7 +38,7 @@ include.exports = {
                 .forEach(function(file){
                 
                     var _relative = file.uri.toRelativeString(io.env.currentDir),
-                        _source = file.uri.toLocalFile(),
+                        _source = file.uri.toString(),
                         _path = glob_getCalculatedPath(_relative, source);
                     
                     files[_source] =  net.Uri.combine(target, _path);
@@ -50,7 +50,7 @@ include.exports = {
                 target = files[source];
 
             if (file.exists() === false){
-                console.warn('File not exists: ', file.uri.toLocalFile());
+                console.error('<file-copy: 404> ', file.uri.toLocalFile());
                 continue;
             }
 

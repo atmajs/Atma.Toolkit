@@ -1,7 +1,7 @@
 
 include
 	.js(
-		'/src/cli/Shell.js'
+		'/src/cli/shell.js::Shell'
 	)
 	.done(function(resp){
 		include.exports = {

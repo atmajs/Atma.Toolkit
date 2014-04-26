@@ -39,7 +39,7 @@
                         .readFiles(files)
                         .files
                         .map(function(x){
-                            return x.uri.toLocalFile();
+                            return x.uri.toString();
                         });
 
                 }
@@ -76,7 +76,7 @@
             files.forEach(function(x, index){
                 var file = new io.File(x);
                 if (file.exists() == false){
-                    logger.error('Import | File not exists - ', file.uri.toLocalFile());
+                    logger.error('<action:importer> | File not exists - ', file.uri.toLocalFile());
                     return;
                 }
 
