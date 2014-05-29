@@ -25,8 +25,8 @@ include.exports = function(file){
 	
 	if (projectPath == null) {
 		logger
-			.error('No project in {atma}/globals/projects.txt - ', project)
-			.log('Run bold<$ atma globals> and add path to projects object'.color)
+			.error('Reference not found', project)
+			.log(path, file.exists());
 		
 		return null;
 	}

@@ -73,6 +73,7 @@
 					exec: args.shift(),
 					args: args,
 					cwd: cwd,
+					//stdio: 'pipe',
 					detached: detached
 				});
 				

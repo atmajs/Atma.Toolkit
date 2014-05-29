@@ -22,6 +22,10 @@ include
 				
 				if (url === '/') 
 					url = 'index.html';
+				
+				var query = url.indexOf('?');
+				if (query !== -1) 
+					url = url.substring(0, query);
 					
 				var uri = new Uri(Uri.combine(base, url)),
 					file = new File(uri);
@@ -45,11 +49,13 @@ include
 		
 		
 		function file_send(file, req, res){
-			var mimeType = resp.MimeTypes[file.uri.extension] || 'text/plain';
+			var mimeType = file.mimeType
+				|| resp.MimeTypes[file.uri && file.uri.extension]
+				|| 'text/plain'
+				;
 			
 			
 			if (mimeType.indexOf('video/') === 0) {
-				
 				resp.Videostreamer(file.uri.toLocalFile(), req, res);
 				return;
 			}
