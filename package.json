@@ -1,39 +1,39 @@
 {
-    "name": "atma",
-    "description": "Atma.Toolkit",
-    "preferGlobal": true,
-    "author": {
-        "name": "Alexander Kit",
-        "email": "alex.kit@atmajs.com"
-    },
-    "version": "0.10.7",
-    "bin": {
-        "atma": "atma"
-    },
-    "main": "module.js",
-    "dependencies": {
-        "uglify-js": "~2.2.2",
-        "clean-css": "~0.9.0",
-        "jshint": "~0.9.1",
-        "coffee-script": "latest",
-        "less": "~1.5.0",
-        "yamljs": "latest",
-        "openurl": "~1.1.0",
-        "socket.io-client": "~0.9.11",
-        "socket.io": "~0.9.16",
-        "atma-libs": "latest",
-        "atma-logger": ">0.0.55",
-        "atma-io": ">0.0.41",
-        "atma-utest": "latest",
-        "atma-server": "latest",
-        "appcfg": "latest",
-        "cheerio": "~0.13.1",
-        "connect": "~2.14.2"
-    },
-    "scripts": {},
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/atmajs/Atma.Toolkit.git"
-    },
-    "license": "MIT"
+  "name": "atma",
+  "description": "Atma.Toolkit",
+  "preferGlobal": true,
+  "author": {
+    "name": "Alexander Kit",
+    "email": "alex.kit@atmajs.com"
+  },
+  "version": "0.10.7",
+  "bin": {
+    "atma": "atma"
+  },
+  "main": "module.js",
+  "dependencies": {
+    "uglify-js": "~2.2.2",
+    "clean-css": "~0.9.0",
+    "jshint": "~0.9.1",
+    "coffee-script": "latest",
+    "less": "~1.5.0",
+    "yamljs": "latest",
+    "openurl": "~1.1.0",
+    "socket.io-client": "~0.9.11",
+    "socket.io": "~0.9.16",
+    "atma-libs": "latest",
+    "atma-logger": ">0.0.55",
+    "atma-io": ">0.0.41",
+    "atma-utest": "latest",
+    "atma-server": "latest",
+    "appcfg": "latest",
+    "cheerio": "~0.13.1",
+    "connect": "~2.14.2"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/atmajs/Atma.Toolkit.git"
+  },
+  "license": "MIT"
 }

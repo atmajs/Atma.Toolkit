@@ -152,9 +152,13 @@ var Application = Class({
         if (path == null) 
             path = '/src/action/' + action + '.js';
         
+        var base = io.env.applicationDir.toString();
+        if (path[0] === '/')
+        	path = net.Uri.combine(base, path);
         
         include
-            .instance(io.env.applicationDir.toString())
+            .instance(base)
+            .setBase(base)
             .js(path + '::Action')
             .done(function(resp){
                 

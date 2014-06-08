@@ -99,19 +99,11 @@ function pipe(req, res, options_, remoteUrl, redirects) {
 			return;
 		}
 		
-		res.statusCode = code;
-		for(var key in response.headers)
-			res.setHeader(key, response.headers[key]);
-		
-		response.pipe(res, {
-			end: true
-		}); 
+		res.writeHead(code, response.headers);
+		response.pipe(res); 
 	});
 	
-	// @TODO pipe post body to redirects
-	req.pipe(request, {
-		end: true
-	});
+	req.pipe(request);
 }
 
 

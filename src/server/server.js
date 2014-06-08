@@ -42,6 +42,9 @@ var resource = include
 					.server
 					.Application({
 						configs: configs,
+						config: {
+							debug: true
+						},
 						args: {
 							debug: true
 						}
@@ -52,24 +55,38 @@ var resource = include
 						
 						var connect = require('connect');
 					
-						var middleware = new resp.Middleware()
-							
-							.add(app.responder({
+						//var middleware = new resp.Middleware()
+						//	
+						//	.add(app.responder({
+						//		middleware: [
+						//			connect.query(),
+						//			connect.urlencoded(),
+						//			connect.json()
+						//		]
+						//	}))
+						//	.add(resp.static())
+						//	.add(resp.proxy(proxyPath))
+						//	;
+						//
+						//
+						//var server = connect()
+						//	.use(middleware.listener)
+						//	.listen(port)
+						//	;
+						app.responders([
+							app.responder({
 								middleware: [
 									connect.query(),
 									connect.urlencoded(),
 									connect.json()
 								]
-							}))
-							.add(resp.static())
-							.add(resp.proxy(proxyPath))
-							;
-						
-						
-						var server = connect()
-							.use(middleware.listener)
-							.listen(port)
-							;
+							}),
+							atma.server.StaticContent.respond,
+							resp.proxy(proxyPath)
+						]);
+						var server = require('http')
+							.createServer(app.process.bind(app))
+							.listen(port);
 						
 						
 						
@@ -100,13 +117,13 @@ var resource = include
 							;
 							
 						app
-							.autoreload(server)
-							.getWatcher()
-							.on('fileChange', function(path){
-								
-								io.File.clearCache(path);
-							})
-							;
+							.autoreload(server);
+						//	.getWatcher()
+						//	.on('fileChange', function(path){
+						//		
+						//		io.File.clearCache(path);
+						//	})
+						//	;
 						
 						
 						

@@ -23,15 +23,14 @@ module.exports = Class({
 				path: file.uri.toLocalFile()
 			}])
 			.done(function() {
-
-			that.config = {
-				tasksAll: this.toJSON(),
-				tasks: prepairTasks(this.toJSON(), rootConfig),
-				$prepairTasks: prepairTasks
-			};
-
-			that.resolve();
-		});
+				that.config = {
+					tasksAll: this.toJSON(),
+					tasks: prepairTasks(this.toJSON(), rootConfig),
+					$prepairTasks: prepairTasks
+				};
+	
+				that.resolve();
+			});
 	},
 
 	data: {
@@ -80,7 +79,6 @@ function getAction(rootConfig) {
 
 
 function prepairTasks(tasks, rootConfig) {
-
 	var _tasks = tasks;
 	if (Array.isArray(tasks) === false) {
 
@@ -96,12 +94,15 @@ function prepairTasks(tasks, rootConfig) {
 				}
 			}
 
-
-
 			ruqq.arr.each(groups, function(groupName) {
 
 				var cfg = tasks[groupName];
-
+				if (cfg == null) {
+					logger.error('Config group name is undefined %s. Tasks: %s'
+						, groupName
+						, tasks
+					);
+				}
 				if (Array.isArray(cfg)) {
 					out = out.concat(cfg);
 					return;
@@ -123,8 +124,17 @@ function prepairTasks(tasks, rootConfig) {
 	while( ++i < imax ) {
 		x = tasks[i];
 
-		if (typeof x === 'string' && _tasks[x])
+		if (typeof x === 'string' && _tasks[x]) {
+			if (_tasks[x] == null) {
+				logger.error(
+					'Config name `%s` must be an Object or name of existing Task. Tasks: %s, All: %s'
+					, x
+					, tasks
+					, _tasks);
+				return {};
+			}
 			x = tasks[i] = _tasks[x];
+		}
 
 		if (typeof x !== 'object') {
 			logger.error('Config must be an Object or name of existing Task', x, i, imax, tasks);
