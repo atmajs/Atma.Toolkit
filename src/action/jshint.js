@@ -11,7 +11,6 @@
 		process: function(config, done) {
 
 
-
 			if (config.files == null) {
 				done('Set file(s) in config.files');
 				return;
@@ -37,9 +36,11 @@
 				.hint
 				;
 
+
+
             ruqq.arr.each(files, function(file){
                 file.read();
-                JSHint(file, config.jshint);
+                JSHint(file, config);
             });
 
             done();
