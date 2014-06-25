@@ -157,7 +157,7 @@ function parseFile(config) {
 	if (uri.isRelative())
 		uri = new net.Uri(net.Uri.combine(process.cwd(), config.file));
 
-	config.uri = uri;
+	config.uri = uri.toString();
 }
 
 function parseType(config) {
@@ -169,7 +169,8 @@ function parseType(config) {
 		types = {
 			htm: 'html',
 			html: 'html',
-			js: 'js'
+			js: 'js',
+			es6: 'js'
 		};
 
 	config.type = types[ext];

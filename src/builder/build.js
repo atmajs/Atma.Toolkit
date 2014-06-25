@@ -14,11 +14,13 @@ include
 			? UglifyJS.parse(code).body
 			: code;
 	}
-	
 	function ast_append(ast, code) {
 		ast.body = ast.body.concat(ast_getBody(code));
 	}
-		
+	function ast_IIF(){
+		return UglifyJS.parse("(function(){}())");
+	}
+	
 	var BuilderHelper = {
 			jsRaw: function(solution, stack, output) {
 				var includeIndex = ruqq.arr.indexOf(stack, function(x) {
@@ -66,50 +68,61 @@ include
 				return (output.js = output.js.join(io.env.newLine + ';'));
 			},
 			jsAst: function(solution, stack, output) {
-				var cfg = solution.config,
-					fileName_IncludeJS = cfg && cfg.includejsFile || 'include.js';
+				var cfg = solution.config || {},
+					fileName_IncludeJS = cfg.includejsFile || 'include.js';
 				
 				var ast = UglifyJS.parse(''),
 					includeIndex = ruqq.arr.indexOf(stack, function(x) {
 						return x.url.indexOf(fileName_IncludeJS) !== -1;
 					});
-					
 				function embedInfo() {
 					var info = (function() {
-						var arr = [];
-
-						function appendInfo(method, object) {
-							arr.push('include.%1(%2);'.format(
+						function format(method, object) {
+							return 'include.%1(%2);'.format(
 								method,
-								object ? JSON.stringify(object) : ''));
+								object ? JSON.stringify(object) : ''
+							);
 						}
-
-						appendInfo('pauseStack');
-						appendInfo('register', solution.bin);
-						appendInfo('routes', resp.includeMock.toJsonRoutes());
+						
+						var arr = [
+							format('pauseStack'),
+							format('routes', resp.includeMock.toJsonRoutes()),
+							format('register', solution.bin)
+						];
+						
+						if (solution.type === 'js') {
+							arr[2] = arr[2].replace(
+								/:"\/"/g,
+								': include.url || "/"'
+							);
+						}
 						
 						return arr.join(io.env.newLine);
 					}());
 
 					ast_append(ast, info);
 				}
-				
-				
-				
-				
 				function defineCurrentInclude(i, resource) {
+					if (mainResource === resource) 
+						return false;
 					if (i <= includeIndex) 
 						return false;
-
 					if (resource.info.hasExports)
 						return true;
-
 					if (resource.info.IncludeSymbolRef == false)
 						return false;
 
 					return true;
 				}
-
+				
+				var mainResource = null;
+				if (solution.type === 'js') {
+					mainResource = solution.resource;
+					stack.unshift(mainResource);
+					ast_append(ast, 'include.setBase(include.location);')
+					
+				}
+				
 				stack.forEach(function(resource, i){
 					
                     if (resource.ast == null)
@@ -144,11 +157,15 @@ include
 							info.state = 4;
 					}
 
-					
-					ast_append(ast, resource.ast.body);
-					ast_append(ast, ';');
-
-					
+					if (cfg.wrapModules) { 
+						var iif = ast_IIF();
+						ast_append(iif.body[0].body.expression, resource.ast.body);
+						ast_append(ast, iif);
+					}
+					else {
+						ast_append(ast, resource.ast.body);
+						ast_append(ast, ';');
+					}
 
 					if (setCurrentInclude && resource.appuri) {
 						var code = "include.getResource('%1', 'js').readystatechanged(3);"
@@ -252,7 +269,6 @@ include
             
 			if (solution.type === 'html')
 				resp.HtmlBuilder.build(solution, solution.output);
-
 
 			done(_filesCount);
 		}

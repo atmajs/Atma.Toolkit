@@ -7,21 +7,20 @@ include.js({
 
 	include.exports = {
 		process: function(config, done) {
-
-            if (config.uri instanceof net.Uri === false)
-				return done('Project HTML file is not defined');
+			var uri = config.uri;
+			if (typeof uri === 'string') 
+				uri = new net.Uri(uri);
 			
-
-			if (new io.File(config.uri.toLocalFile()).exists() == false) 
-				return done('File doesnt exists (404) ' + config.uri.toLocalFile());
-			
-			
+            if (uri instanceof net.Uri === false)
+            	return done('Project HTML file is not defined');
+			if (io.File.exists(uri) == false) 
+				return done('File doesnt exists (404) ' + uri.toLocalFile());
 			if (!config.type) 
 				return done('Unknown solution type ' + config.type);
 			
+			config.uri = uri;
 			
 			var action = config.action;
-
 			switch(action){
 				case 'project-import':
 				case 'project-reference':

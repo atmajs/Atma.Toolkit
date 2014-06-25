@@ -65,6 +65,7 @@ include.js(
 				break;
 			case 'cfg':
 			case 'instance':
+			case 'setBase':
 			case 'embed':
 			case 'plugin':
 			case 'ajax':

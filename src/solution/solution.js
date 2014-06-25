@@ -97,21 +97,24 @@ include
 		
 		save: function(){
 			if (this.output.js) {
-				new io
-					.File(this.uris.outputDirectory.combine('script.js'))
-					.write(this.output.js);
+				var uri = this.type === 'js'
+					? this.uris.outputMain
+					: this.uris.outputDirectory.combine('script.js')
+					;
+				io.File.write(uri, this.output.js);
 			}
 
 			if (this.output.css) {
-				new io
-					.File(this.uris.outputDirectory.combine('style.css'))
-					.write(this.output.css);
+				var uri = this.uris.outputDirectory.combine('style.css');
+				io.File.write(uri, this.output.css);
 			}
 			
 			if (this.output.html) {
-				new io
-					.File(this.uris.outputMain)
-					.write(this.output.html);
+				var uri = this.type === 'js'
+					? this.uris.outputDirectory.combine('load.html')
+					: this.uris.outputMain
+					;
+				io.File.write(uri, this.output.html);
 			}
 		},
         

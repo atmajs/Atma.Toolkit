@@ -100,7 +100,7 @@ include.js({
                 this.includes = includes.map(function(x){
                     return new Resource(x, that);
                 });
-
+                
                 break;
             case 'css':
             case 'load':
