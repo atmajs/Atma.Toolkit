@@ -36,9 +36,7 @@
 
             
             config.minify = true;
-
-            
-
+            config.sourceMap = true;
             _files
             	.map(function(x){
 	                var file = new io.File(x);
@@ -73,10 +71,19 @@
 					output = file.uri.combine(file.uri.getName() + '.min.' + file.uri.extension); 
 				}
 				
-                new io
-                	.File(output)
-                	.write(file.content);
-
+                if (file.sourceMap) {
+					var map = output + '.map';
+					logger.log('Append comment'.bold);
+					file.content += '\n'
+						+ '//# sourceMappingURL='
+						+ map.substring(map.lastIndexOf('/') + 1)
+						;
+					
+					io.File.write(map, file.sourceMap);
+				}
+				logger.log(file.content.substring(file.content.length - 30));
+				
+				io.File.write(output, file.content, { skipHooks: true });
             });
 
             done();

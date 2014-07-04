@@ -53,32 +53,20 @@ var resource = include
 						
 						mask.cfg('allowCache', false);
 						
-						var connect = require('connect');
-					
-						//var middleware = new resp.Middleware()
-						//	
-						//	.add(app.responder({
-						//		middleware: [
-						//			connect.query(),
-						//			connect.urlencoded(),
-						//			connect.json()
-						//		]
-						//	}))
-						//	.add(resp.static())
-						//	.add(resp.proxy(proxyPath))
-						//	;
-						//
-						//
-						//var server = connect()
-						//	.use(middleware.listener)
-						//	.listen(port)
-						//	;
+						var bodyParser = require('body-parser'),
+							Url = require('url')
+							;
+						
+						
 						app.responders([
 							app.responder({
 								middleware: [
-									connect.query(),
-									connect.urlencoded(),
-									connect.json()
+									function(req, res, next){
+										var url = Url.parse(req.url, true);
+										req.query = url.query;
+										next();
+									},
+									bodyParser.json()
 								]
 							}),
 							atma.server.StaticContent.respond,
