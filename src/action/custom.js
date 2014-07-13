@@ -33,16 +33,22 @@ include.exports = {
             return;
         }
 
-        if (new io.File(script).exists() === false) {
+        if (io.File.exists(script) === false) {
             script += '.js';
         }
 
-        if (new io.File(script).exists() === false) {
+        if (io.File.exists(script) === false) {
             done('Custom script not exists: %1'.format(script));
             return;
         }
 
-        var url = net.Uri.combine('file:///', process.cwd().replace(/\\/g, '/'), script);
+        script = script.replace(/\\/g, '/');
+        var base = process.cwd().replace(/\\/g, '/');
+        var url = net.Uri.combine(
+        	'file:///'
+        	, base
+        	, script
+        );
 
 
         include
