@@ -93,32 +93,33 @@ var Application = Class({
             .findAction(taskConfig.action)
             .fail(function(error){
                 logger.error('<app.action>', error);
-                
                 next();
             })
             .done(function(handler){
 				
-				if (handler.strategy) {
-					
-					var strategy = new ShellStrategy(handler.strategy),
-						path = process.argv.slice(3).join(' '),
-						cmd = ruta.$utils.pathFromCLI(path);
-					
-					strategy.process(cmd, taskConfig, callback);
-					return;
-				}
+				// defer `run` to wait before for all `done`-stack is called when resolving action
+				setTimeout(run);
 				
-				if (handler.process) {
-					handler.process(taskConfig, callback);
-					return;
+				function run() {
+					if (handler.strategy) {
+						
+						var strategy = new ShellStrategy(handler.strategy),
+							path = process.argv.slice(3).join(' '),
+							cmd = ruta.$utils.pathFromCLI(path);
+						
+						strategy.process(cmd, taskConfig, callback);
+						return;
+					}
+					if (handler.process) {
+						handler.process(taskConfig, callback);
+						return;
+					}
+					app.errors.push('<fail> '
+						+ taskConfig.action
+						+ ':'
+						+ ' No `strategy` object, no `process` function'
+					);
 				}
-                
-				
-				app.errors.push('<fail> '
-					+ taskConfig.action
-					+ ':'
-					+ ' No `strategy` object, no `process` function'
-				);
                 
 				
 				function callback(error){
