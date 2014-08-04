@@ -1,26 +1,42 @@
 include.exports = {
 	help: {
-		description: 'Increase version in `package.json` from CWD. \n `00` pattern, e.g. `0.11.54`',
+		description: 'Increase version in `package.json | bower.json | component.json` from CWD. \n `00` pattern, e.g. `0.11.54`',
 		args: {},
 	},
 	process: function(config, done){
-		var file = new io.File('package.json'),
-            pckg;
-        
-        if (file.exists() === false) 
-            return done('cwd contains no `package.json`');
-        
-        pckg = file.read();
-		pckg.version = increaseVersion(pckg.version);
+		var version, file, pckg;
 		
-		if (pckg.version == null) 
+		files.forEach(function(filename){
+			file = new io.File(filename);
+			if (file.exists() === false) 
+				return;
+			
+			pckg = file.read();
+			if (version == null) 
+				version = increaseVersion(pckg.version);
+			
+			if (version == null) {
+				logger.error('Invalid package version', filename, pckg.version);
+				return;
+			}
+			logger.log('Update', filename.yellow.bold);
+			pckg.version = version;
+			file.write(pckg);
+		});
+		
+		if (version == null) 
 			return done('Invalid version');
 		
-        file.write(pckg);
-		done();
+		logger.log('New version:', version.bold);
+		done(null, version);
 	}
 };
 
+var files = [
+	'package.json',
+	'bower.json',
+	'component.json'
+];
 
 function increaseVersion(version) {
     if (typeof version !== 'string') 
