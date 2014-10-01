@@ -7,15 +7,21 @@ include.js({
 
 	include.exports = {
 		process: function(config, done) {
-			var uri = config.uri;
+			var uri = config.uri || config.file;
 			if (typeof uri === 'string') 
 				uri = new net.Uri(uri);
 			
-            if (uri instanceof net.Uri === false)
+			if (uri instanceof net.Uri === false)
             	return done('Project HTML file is not defined');
+			
+			
 			if (io.File.exists(uri) == false) 
 				return done('File doesnt exists (404) ' + uri.toLocalFile());
-			if (!config.type) 
+			
+			if (config.type == null) 
+				config.type = uri.extension;
+			
+			if (['js', 'html'].indexOf(config.type) === -1) 
 				return done('Unknown solution type ' + config.type);
 			
 			config.uri = uri;
@@ -31,6 +37,10 @@ include.js({
 					break;
 			}
 			
+			if (config.output) {
+				config.outputMain = net.Uri.combine(config.output, config.file);
+				config.outputSources = config.output;
+			}
 			
 			var solution = new Solution(config, function(solution) {
 				logger.log(' - resources loaded - ');

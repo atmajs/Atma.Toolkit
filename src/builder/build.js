@@ -43,7 +43,7 @@ include
 					output.js.push(x.content);
 
 					if (i > includeIndex && x.appuri) {
-						output.js.push(String.format("include.getResource('%1', 'js').readystatechanged(3);", x.appuri));
+						output.js.push(String.format("include.getResourceById('%1', 'js').readystatechanged(3);", x.appuri));
 					}
 				}
 
@@ -142,6 +142,7 @@ include
 								id: resource.appuri,
 								namespace: resource.namespace || '',
 								url: resource.appuri
+
 							});
 
 						ast_append(ast, code);
@@ -168,7 +169,7 @@ include
 					}
 
 					if (setCurrentInclude && resource.appuri) {
-						var code = "include.getResource('%1', 'js').readystatechanged(3);"
+						var code = "include.getResourceById('%1', 'js').readystatechanged(3);"
 							.format(resource.appuri);
 						
 						ast_append(ast, code);

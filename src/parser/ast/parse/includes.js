@@ -48,7 +48,7 @@ include.js(
 			case 'load':
 			case 'lazy':
 			case 'routes':
-
+			case 'setBase':
 				var pckg = {
 					type: node.expression.property,
 					args: util.getArguments(node.args, scope),
@@ -65,7 +65,6 @@ include.js(
 				break;
 			case 'cfg':
 			case 'instance':
-			case 'setBase':
 			case 'embed':
 			case 'plugin':
 			case 'ajax':
@@ -74,6 +73,9 @@ include.js(
 			case 'server':
 			case 'use':
 			case 'getPending':
+			case 'getResource':
+			case 'getResourceById':
+			case 'getResources':
 			case 'apply':
 				break;
 			default:

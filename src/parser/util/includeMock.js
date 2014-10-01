@@ -20,12 +20,12 @@
 					}
 					
 					
-					
+					var base = this.base;
 					Routes.each(x, pckg, function(namespace, route) {
 						
 						this.includes.push({
 							type: x,
-							url: route.path,
+							url: base && net.Uri.combine(base, route.path) || route.path,
 							route: route,
 							namespace: namespace
 						});
@@ -46,6 +46,10 @@
 			for (var key in arg) {
                 Routes.register(key, arg[key], this);
 			}
+			return this;
+		},
+		setBase: function(path){
+			this.base = path;
 			return this;
 		},
         Static: {

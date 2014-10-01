@@ -2,11 +2,14 @@ include.exports = {
 	help: {
 		description: [
 			'Increase version in `package.json | bower.json | component.json`',
-			'Resolve release files from `build.js` exports (`release` property)',
-			'Checkout branch release',
-			'Checkout release files from `master`',
+			'Commit and push version',
+			'npm publish',
+			'Resolve release files from `lib/*`',
+			'Checkout `release` branch',
+			'Ignore files not for `release`',
 			'Commit and push changes',
-			'Add and push the git tag using current version'
+			'Create and push the git tag using current version',
+			'Checkout master'
 		],
 		args: {},
 	},
@@ -15,6 +18,7 @@ include.exports = {
 		var cwd = io.env.currentDir.toString();
 		var files = [
 			'lib/*',
+			'vendor/*',
 			'readme.md',
 			'package.json',
 			'bower.json'
@@ -33,7 +37,7 @@ include.exports = {
 			
 			aggr.push(path);
 			return aggr;
-		}, [])
+		}, []);
 		
 		app
 			.findAction('bump')
@@ -55,21 +59,37 @@ include.exports = {
 				})
 		}
 		
+		
 		function process() {
 			var commands = [
 				'git add -A',
-				'git commit -am "bump ' + _version + '"',
+				'git commit -a -m "v' + _version + '"',
+				'git push origin master',
+				(function(){
+					if (io.File.exists('package.json') === false) 
+						return null;
+					
+					var pckg = io.File.read('package.json');
+					if (typeof pckg === 'string') 
+						pckg = JSON.parse(pckg);
+					
+					var name = pckg.name;
+					if (name && name !== '-') 
+						return 'npm publish';
+					
+					return null;
+				}()),
 				'git checkout -B release',
 				function () {
 					createIgnore(files)
 				},
 				'git rm -r --cached .',
 				'git add -A',
-				'git commit -am "v' + _version + '"',
+				'git commit -a -m "v' + _version + '"',
 				'git push origin release -ff',
 				'git tag v' + _version,
 				'git push --tags',
-				function (args) {
+				function () {
 					resetIgnore();
 				},
 				'git checkout master -ff'
@@ -82,7 +102,15 @@ include.exports = {
 				}
 				
 				var command = commands[index];
+				if (command == null) {
+					next();
+					return;
+				}
 				if (typeof command === 'function') {
+					if (command.length === 1) {
+						command(next);
+						return;
+					}
 					command();
 					next();
 					return;
@@ -108,7 +136,8 @@ function createIgnore(files) {
 	_gitignore = io.File.read(GIT_IGNORE);
 	var lines = [
 		'*',
-		'!*/'
+		'!lib/',
+		'!vendor/'
 	];
 	lines = lines.concat(files.map(function(filename){
 		return '!' + filename;

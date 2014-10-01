@@ -5,7 +5,7 @@ module.exports = Class({
 		var file = getFile(rootConfig.$cli),
 			action = getAction(rootConfig),
 			that = this;
-
+			
 		if (action != null) {
 			this.config = {
 				tasks: [action]
