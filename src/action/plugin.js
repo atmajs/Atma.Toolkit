@@ -14,10 +14,9 @@ include
 				
 				'^install/:pluginName??:global(g|global)': function(params, config, done){
 				
-					var pluginName = params.pluginName,
-						global = params.global;
+					var pluginName = params.pluginName;
 					
-					if (global) {
+					if ('global' in params) {
 						
 						install_npmGlobal(pluginName, function(code){
 							

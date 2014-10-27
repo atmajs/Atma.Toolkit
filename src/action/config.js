@@ -1,7 +1,7 @@
 
 include.exports = {
 	help: {
-		description: 'Opens file which contains projects information for editing'
+		description: 'Opens Atma.Toolkit global configuration file'
 	},
 	process: function(config, done) {
 		

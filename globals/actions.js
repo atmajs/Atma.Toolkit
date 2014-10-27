@@ -11,7 +11,7 @@ function defaultActions() {
 		'custom',
 		'template',
 		
-		'globals',
+		'config',
 		'import',
 		
 		'jshint',
