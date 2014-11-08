@@ -15,8 +15,7 @@ include
 				'^install/:pluginName??:global(g|global)': function(params, config, done){
 				
 					var pluginName = params.pluginName;
-					
-					if ('global' in params) {
+					if (params.global != null) {
 						
 						install_npmGlobal(pluginName, function(code){
 							
@@ -88,7 +87,6 @@ include
 		}
 		
 		function install_npmGlobal(pluginName, done){
-			
 			var path = io.env.applicationDir.toLocalDir();
 			
 			new resp
