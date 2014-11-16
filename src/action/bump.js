@@ -59,6 +59,11 @@ function increaseVersion(version) {
         }
         parts[2] = 0;
     }
+
+    if (parts[1] >= 100) {
+    	parts[0]++;
+        parts[1] = 0;
+    }
     
     return parts.join('.');
 }
