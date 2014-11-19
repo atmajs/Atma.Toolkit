@@ -1,5 +1,0 @@
-
-handler:
-	location: '/server/http/handler/{0}.js'
-
-	
