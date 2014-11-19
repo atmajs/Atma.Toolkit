@@ -15,14 +15,16 @@ include.exports = {
 	},
 	process: function(config, done){
 		
-		var cwd = io.env.currentDir.toString();
-		var files = [
+		var includes = app.config.settings && app.config.settings.release || [
 			'lib/*',
 			'vendor/*',
 			'readme.md',
 			'package.json',
 			'bower.json'
-		].reduce(function(aggr, path){
+		];
+		
+		var cwd = io.env.currentDir.toString();
+		var files = includes.reduce(function(aggr, path){
 			if (path.indexOf('*') !== -1) {
 				var files = io
 					.glob
@@ -81,7 +83,7 @@ include.exports = {
 				}()),
 				'git checkout -B release',
 				function () {
-					createIgnore(files)
+					createIgnore(files, includes)
 				},
 				'git rm -r --cached .',
 				'git add -A',
@@ -132,13 +134,18 @@ var _version,
 	_shell;
 
 var GIT_IGNORE = '.gitignore';
-function createIgnore(files) {
+function createIgnore(files, includes) {
 	_gitignore = io.File.read(GIT_IGNORE);
-	var lines = [
-		'*',
-		'!lib/',
-		'!vendor/'
-	];
+	
+	var lines = [ '*' ];
+	lines = lines.concat(includes
+		.filter(function(path){
+			return path.indexOf('/') !== -1
+		})
+		.map(function(path){
+			return '!' + path.substring(0, path.indexOf('/') + 1)
+		})
+	);
 	lines = lines.concat(files.map(function(filename){
 		return '!' + filename;
 	}));
