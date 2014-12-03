@@ -1,17 +1,21 @@
 include.exports = {
 	help: {
-		description: 'Increase version in `package.json | bower.json | component.json` from CWD. \n `00` pattern, e.g. `0.11.54`',
+		description: 'Increase the semver in `package.json | bower.json | component.json` from the CWD. \n `00` pattern, e.g. `0.11.54`',
 		args: {},
 	},
 	process: function(config, done){
 		var version, file, pckg;
 		
 		files.forEach(function(filename){
+			io.File.clearCache(file.uri.toLocalFile());
+
 			file = new io.File(filename);
 			if (file.exists() === false) 
 				return;
+
+			var source = file.read({ skipHooks: true });
 			
-			pckg = file.read();
+			pckg = JSON.parse(source);
 			if (version == null) 
 				version = increaseVersion(pckg.version);
 			
@@ -20,8 +24,9 @@ include.exports = {
 				return;
 			}
 			logger.log('Update', filename.yellow.bold);
-			pckg.version = version;
-			file.write(pckg);
+			
+			source = source.replace(pckg.version, version);
+			file.write(source);
 		});
 		
 		if (version == null) 

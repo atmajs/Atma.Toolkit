@@ -1,5 +1,5 @@
 /**
- * Run IncludeJS Config(Actions on file changes)
+ * Run Actions on file changes
  */
 
 include
@@ -35,8 +35,6 @@ include
 				var files = _config.files,
 					config = _config.config,
 					ignore = _config.ignore;
-				
-				
 				
 				if (!config && _config.actions && app.config.tasksAll) {
 					var actions = _config.actions;

@@ -175,6 +175,32 @@ var Application = Class({
         return dfr;
     },
 
+    findActions: function(){
+        var actions = Array.prototype.slice.call(arguments),
+            fns = [],
+            dfr = new Class.Deferred(),
+            app = this;
+
+        function next() {
+        	if (actions.length === 0) {
+                dfr.resolve.apply(dfr, fns);
+                return;
+            }
+            app
+                .findAction(actions.shift())
+                .done(function(fn){
+                    fns.push(fn);
+                    next();
+                })
+                .fail(function(error){
+                    dfr.reject(error);
+                })
+        }
+
+        next();
+        return dfr;
+    },
+
     runAction: function(action, config, done){
         this
             .findAction(action)

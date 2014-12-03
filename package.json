@@ -6,29 +6,29 @@
         "name": "Alexander Kit",
         "email": "alex.kit@atmajs.com"
     },
-    "version": "0.10.21",
+    "version": "0.10.26",
     "bin": {
         "atma": "atma"
     },
     "main": "module.js",
     "dependencies": {
-        "uglify-js": "~2.2.2",
-        "clean-css": "~0.9.0",
-        "jshint": "~0.9.1",
-        "coffee-script": "latest",
-        "less": "~1.5.0",
-        "yamljs": "latest",
-        "openurl": "~1.1.0",
-        "socket.io-client": "~1.0.0",
-        "socket.io": "~1.0.0",
+        "appcfg": "~0.1.41",
+        "atma-io": "^0.1.92",
         "atma-libs": "latest",
         "atma-logger": ">0.0.55",
-        "atma-io": "~0.1.86",
-        "atma-utest": "latest",
         "atma-server": "~0.1.12",
-        "appcfg": "~0.1.41",
+        "atma-utest": "latest",
+        "body-parser": "~1.4.3",
         "cheerio": "~0.13.1",
-        "body-parser": "~1.4.3"
+        "clean-css": "~0.9.0",
+        "coffee-script": "latest",
+        "jshint": "~0.9.1",
+        "less": "~1.5.0",
+        "openurl": "~1.1.0",
+        "socket.io": "~1.0.0",
+        "socket.io-client": "~1.0.0",
+        "uglify-js": "~2.2.2",
+        "yamljs": "latest"
     },
     "scripts": {},
     "repository": {

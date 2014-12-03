@@ -128,14 +128,13 @@ module.exports = {
         Base: Class.Deferred,
         
         read: function(rootConfig){
+            if (rootConfig.settings) {
+                
+                if (rootConfig.settings.io) 
+                    io.settings(rootConfig.settings.io);
+                
+            }
             this.resolve();
-            
-            if (rootConfig.settings == null) 
-                return;
-            
-            if (rootConfig.settings.io) 
-                io.settings(rootConfig.settings.io);
-            
         },
         
         data: {
