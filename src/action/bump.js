@@ -7,9 +7,7 @@ include.exports = {
 		var version, file, pckg;
 		
 		files.forEach(function(filename){
-			io.File.clearCache(file.uri.toLocalFile());
-
-			file = new io.File(filename);
+			file = new io.File(filename, { cached: false });
 			if (file.exists() === false) 
 				return;
 
