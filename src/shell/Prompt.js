@@ -1,3 +1,18 @@
+if (atma.shell == null) {
+	atma.shell = {};
+}
+
+module.exports = atma.shell.Prompt = {
+	prompt: function(str, callback){
+		Factory.create(new PromptAction(str, callback));
+	},
+	confirm: function(str, callback){
+		Factory.create(new ConfirmAction(str + ' (y): ', callback));
+	}
+};
+
+
+
 var rl,
 	factory_;
 
@@ -10,15 +25,6 @@ function initialize() {
 		output: process.stdout
 	});
 }
-
-module.exports = {
-	prompt: function(str, callback){
-		Factory.create(new PromptAction(str, callback));
-	},
-	confirm: function(str, callback){
-		Factory.create(new ConfirmAction(str + ' (y): ', callback));
-	}
-};
 
 
 var Factory = Class({

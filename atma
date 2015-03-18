@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+global.atma = {};
+
 process
 		.mainModule
 		.paths

@@ -1,7 +1,7 @@
 
 include
 	.js(
-		'/src/cli/shell.js::Shell'
+		'/src/shell/Process.js::Shell'
 	)
 	.done(function(resp){
 		include.exports = {
@@ -78,24 +78,20 @@ include
 		
 		function install_npmLocal(pluginName, done){
 			
-			new resp
-				.Shell({
-					command: 'npm install --save ' + pluginName
-				}, done)
-				.process()
-				;
+			var process = new resp.Shell('npm install --save ' + pluginName, done);
+			process.run();
 		}
 		
 		function install_npmGlobal(pluginName, done){
 			var path = io.env.applicationDir.toLocalDir();
 			
-			new resp
-				.Shell({
-					command: 'npm install ' + pluginName,
-					cwd: path
-				}, done)
-				.process()
-				;
+			var process = new resp.Shell({
+				command: 'npm install ' + pluginName,
+				cwd: path
+			}, done);
+			
+			
+			process.run();
 		}
 		
 	});

@@ -1,8 +1,9 @@
 
 var AppCfg = require('appcfg'),
 	Config = require('./config/Config'),
-	ShellStrategy = require('./cli/ShellStrategy.js'),
-	ShellPrompt = require('./cli/ShellPrompt.js')
+	ShellStrategy = require('./shell/Strategy.js'),
+	ShellPrompt  = require('./shell/Prompt.js'),
+	ShellProcess = require('./shell/Process.js')
 	;
 
 

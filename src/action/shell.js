@@ -1,38 +1,32 @@
-(function() {
-	
-	var resource = include;
-	
-	resource.exports = {
-		help: {
-			description: 'Run shell commands',
-			args: {
-				command: '<string> Command'
-			},
-			examples: [
-				'$ atma shell --command "my command"',
-				{
-					action: 'shell',
-					command: 'my command'
-				}
-			]
+module.exports = {
+	help: {
+		description: 'Run shell commands',
+		args: {
+			command: '(string | Array<string>) Shell command(s)',
+			cwd: '(string) working directory'
 		},
-		process: function(config, done) {
+		examples: [
+			'$ atma shell --command "foo bar -qux"',
+			{
+				action: 'shell',
+				command: 'foo bar -qux'
+			}
+		]
+	},
+	process: function(config, done) {
 
-            if (!config.command){
-                done('Shell Command(s) is not defined.');
-				return;
-            }
-
-			resource
-				.js('/src/cli/shell.js::Shell')
-				.done(function(resp) {
-					
-					var shell = new resp.Shell(config.command, done);
-					
-					shell.process();
-				});
-
-		}
+		var process = new atma.shell.Process(config.command, done);
+		
+		process
+			.on('command_exit', function(command, code){
+				logger.log('>'.cyan, command, ', returned ', code);
+			})
+			.fail(done)
+			.done(function(){
+				done && done()
+			})
+			.run();
+		
+		return process;
 	}
-
-}());
+};

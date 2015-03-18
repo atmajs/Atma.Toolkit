@@ -1,5 +1,8 @@
+if (atma.shell == null) {
+	atma.shell = {};
+}
 
-module.exports = Class({
+module.exports = atma.shell.Strategy = Class({
 	Construct: function(strategy){
 		
 		this.routes = new ruta.Collection();
