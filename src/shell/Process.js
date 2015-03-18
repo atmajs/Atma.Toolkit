@@ -2,10 +2,24 @@ if (atma.shell == null) {
 	atma.shell = {};
 }
 
+/*
+ *	Events:
+ *		- process_start     { command }
+ *		- process_exception { command, error }
+ *		- process_exit      { command, code }
+ *		- process_ready     { command }
+ *		- process_stdout    { command, buffer }
+ *		- process_stderr    { command, buffer }
+ *
+ *	Promise
+ *		- fail (Array<{ command, error }> errors)
+ *		- done (Process self)
+ */
 module.exports = atma.shell.Process = Class({
 	Extends: [ Class.Deferred, Class.EventEmitter ],
 	
 	children: null,
+	errors: null,
 	lastCode: 0,
 	
 	Construct: function(mix, done) {
@@ -13,7 +27,7 @@ module.exports = atma.shell.Process = Class({
 		
 		if (typeof mix === 'string') {
 			params = {
-				command: mix,
+				command : mix,
 				detached: false
 			};
 		}
@@ -21,8 +35,10 @@ module.exports = atma.shell.Process = Class({
 		var command  = params.command,
 			detached = params.detached || false,
 			cwd      = params.cwd || process.cwd(),
-			rgxStart = params.matchReady;
+			rgxReady = params.matchReady;
 		
+		this.silent   = params.silent;
+		this.errors   = [];
 		this.children = [];
 		this.commands = Array.isArray(command)
 			?   command  
@@ -30,16 +46,27 @@ module.exports = atma.shell.Process = Class({
 			;
 
 			
-		this.commands = command_parseAll(this.commands, detached, cwd, rgxStart);
+		this.commands = command_parseAll(this.commands, detached, cwd, rgxReady);
 		this.callback = done;
 	},
 	
 	process: function(){
 		this.run();
 	},
+	kill: function(){
+		var child = this.children.pop();
+		if (child != null) {
+			child.kill('SIGINT');
+		}
+	},
 	run: function() {
 		if (this.commands.length === 0) {
-			this.resolve(this);				
+			if (this.errors.length === 0) {
+				this.resolve(this);
+			} else {
+				this.reject(this.errors);
+			}
+			
 			this.callback && this.callback(this.lastCode);
 			return;
 		}
@@ -48,6 +75,7 @@ module.exports = atma.shell.Process = Class({
 			command  = options.command,
 			rgxReady = options.matchReady,
 			detached = options.detached === true,
+			silent   = this.silent,
 			stdio = detached ? (void 0) : 'pipe',
 			child;
 		
@@ -67,52 +95,75 @@ module.exports = atma.shell.Process = Class({
 				detached: detached
 			});
 			this.children.push(child);
-			
 		}catch(error){
 
-			logger.error('Could not run the command', options);
-			this.emit('command_exception', error);
+			logger.error('Could not run the command', command, error);
+			this.errors.push({
+				command: command,
+				error: error
+			});
+			this.emit('process_exception', {
+				command: command,
+				error: error
+			});
 			this.run();
 			return;
 		}
 		
 		var that = this;
 		child.on('exit', function(code) {
-			that.emit('command_exit', command, code);
+			that.emit('process_exit', {
+				command: command,
+				code: code
+			});
 			that.lastCode = code;
+			if (code > 0) {
+				that.errors.push({
+					command: command,
+					error: new Error('Exit code: ' + code)
+				});
+			}
 			that.run();
 		});
+		
 		child.stdout.on('data', function(buffer){
-			if (detached !== true) {
+			if (detached !== true && silent !== true) {
 				process.stdout.write(buffer);
 			}
 			if (rgxReady != null && rgxReady.test(buffer.toString())) {
 				rgxReady = null;
-				that.emit('command_ready', {
+				that.emit('process_ready', {
 					command: command
 				});
 			}
-			that.emit('command_stdout', {
+			that.emit('process_stdout', {
 				command: command,
 				buffer: buffer
 			});
 		});
 		child.stderr.on('data', function(buffer){
-			if (detached !== true) {
+			if (detached !== true && silent !== true) {
 				process.stderr.write(buffer);
 			}
-			that.emit('command_stderr', {
+			that.emit('process_stderr', {
 				command: command,
 				buffer: buffer
 			});
 		});
 		
-		that.emit('command_spawn', {
+		that.emit('process_start', {
 			command: command
 		});
 		
 		if (detached === true) {
 			this.run();
+		}
+		if (rgxReady == null) {
+			setTimeout(function(){
+				that.emit('process_ready', {
+					command: command
+				});
+			}, 200);
 		}
 	}
 });
