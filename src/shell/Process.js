@@ -53,11 +53,13 @@ module.exports = atma.shell.Process = Class({
 	process: function(){
 		this.run();
 	},
-	kill: function(){
+	kill: function(done){
 		var child = this.children.pop();
-		if (child != null) {
-			child.kill('SIGINT');
+		if (child == null) {
+			return done && done();
 		}
+		this.once('process_exit', done);
+		child.kill('SIGINT');
 	},
 	run: function() {
 		if (this.commands.length === 0) {
