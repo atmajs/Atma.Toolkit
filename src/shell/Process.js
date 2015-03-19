@@ -38,6 +38,7 @@ module.exports = atma.shell.Process = Class({
 			rgxReady = params.matchReady;
 		
 		this.silent   = params.silent;
+		this.parallel = params.parallel || false;
 		this.errors   = [];
 		this.children = [];
 		this.commands = Array.isArray(command)
@@ -88,7 +89,6 @@ module.exports = atma.shell.Process = Class({
 				options.exec = 'cmd';
 			}
 		}
-		
 		try {
 			child = child_process.spawn(options.exec, options.args, {
 				cwd: options.cwd || process.cwd(),
@@ -152,12 +152,12 @@ module.exports = atma.shell.Process = Class({
 				buffer: buffer
 			});
 		});
-		
+		logger.log('start'.bold);
 		that.emit('process_start', {
 			command: command
 		});
 		
-		if (detached === true) {
+		if (this.parallel !== false) {
 			this.run();
 		}
 		if (rgxReady == null) {
