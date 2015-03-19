@@ -152,7 +152,6 @@ module.exports = atma.shell.Process = Class({
 				buffer: buffer
 			});
 		});
-		logger.log('start'.bold);
 		that.emit('process_start', {
 			command: command
 		});

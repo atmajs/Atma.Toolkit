@@ -66,42 +66,6 @@ module.exports = {
 			], done)
 
 		});
-		
-		
-		function process() {
-			var commands = [
-				
-			];
-			var index = -1;
-			function next(){
-				if (++index >= commands.length) {
-					done();
-					return;
-				}
-				
-				var command = commands[index];
-				if (command == null) {
-					next();
-					return;
-				}
-				if (typeof command === 'function') {
-					if (command.length === 1) {
-						command(next);
-						return;
-					}
-					command();
-					next();
-					return;
-				}
-				
-				logger.log('command'.cyan, command);
-				_shell.process({
-					command: command
-				}, next);
-			}
-			
-			next();
-		}
 	},
 	includeFiles: {
 		create: function(includes){
@@ -234,10 +198,10 @@ var runCommands;
 					return;
 				}
 				
-				logger.log('command'.cyan, command);
-				_shell.process({
-					command: command
-				}, next);
+				
+				_shell.process(command, function(){
+					next();
+				});
 			}
 			
 			next();

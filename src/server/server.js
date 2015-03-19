@@ -80,12 +80,13 @@ var resource = include
 						
 						var serverCfg = appConfig.server,
 							
-							handlers, websockets, subapps;
+							handlers, pages, websockets, subapps;
 						
 						if (serverCfg) {
 							handlers = serverCfg.handlers,
 							websockets = serverCfg.websockets,
 							subapps = serverCfg.subapps;
+							pages = serverCfg.pages;
 						}
 							
 						
@@ -103,6 +104,10 @@ var resource = include
 							.handlers
 							.registerSubApps(subapps)
 							;
+						
+						pages && app
+							.handlers
+							.registerPages(pages, app.config.page)
 							
 						app
 							.autoreload(server);
