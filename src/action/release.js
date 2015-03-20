@@ -199,9 +199,11 @@ var runCommands;
 				}
 				
 				
-				_shell.process(command, function(){
-					next();
-				});
+				_shell
+					.process(command)
+					.always(function(){
+						next();
+					});
 			}
 			
 			next();
