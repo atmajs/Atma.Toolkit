@@ -5,17 +5,29 @@ module.exports = Class({
 		var file = getFile(rootConfig.$cli),
 			action = getAction(rootConfig),
 			that = this;
-			
+		
 		if (action != null) {
+			delete rootConfig.tasks;
 			this.config = {
 				tasks: [action]
 			};
-
 			return this.resolve();
 		}
 
-		if (file == null)
+		if (file == null) {
+			if (rootConfig['tasks'] != null) {
+				var tasks = rootConfig.tasks;
+				delete rootConfig.tasks;
+				
+				
+				this.config = {
+					tasksAll: obj_extend({}, tasks),
+					tasks: prepairTasks(obj_extend({}, tasks), rootConfig),
+					$prepairTasks: prepairTasks
+				};
+			}
 			return this.resolve();
+		}
 
 		rootConfig
 			.constructor
@@ -23,6 +35,7 @@ module.exports = Class({
 				path: file.uri.toLocalFile()
 			}])
 			.done(function() {
+				// toJSON: to create clone objects
 				that.config = {
 					tasksAll: this.toJSON(),
 					tasks: prepairTasks(this.toJSON(), rootConfig),
@@ -104,7 +117,23 @@ function prepairTasks(tasks, rootConfig) {
 					);
 				}
 				if (Array.isArray(cfg)) {
-					out = out.concat(cfg);
+					ruqq.arr.each(cfg, function(x){
+						if (x == null) {
+							return;
+						}
+						if (typeof x === 'string') {
+							var config = tasks[x];
+							if (config == null) {
+								logger.error('Subarray contains no taks with the name: ', x);
+								return;
+							}
+							var obj = obj_extend({}, config);
+							obj.name = x;
+							out.push(obj);
+							return;
+						}
+						out.push(x);
+					});
 					return;
 				}
 
@@ -147,8 +176,6 @@ function prepairTasks(tasks, rootConfig) {
 		}
 	}
 
-
-
 	return tasks;
 }
 
@@ -177,7 +204,9 @@ function parseType(config) {
 
 }
 
-
+function getDefaults(obj) {
+	return obj['defaults'] || obj['default'];
+}
 
 function getCurrentGroups(config, rootConfig) {
 	var overrides = rootConfig.$cli,
@@ -191,8 +220,8 @@ function getCurrentGroups(config, rootConfig) {
 		});
 	}
 
-	if (groups.length === 0 && config.defaults) {
-		ruqq.arr.each(config.defaults, function(x) {
+	if (groups.length === 0 && getDefaults(config)) {
+		ruqq.arr.each(getDefaults(config), function(x) {
 			if (config.hasOwnProperty(x)) {
 				groups.push(x);
 				return;

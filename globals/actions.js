@@ -27,6 +27,8 @@ function defaultActions() {
 		'server',
 		'shell',
 		
+		'transpile',
+		
 		// build includejs project
 		'build',
 		'project-import',

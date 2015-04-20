@@ -46,11 +46,10 @@ module.exports = atma.shell.Process = Class({
 			: [ command ]
 			;
 
-			
 		this.commands = command_parseAll(this.commands, detached, cwd, rgxReady);
 		this.callback = done;
 	},
-	
+	state: 0,
 	process: function(){
 		this.run();
 	},
@@ -64,13 +63,15 @@ module.exports = atma.shell.Process = Class({
 	},
 	run: function() {
 		if (this.commands.length === 0) {
-			if (this.errors.length === 0) {
-				this.resolve(this);
-			} else {
-				this.reject(this.errors);
+			if (this.state !== -1) {
+				this.state = -1;
+				if (this.errors.length === 0) {
+					this.resolve(this);
+				} else {
+					this.reject(this.errors);
+				}		
+				this.callback && this.callback(this.errors.pop());
 			}
-			
-			this.callback && this.callback(this.lastCode);
 			return;
 		}
 		

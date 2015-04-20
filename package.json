@@ -6,16 +6,16 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.10.33",
+  "version": "0.10.35",
   "bin": {
     "atma": "atma"
   },
   "main": "module.js",
   "dependencies": {
     "appcfg": "~0.1.41",
-    "atma-io": "^0.2.2",
+    "atma-io": "^0.2.10",
     "atma-libs": "latest",
-    "atma-logger": ">0.0.55",
+    "atma-logger": "~1.0.1",
     "atma-server": "~0.1.12",
     "atma-utest": "latest",
     "body-parser": "~1.4.3",

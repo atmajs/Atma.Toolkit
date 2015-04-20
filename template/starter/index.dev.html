@@ -5,8 +5,10 @@
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 	<link rel='stylesheet' href='style/main.less'/>
 
-    <script type='text/javascript' src='.reference/atma/class/lib/class.js'></script>
-    <script type='text/javascript' src='.reference/atma/include/lib/include.js'></script>
+	<script type='text/javascript' src='node_modules/jquery/dist/jquery.min.js'></script>
+    <script type='text/javascript' src='node_modules/atma-class/lib/class.js'></script>
+    <script type='text/javascript' src='node_modules/includejs/lib/include.js'></script>
+	<script type='text/javascript' src='node_modules/maskjs/lib/mask.js'></script>
 
     <script type='text/javascript' src='include.routes.js'></script>
     <script type='text/javascript' src='script/main.js'></script>
@@ -14,15 +16,12 @@
 </head>
 <body>
 
-    <script type="mask/template" id='layout'>
-
+    <script type="text/mask" data-run='true'>
         header {
-            'HTML5 Header'
+            'Header'
         }
 
         section#content > 'Mask Main Layout'
-
-
     </script>
 
 </body>

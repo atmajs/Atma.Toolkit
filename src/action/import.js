@@ -13,12 +13,13 @@
             description: 'Perfom import operations on specified files',
             args: {
                 files: '<array|string> source file(s) (supports glob)',
-                output: '<string> output directory'
+                output: '<string> output directory or file pattern'
             },
             example: [
                 '$ atma import -files build/ -output release/',
                 '$ atma import -files build/lib.js -output release/lib.js',
                 '$ atma import -files foo.js;bar.js -output release/',
+                '$ atma import -files foo.js;bar.js -output release/{filename}_build.js',
                 {
                     files: 'build/',
                     output: 'release/'
@@ -87,13 +88,16 @@
                     logger.error('output not defined at %s for %s', index, file.uri.file);
                     return;
                 }
+                
+                if (dist.indexOf('{') !== -1) {
+                    dist = output_fromPattern(dist, file.uri);
+                }
 
                 if (/\.[\w]{1,6}/g.test(dist)){
-                    
-                    // is a file
-                }else{
-                    
-                    dist = net.Uri.combine(dist, file.uri.file);
+                    // is file
+                }
+                else {
+                    dist = output_fromDirectory(dist, file.uri);
                 }
 
                 io
@@ -121,4 +125,20 @@
         }
     };
 
+    function output_fromDirectory(ouput, fileUri) {
+        return net.Uri.combine(ouput, fileUri.file);
+    }
+    function output_fromPattern(output, fileUri) {
+        return output.replace(/\{(\w+)\}/g, function(full, pattern){
+            switch(pattern) {
+                case 'filename':
+                    return fileUri.getName();
+                case 'extension':
+                    return fileUri.extension;
+                default:
+                    logger.error('Invalid filepattern', pattern, 'Expect: {filename}, {extension}');
+                    throw Error('Invalid filepattern, expect')
+            }
+        })
+    }
 }());

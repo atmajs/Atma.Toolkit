@@ -1,17 +1,22 @@
 module.exports = {
 	help: {
 		description: [
-			'Increase version in `package.json | bower.json | component.json`',
+			'Increase the version in `package.json | bower.json | component.json`',
+			'`npm run build` the project',
 			'Commit and push version',
-			'npm publish',
-			'Resolve release files from `lib/*`',
+			'`npm publish` the project',
 			'Checkout `release` branch',
-			'Ignore files not for `release`',
+			'Remove files not for `release`',
 			'Commit and push changes',
 			'Create and push the git tag using current version',
-			'Checkout master'
+			'Checkout back to master'
 		],
-		args: {},
+		args: {
+			release: 'Array, default: lib/**, vendor/**, readme.md, package.json, bower.json',
+			branch: 'String, Current active branch, default: master',
+			afterBump: 'Array, additional commands after bump',
+			afterPublish: 'Array, additional commands after publishing',
+		},
 	},
 	process: function(config, done){
 		
@@ -23,15 +28,17 @@ module.exports = {
 			'package.json',
 			'bower.json'
 		];
-		
+		var afterBump     = config.afterBump    || [],
+			afterPublish  = config.afterPublish || [];
 
 		this.bump(function(error, version){
 			if (error) {
 				done(error);
 				return;
 			}
-
-			runCommands([
+			
+			var publish = [
+				'npm run build',
 				'git add -A',
 				'git commit -a -m "v' + version + '"',
 				'git push origin ' + branch,
@@ -63,8 +70,14 @@ module.exports = {
 					ignoreFile_reset();
 				},
 				'git checkout ' + branch + ' -ff'
-			], done)
-
+			];
+			
+			var commands = afterBump
+				.concat(publish)
+				.concat(afterPublish)
+				;
+			
+			runCommands(commands, done);
 		});
 	},
 	includeFiles: {
@@ -201,9 +214,13 @@ var runCommands;
 				
 				_shell
 					.process(command)
-					.always(function(){
+					.done(function(){
 						next();
-					});
+					})
+					.fail(function(error){
+						logger.error('Shell error', error);
+						next(error);
+					})
 			}
 			
 			next();

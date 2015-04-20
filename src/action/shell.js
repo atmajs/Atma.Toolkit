@@ -15,7 +15,7 @@ module.exports = {
 	},
 	process: function(config, done) {
 
-		var process = new atma.shell.Process(config, done);
+		var process = new atma.shell.Process(config);
 		
 		process
 			.on('process_start', function(data){

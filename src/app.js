@@ -70,8 +70,7 @@ var Application = Class({
             
             taskConfigs = this.config.tasks;
         }
-        
-        if (Array.isArray(taskConfigs) === false || taskConfigs.length === 0) {
+		if (Array.isArray(taskConfigs) === false || taskConfigs.length === 0) {
             
             return app
                 .worker

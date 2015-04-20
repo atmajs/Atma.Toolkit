@@ -1,5 +1,3 @@
-
-
 ### Atma.js Toolkit
 
 
@@ -22,10 +20,12 @@
 
 - [Build](#build)
 - [Shell](#shell)
+- [Transpiler](#transpile)
 - [Run scripts](#custom)
 - [HTTP Server](#server)
 - [Reference](#reference)
 - [Generate](#gen)
+
 
 _... some more, just run atma -help_
 
@@ -142,6 +142,43 @@ Copy resources, that are used by current project, from referenced directories in
 }
 ```
 Switch back from "project-import" to resource referencing
+
+#### transpiler
+```javascript
+{
+	action: 'transpile',
+	source: 'scripts/**.es6',
+	extension: 'js'
+}
+# or many
+{
+	action: 'transpile',
+	many:[
+		{
+			source: 'scripts/**.es6',
+			extension: 'js'
+		},
+		{
+			source: 'styles/**.less',
+			extension: 'css'
+		}
+	]
+}
+```
+```bash
+atma transpile --source "scripts/**.es6" --extension js
+```
+
+Preprocess files and save at the same directory just with another extension. You can quickly transpile ES6 modules to ES5, LESS to CSS and so on.
+
+To make transpiler work you have to install appropriate plugins: like [Atma.Babel](https://github.com/atmajs/atma-loader-babel)
+
+**Watch files for changes: **
+```bash
+atma transpile --source "scripts/**.es6" --extension js --watch
+# Have you set settings to configuration file?
+atma run MyTranspiles --watch
+```
 
 #### shell
 ```javascript

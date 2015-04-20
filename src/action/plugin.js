@@ -12,8 +12,7 @@ include
 			
 			strategy: {
 				
-				'^install/:pluginName??:global(g|global)': function(params, config, done){
-				
+				'^install/:pluginName??:global(g|global):save-dev': function(params, config, done){
 					var pluginName = params.pluginName;
 					if (params.global != null) {
 						
@@ -23,18 +22,15 @@ include
 								install_writeMetaGlobal(pluginName);
 							
 							done(code);	
-						})
-						
+						});
 						return;
 					}
 					
-					
-					install_npmLocal(pluginName, function(code){
-						
-						if (code === 0) 
+					install_npmLocal(pluginName, params['save-dev'] != null, function(error){
+						if (error == null) 
 							install_writeMetaLocal(pluginName);
 						
-						done(code);
+						done(error);
 					});
 					
 				}
@@ -48,21 +44,35 @@ include
 			if (file.exists()) 
 				package_ = file.read();
 			
-			if (package_.dependencies == null) 
-				package_.dependencies = {};
-			
-			package_.dependencies[pluginName] = '>0.0.0';
-			
 			if (package_.atma == null) 
 				package_.atma = {};
 			
 			if (package_.atma.plugins == null) 
 				package_.atma.plugins = [];
-				
-			if (package_.atma.plugins.indexOf(pluginName) === -1) 
+			
+			var shouldWrite = false;
+			if (package_.atma.plugins.indexOf(pluginName) === -1) {
+				shouldWrite = true;
 				package_.atma.plugins.push(pluginName);
+			}
+			if (package_.atma.settings == null) {
+				package_.atma.settings = {};
+			}
+			if (package_.atma.settings[pluginName] == null) {
+				shouldWrite = true;
+				package_.atma.settings[pluginName] = {};
 				
-			file.write(package_);
+				var pluginPackage = 'node_modules/' + pluginName + '/package.json';
+				if (io.File.exists(pluginPackage)) {
+					var obj = io.File.read(pluginPackage).defaultSettings;
+					if (obj) {
+						package_.atma.settings[pluginName] = obj;
+					}
+				}
+			}
+			
+			
+			shouldWrite && file.write(package_);
 		}
 		
 		function install_writeMetaGlobal(pluginName) {
@@ -76,9 +86,9 @@ include
 			});
 		}
 		
-		function install_npmLocal(pluginName, done){
-			
-			var process = new resp.Shell('npm install --save ' + pluginName, done);
+		function install_npmLocal(pluginName, saveDev, done){
+			var save = saveDev ? '--save-dev' : '--save';
+			var process = new resp.Shell('npm install ' + save + ' ' + pluginName, done);
 			process.run();
 		}
 		
