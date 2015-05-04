@@ -69,7 +69,11 @@ var resource = include
 									bodyParser.json()
 								]
 							}),
-							atma.server.StaticContent.respond,
+							atma.server.StaticContent.create({
+								headers: {
+									'Access-Control-Allow-Origin': '*'
+								}
+							}),
 							resp.proxy(proxyPath)
 						]);
 						var server = require('http')
