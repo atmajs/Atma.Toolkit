@@ -14,7 +14,7 @@
   "dependencies": {
     "appcfg": "~0.1.41",
     "atma-io": "^0.2.10",
-    "atma-libs": "latest",
+    "atma-libs": "^0.9.72",
     "atma-logger": "~1.0.1",
     "atma-server": "^0.1.22",
     "atma-utest": "latest",

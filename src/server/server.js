@@ -1,8 +1,3 @@
-
-
-require('atma-server');
-
-
 var resource = include
 	.js(
 		'./server/middleware/Middleware.js',
@@ -17,6 +12,9 @@ var resource = include
 		resource.exports = {
 		
 			start: function(config) {
+
+				var Server = require('atma-server');
+
 				
 				var port = config.port || process.env.PORT || 5777,
 					proxyPath = config.proxy;
@@ -38,8 +36,7 @@ var resource = include
 					path: base
 				});
 				
-				atma.server.app = atma
-					.server
+				atma.server.app = Server
 					.Application({
 						configs: configs,
 						config: {
@@ -69,7 +66,7 @@ var resource = include
 									bodyParser.json()
 								]
 							}),
-							atma.server.StaticContent.create({
+							Server.StaticContent.create({
 								headers: {
 									'Access-Control-Allow-Origin': '*'
 								}
