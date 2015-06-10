@@ -119,9 +119,15 @@ include
 		},
         
         process: function() {
-            this.resource.load();
-            
-            this.done(this);
+            this
+				.resource
+				.load()
+				.done(function(){
+					
+					this.done(this);
+					
+				}.bind(this));
+				
             return this;
         },
 		

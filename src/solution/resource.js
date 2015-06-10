@@ -7,6 +7,7 @@ include.js({
     var __cache = {};
     
     var Resource = Class({
+        Base: Class.Deferred,
         Construct: function(includeData, parent) {
 
             var _type = includeData.type,
@@ -52,10 +53,9 @@ include.js({
         },
 
         load: function(){
-           
+            this.defer();
             if (this.content == null) {
                 var file = new io.File(this.uri);
-                
                 
                 if (!file.exists()) 
                     file = resp.RefPath(this.uri.toLocalFile());
@@ -68,8 +68,7 @@ include.js({
     
                 this.content = file.read();
                 
-                if (this.content) {
-                    
+                if (this.content) {                    
                     logger.log('<resource>', this.type, this.uri.file.bold.green);
                 }else{
                     
@@ -82,15 +81,18 @@ include.js({
 
             switch (this.type) {
             case 'html':
-                includes = resp
+                resp
                     .HTML
-                    .extractIncludes(this.content, solution.directory, solution.variables);
-                
-                this.includes = includes.map(function(x){
-                    return new Resource(x, that);
-                });
-                
-                break;
+                    .extractIncludes(this.content, solution.directory, solution.variables)
+                    .done(function(includes){
+                        this.includes = includes.map(function(x){
+                            return new Resource(x, that);
+                        });
+                        
+                        ruqq.arr.invoke(this.includes, 'load');
+                        this.resolve(this.includes);
+                    }.bind(this));
+                return this;
             case 'js':
                 
                 includes = resp
@@ -112,7 +114,7 @@ include.js({
             }
 
             ruqq.arr.invoke(this.includes, 'load');
-
+            this.resolve(this.includes);
             return this;
         },
         Static: {
