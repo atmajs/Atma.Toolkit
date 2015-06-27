@@ -121,7 +121,7 @@ var resource = include
 						
 						
 						
-						
+						include.cfg('path', null);
 						logger.log('Listen %s'.green.bold, port);
 					});	
 			}
