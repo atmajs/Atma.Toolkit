@@ -32,7 +32,7 @@ module.exports = atma.shell.Process = Class({
 			};
 		}
 		
-		var command  = params.command,
+		var command  = params.command || params.commands,
 			detached = params.detached || false,
 			cwd      = params.cwd || process.cwd(),
 			rgxReady = params.matchReady;
@@ -186,7 +186,7 @@ function command_parseAll(commands, detachedAll, cwdAll, rgxReadyAll) {
 			var obj = command;
 			exec    = obj.command;
 			if (obj.cwd) {
-				cwd  = obj.cwd;
+				cwd  = path_ensure(obj.cwd, cwd);
 			}
 			if (obj.detached) {
 				detached = obj.detached;
@@ -252,6 +252,15 @@ function command_parse(command) {
 		}
 	}
 	return parts;
+}
+
+function path_ensure(cwd, base) {
+	if (new net.Uri(cwd).isRelative()) {
+		var x = require('path').normalize(net.Uri.combine(base, cwd));
+		logger.log('>>>', x.bold);
+		return x;
+	}
+	return cwd;
 }
 
 var child_process = require('child_process');

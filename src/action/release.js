@@ -38,7 +38,8 @@ module.exports = {
 			}
 			
 			var publish = [
-				'npm run build',
+				npm_run('beforeRelease'),
+				npm_run('build'),
 				'git add -A',
 				'git commit -a -m "v' + version + '"',
 				'git push origin ' + branch,
@@ -100,6 +101,33 @@ module.exports = {
 	}
 };
 
+
+var npm_run;
+(function(){
+	var pckg = null;
+	npm_run = function(action){
+		if (pckg == null)
+			_load();
+		
+		if (action in pckg) {
+			return 'npm run ' + action;
+		}
+		return null;
+	};
+
+	function _load(){
+		if (io.File.exists('package.json') === false) {
+			pckg = {};
+			return;
+		}
+		
+		pckg = io.File.read('package.json');
+		if (typeof pckg === 'string') {
+			pckg = JSON.parse(pckg);
+		}
+	}
+
+}());
 
 
 var ignoreFile_create,
