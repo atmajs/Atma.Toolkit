@@ -91,6 +91,10 @@ module.exports = atma.shell.Process = Class({
 			}
 		}
 		try {
+			var cwd = options.cwd || process.cwd();
+			if (io.Directory.exists(cwd + '/') === false) {
+				throw Error('CWD Directory not exists: ' + cwd);
+			}
 			child = child_process.spawn(options.exec, options.args, {
 				cwd: options.cwd || process.cwd(),
 				env: process.env,
@@ -171,6 +175,9 @@ module.exports = atma.shell.Process = Class({
 });
 
 function command_parseAll(commands, detachedAll, cwdAll, rgxReadyAll) {
+	if (cwdAll != null) {
+		cwdAll = path_ensure(cwdAll, process.cwd());
+	}
 	return commands.reduce(function(aggr, command, index){
 
 		var detached = detachedAll || false,
@@ -257,7 +264,6 @@ function command_parse(command) {
 function path_ensure(cwd, base) {
 	if (new net.Uri(cwd).isRelative()) {
 		var x = require('path').normalize(net.Uri.combine(base, cwd));
-		logger.log('>>>', x.bold);
 		return x;
 	}
 	return cwd;

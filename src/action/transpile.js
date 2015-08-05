@@ -108,7 +108,7 @@ function transpileFile(file, config, next) {
 	var uri = file.uri.combine();
 	uri.file = uri.file.replace(uri.extension, config.extension);
 	if (uri.toLocalFile() === file.uri.toLocalFile()) {
-		throw Error('Same path: ', file.uri.toLocalFile());
+		throw Error('Configuration failed. Transpiler will overwrite the original path ' + file.uri.toLocalFile() + '.');
 	}
 	
 	read(write);
