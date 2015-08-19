@@ -46,8 +46,9 @@ module.exports = atma.shell.Process = Class({
 			: [ command ]
 			;
 
-		this.commands = command_parseAll(this.commands, detached, cwd, rgxReady);
-		this.callback = done;
+		this.commands  = command_parseAll(this.commands, detached, cwd, rgxReady);
+		this.callback  = done;
+		this.extracted = {};
 	},
 	state: 0,
 	process: function(){
@@ -76,13 +77,14 @@ module.exports = atma.shell.Process = Class({
 		}
 		
 		var options  = this.commands.shift(),
-			command  = options.command,
+			command  = ValueExtractor.interpolateAny(options.command, this.extracted),
 			rgxReady = options.matchReady,
 			detached = options.detached === true,
 			silent   = this.silent,
 			stdio = detached ? (void 0) : 'pipe',
+			extractor = options.extract ? new ValueExtractor(this.extracted, options.extract) : null,
 			child;
-		
+
 		if (global.process.platform === 'win32'){
 			if (options.exec !== 'cmd'){
 				
@@ -95,7 +97,11 @@ module.exports = atma.shell.Process = Class({
 			if (io.Directory.exists(cwd + '/') === false) {
 				throw Error('CWD Directory not exists: ' + cwd);
 			}
-			child = child_process.spawn(options.exec, options.args, {
+			
+			var exec = ValueExtractor.interpolateAny(options.exec, this.extracted),
+				args = ValueExtractor.interpolateAny(options.args, this.extracted);
+
+			child = child_process.spawn(exec, args, {
 				cwd: options.cwd || process.cwd(),
 				env: process.env,
 				stdio: stdio,
@@ -130,6 +136,7 @@ module.exports = atma.shell.Process = Class({
 					error: new Error('Exit code: ' + code)
 				});
 			}
+			extractor && extractor.complete();
 			that.run();
 		});
 		
@@ -142,6 +149,9 @@ module.exports = atma.shell.Process = Class({
 				that.emit('process_ready', {
 					command: command
 				});
+			}
+			if (extractor != null) {
+				extractor.write(buffer);
 			}
 			that.emit('process_stdout', {
 				command: command,
@@ -179,10 +189,11 @@ function command_parseAll(commands, detachedAll, cwdAll, rgxReadyAll) {
 		cwdAll = path_ensure(cwdAll, process.cwd());
 	}
 	return commands.reduce(function(aggr, command, index){
-
+		
 		var detached = detachedAll || false,
 			cwd = cwdAll || process.cwd(),
 			matchReady = rgxReadyAll,
+			extract = null,
 			exec;
 		
 		if (typeof command === 'string') {
@@ -201,6 +212,9 @@ function command_parseAll(commands, detachedAll, cwdAll, rgxReadyAll) {
 			if (obj.matchReady) {
 				matchReady = obj.matchReady;
 			}
+			if (obj.extract) {
+				extract = obj.extract;
+			}
 		}
 		
 		if (exec == null || exec === '') {
@@ -216,7 +230,8 @@ function command_parseAll(commands, detachedAll, cwdAll, rgxReadyAll) {
 			//stdio: 'pipe',
 			detached: detached,
 			command: exec,
-			matchReady: matchReady
+			matchReady: matchReady,
+			extract: extract
 		});
 		return aggr;
 		
@@ -270,3 +285,52 @@ function path_ensure(cwd, base) {
 }
 
 var child_process = require('child_process');
+var ValueExtractor = Class({
+	target: null,
+	extractMeta: null,
+	string: '',
+	Construct: function(current, extract) {
+		this.target = current;
+		this.extractMeta = extract;
+		this.string = '';
+	},
+	write: function(buffer){
+		this.string += buffer.toString();
+	},
+	complete: function(){
+		for (var key in this.extractMeta) {
+			this.target[key] = ValueExtractor.extract(this.string, this.extractMeta[key]);
+		}
+	},
+	Static: {
+		extract: function (str, mix) {
+			if (typeof mix === 'function') {
+				return mix(str);
+			}
+		},
+		interpolateAny: function(mix, values){
+			if (mix == null) {
+				return;
+			}
+			if (typeof mix === 'string') {
+				return ValueExtractor.interpolateStr(mix, values);
+			}
+			if (typeof mix.map === 'function') {
+				return mix.map(function(str){
+					return ValueExtractor.interpolateAny(str, values);
+				});
+			}
+			return mix;
+		},
+		interpolateStr: function(str, values) {
+			return str.replace(/\{\{(\w+)\}\}/g, function(full, prop){
+				var val = values[prop];
+				if (val == null) {
+					logger.warn('Extracted property expected: ', prop, values);
+					return '';
+				}
+				return val;
+			});
+		}
+	}
+})
