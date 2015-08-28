@@ -148,8 +148,13 @@ var Application = Class({
     
     findAction: function(action){
         var dfr = new Class.Deferred(),
-            path = this.config.actions[action];
-            
+            mix = this.config.actions[action];
+			
+		if (mix != null && typeof mix === 'object') {
+			return dfr.resolve(mix);
+		}
+		
+		var path = mix;
         if (path == null) 
             path = '/src/action/' + action + '.js';
         
@@ -169,6 +174,7 @@ var Application = Class({
                     return;
                 }
                 
+				
                 dfr.resolve(resp.Action);
             });
             
