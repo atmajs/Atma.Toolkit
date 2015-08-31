@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.10.45",
+  "version": "0.10.46",
   "bin": {
     "atma": "atma"
   },
@@ -28,6 +28,7 @@
     "socket.io": "~1.0.0",
     "socket.io-client": "~1.0.0",
     "uglify-js": "~2.2.2",
+    "utest": "0.0.8",
     "yamljs": "latest"
   },
   "scripts": {},
