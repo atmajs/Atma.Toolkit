@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+	<link href='/bower_components/bootstrap/dist/css/bootstrap.min.css' rel='stylesheet' />
+	
+	<script src='/bower_components/jquery/dist/jquery.min.js'></script>
+	<script src='/bower_components/maskjs/lib/mask.js'></script>	
+	<script src='/lib/#{name}.js'></script>
+	<script type='text/mask' data-run="true">
+		if (sample) {
+			.container {
+				import from 'samples/~[sample]';
+			}
+		} else {
+			h3 > 'Please select one of the example:'
+			
+			var examples = [
+				{ name: 'simple', title: 'Simple' }
+			];
+			
+			each ($scope.examples) {
+				ul {
+					li > a href='index.html?~[name]' > '~[title]'
+				}
+			}
+		}
+	</script>
+	<script type='application/javascript'>
+		var MODEL = {};
+		var app = mask.run(MODEL);
+		
+	</script>
+</body>
+</html>

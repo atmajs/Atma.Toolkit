@@ -10,9 +10,21 @@
 		"mask-animation": "latest",
 		"atma-class": "latest"
 	},
+	"devDependencies": {
+		"atma-loader-babel": "latest",
+		"atma-loader-less": "latest"
+	},
 	
 	"scripts": {
 		"build": "atma",
 		"server": "atma server index.dev.html"
-	}
+	},
+	"atma": {
+        "plugins": [
+            "atma-loader-babel"
+        ],
+        "settings": {
+            "atma-loader-babel": {}
+        }
+    }
 }

@@ -1,0 +1,45 @@
+{
+    "name": "compo-#{name}",
+    "description": "",
+    "version": "0.5.0",
+    "homepage": "http://example.fake",
+    "dependencies": {
+        "maskjs": "latest"
+    },
+    "main": "./lib/#{name}.js",
+    "author": "Musterman <Musterman@example.fake>",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/example/example.git"
+    },
+    "bugs": {
+        "url": "https://github.com/example/compo-#{name}/issues"
+    },
+    "devDependencies": {
+        "atma": ">0.9.26",
+        "atma-loader-babel": "latest",
+        "atma-io-middleware-uglify": "^1.0.19"
+    },
+
+    "scripts": {
+        "build": "atma"
+    },
+    "keywords": [],
+    "atma": {
+        "plugins": [
+            "atma-loader-babel",
+            "atma-io-middleware-uglify"
+        ],
+        "settings": {
+            "atma-loader-babel": {
+                "extensions": [
+                    "es6",
+                    "test"
+                ]
+            }
+        }
+    },
+    "licenses": [
+        "MIT"
+    ]
+}
