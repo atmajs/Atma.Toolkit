@@ -1,6 +1,3 @@
-
-
-
 include
 	
 	.cfg('sync', true)	
@@ -24,7 +21,7 @@ include
 		
 		include.cfg('sync', false);
 		
-		include.exports = Class({
+		module.exports = Class({
 			Extends: Class.Deferred,
 			
 			/**
