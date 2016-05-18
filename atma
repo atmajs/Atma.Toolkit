@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 global.atma = {};
+global.ruta = require('ruta');
 
 process
 	.mainModule
@@ -9,9 +10,9 @@ process
 
 require('atma-libs/globals-dev');
 require('atma-logger/lib/global-dev');
-
-
 require('atma-io');
+
+
 
 
 var base = io.env.applicationDir.toString();

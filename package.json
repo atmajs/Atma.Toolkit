@@ -25,6 +25,7 @@
     "jshint": "~0.9.1",
     "less": "~1.5.0",
     "openurl": "~1.1.0",
+    "ruta": "^0.2.21",
     "uglify-js": "~2.2.2",
     "yamljs": "latest"
   },

@@ -8,12 +8,7 @@ var base = 'file://' + __dirname.replace(/\\/g, '/') + '/';
 
 include
 	.cfg({
-		path: base,
-		loader: {
-			coffee: loaderPath('coffee'),
-			less: loaderPath('less'),
-			yml: loaderPath('yml')
-		}
+		path: base
 	})
 	.routes({
 		handler: base + 'src/handler/{0}.js',
