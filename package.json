@@ -13,7 +13,8 @@
   "main": "module.js",
   "dependencies": {
     "appcfg": "^0.2.42",
-    "atma-io": "^0.2.12",
+    "atma-class": "^1.1.70",
+    "atma-io": "^0.2.16",
     "atma-libs": "^0.9.74",
     "atma-logger": "^1.0.2",
     "atma-server": "^0.1.35",

@@ -198,7 +198,6 @@ function command_parseAll(commands, detachedAll, cwdAll, rgxReadyAll) {
 		
 		if (typeof command === 'string') {
 			exec = command;
-			cwd  = process.cwd();
 		}
 		else if (command != null) {
 			var obj = command;
@@ -218,7 +217,7 @@ function command_parseAll(commands, detachedAll, cwdAll, rgxReadyAll) {
 		}
 		
 		if (exec == null || exec === '') {
-			logger.warn('Command Object is not valid');
+			logger.warn('Command Object is not valid. Should be at least {command: string}');
 			return aggr;
 		}
 		
