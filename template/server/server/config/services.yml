@@ -1,7 +1,0 @@
-
-service:
-	location: /server/http/service/{0}.js
-
-services:
-	# path : controller
-	# '/auth/github': auth/github

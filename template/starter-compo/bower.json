@@ -1,7 +1,0 @@
-{
-	"name": "compo-#{name}",
-	"version": "0.5.0",
-	"dependencies": {
-		"maskjs": ">0.0.0"
-	}
-}
