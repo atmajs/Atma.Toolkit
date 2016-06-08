@@ -17,11 +17,15 @@
 <body>
 
     <script type="text/mask" data-run='true'>
+        import MyButton from './compos/MyButton' 
+
         header {
-            'Header'
+            'Hello, ~user.name'
         }
 
         section#content > 'Mask Main Layout'
+
+        MyButton (user);
     </script>
 
 </body>

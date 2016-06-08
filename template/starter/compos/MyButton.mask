@@ -1,0 +1,12 @@
+import from 'MyButton.less';
+
+// Use Sublime or Atom Mask package to highlight mask syntax
+
+define MyButton (user) {
+
+	slot onClick () {
+		alert('Good job');
+	}
+
+	button.my-button x-tap='onClick' > '~user.name, push the button';
+}

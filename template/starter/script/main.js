@@ -1,14 +1,16 @@
 include
-	.js({
-		
-	})
-	.ready(function(){
+	.js([
+		'./models/User.es6'
+	])
+	.ready(function(resp){
 	
 		var App = Compo({
 			/* Properties */
 		});
 	
-		var model = {},
+		var model = {
+			user: new resp.User('Foo')
+		},
 			ctx = {};
 	
 		

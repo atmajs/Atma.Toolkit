@@ -2,7 +2,7 @@
 	"dependencies": {
 		"jquery": "latest",
 		"bootstrap": "latest",
-		"bootstrap-material": "latest",
+		"bootstrap-material-design": "latest",
 		
 		"maskjs": "latest",
 		"includejs": "latest",
