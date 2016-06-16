@@ -1,8 +1,8 @@
 
 
 if (typeof includeLib === 'undefined'){
-    require('libjs-class');
-    require('./src/libjs/include.node.js');
+    require('atma-class');
+    require('includejs');
     require('socket.io');
 }
 
