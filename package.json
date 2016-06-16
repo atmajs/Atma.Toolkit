@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.10.52",
+  "version": "0.10.53",
   "bin": {
     "atma": "atma"
   },
@@ -17,12 +17,13 @@
     "atma-io": "^0.2.16",
     "atma-libs": "^0.9.74",
     "atma-logger": "^1.0.2",
-    "atma-server": "^0.1.35",
-    "atma-utest": "^0.20.45",
+    "atma-server": "^0.2.38",
+    "atma-utest": "^0.20.49",
     "body-parser": "~1.4.3",
     "cheerio": "~0.13.1",
     "clean-css": "~0.9.0",
     "coffee-script": "latest",
+    "includejs": "^0.10.27",
     "jshint": "~0.9.1",
     "less": "~1.5.0",
     "openurl": "~1.1.0",
