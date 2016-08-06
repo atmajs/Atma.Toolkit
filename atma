@@ -8,6 +8,7 @@ process
 	.paths
 	.push(process.cwd() + '/node_modules');
 
+require('includejs');
 require('atma-libs/globals-dev');
 require('atma-logger/lib/global-dev');
 require('atma-io');
