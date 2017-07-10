@@ -122,7 +122,7 @@ function preload (onComplete) {
 		.push(process.cwd() + '/node_modules');
 
 	require('includejs');
-	require('maskjs');
+	global.mask = require('maskjs');
 	require('atma-logger/lib/global-dev');
 	require('atma-io');
 
