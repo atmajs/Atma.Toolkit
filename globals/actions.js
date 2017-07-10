@@ -37,11 +37,10 @@ function defaultActions() {
 		'atma-clone'
 	];
 	
-	var paths = {};
-	
-	ruqq.arr.each(actions, function(x){
-		paths[x] = String.format('/src/action/%1.js', x);
-	});
+	var paths = actions.reduce((obj, action) => {
+		obj[action] = `/src/action/${action}.js`;
+		return obj;
+	}, {});
 	
 	// overrides
 	var solution = '/src/action/solution.js';

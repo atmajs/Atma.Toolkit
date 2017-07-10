@@ -101,11 +101,20 @@ function resolveNativeNodeArgumentsIfAny () {
 
 function preload (onComplete) {
 
+	var _ = require('atma-utils');
 	global.atma = {};
 	global.ruta = require('ruta');
+	global.Class = require('atma-class');
 	global.net = {
-		Uri: require('atma-utils').class_Uri
+		Uri: _.class_Uri
 	};
+	global.ruqq = {
+		arr: {
+			each: _.arr_each,
+			remove: _.arr_remove
+		}
+	};
+	String.format = _.str_format;
 
 	process
 		.mainModule
@@ -117,23 +126,14 @@ function preload (onComplete) {
 	require('atma-logger/lib/global-dev');
 	require('atma-io');
 
-	var base = io.env.applicationDir.toString();
 
-	function loaderPath(name) {
-		return base + 'node_modules/atma-libs/include/loader/' + name + '/loader.js';
-	}
+	var base = io.env.applicationDir.toString();
 
 	include
 		.cfg({
-			path: base,
-			loader: {
-				coffee: loaderPath('coffee'),
-				less: loaderPath('less'),
-				yml: loaderPath('yml')
-			}
+			path: base
 		})
 		.routes({
-
 			handler: base + 'src/handler/{0}.js',
 			parser: base + 'src/parser/{0}.js',
 			action: base + 'src/action/{0}.js',
@@ -144,7 +144,7 @@ function preload (onComplete) {
 		})
 		.js({
 			atma: [
-					'src/utils/exports'
+				'src/utils/exports'
 			]
 		})
 		.done(function() {
@@ -160,7 +160,7 @@ function initialize(app) {
 		.js({
 			settings: '/src/app.settings.js',
 			script: [
-					'helper/extensions',
+				'helper/extensions',
 			],
 		})
 		.done(function(resp) {

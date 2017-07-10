@@ -23,7 +23,7 @@
     "cheerio": "~0.13.1",
     "clean-css": "~0.9.0",
     "coffee-script": "latest",
-    "includejs": "^0.12.43",
+    "includejs": "^0.12.50",
     "jshint": "~0.9.1",
     "less": "~1.5.0",
     "maskjs": "^0.61.16",
