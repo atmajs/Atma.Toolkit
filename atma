@@ -33,11 +33,11 @@ function runNewNode (args) {
 function resolveNativeNodeArgumentsIfAny () {
 	var path = require('path');
 	var args = [path.join(__dirname, 'atma')];
+	var isDebug = false;
 	var count = 0;
 
 	process.argv.slice(2).forEach(function (arg) {
 		var flag = arg.split('=')[0];
-		var isDebug = false;
 		switch (flag) {
 		case '-d':
 			args.unshift('--debug');
