@@ -101,28 +101,21 @@ function resolveNativeNodeArgumentsIfAny () {
 
 function preload (onComplete) {
 
+	require('includejs');
+	require('atma-libs/globals-dev');
+
 	var _ = require('atma-utils');
 	global.atma = {};
 	global.ruta = require('ruta');
 	global.Class = require('atma-class');
-	global.net = {
-		Uri: _.class_Uri
-	};
-	global.ruqq = {
-		arr: {
-			each: _.arr_each,
-			remove: _.arr_remove
-		}
-	};
-	String.format = _.str_format;
+	global.mask = require('maskjs');
 
 	process
 		.mainModule
 		.paths
 		.push(process.cwd() + '/node_modules');
 
-	require('includejs');
-	global.mask = require('maskjs');
+	
 	require('atma-logger/lib/global-dev');
 	require('atma-io');
 

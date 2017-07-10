@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.10.71",
+  "version": "0.10.72",
   "bin": {
     "atma": "atma"
   },
@@ -15,6 +15,7 @@
     "appcfg": "^0.2.42",
     "atma-class": "^1.1.72",
     "atma-io": "^0.2.22",
+    "atma-libs": "^0.9.75",
     "atma-logger": "^1.0.2",
     "atma-server": "^0.2.38",
     "atma-utest": "^0.20.62",
