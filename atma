@@ -103,6 +103,9 @@ function preload (onComplete) {
 
 	global.atma = {};
 	global.ruta = require('ruta');
+	global.net = {
+		Uri: require('atma-utils').class_Uri
+	};
 
 	process
 		.mainModule
@@ -110,7 +113,7 @@ function preload (onComplete) {
 		.push(process.cwd() + '/node_modules');
 
 	require('includejs');
-	require('atma-libs/globals-dev');
+	require('maskjs');
 	require('atma-logger/lib/global-dev');
 	require('atma-io');
 
