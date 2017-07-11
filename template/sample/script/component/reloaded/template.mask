@@ -1,6 +1,0 @@
-
-hr;
-div > h7 > tt > "Autoreload example > go to '/component/reloaded' and make changes to template or controller /"
-input value = 'Change Me';
-button > 'Click Me'
-hr;
