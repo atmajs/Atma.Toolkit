@@ -32,21 +32,29 @@ module.exports = {
                     if (io.File.exists(url) === false) {
                         var cwd = io.env.currentDir,
                             uri = new net.Uri(cwd);
-                        
-                        while (true){
-                            url = uri
-                                .combine('node_modules/' + plugin + '/index.js')
-                                .toString();
-                            
-                            if (io.File.exists(url))
-                                break;
-                            
-                            if (!uri.path || uri.path === '/') {
+
+                        if (plugin[0] === '.' || plugin[0] === '/') {
+                            url = net.Uri.combine(cwd, plugin);
+                            if (io.File.exists(url) === false) {
                                 url = null;
-                                break;
                             }
-                            
-                            uri = uri.combine('../')
+                        }
+                        else {
+                            while (true){
+                                url = uri
+                                    .combine('node_modules/' + plugin + '/index.js')
+                                    .toString();
+                                
+                                if (io.File.exists(url))
+                                    break;
+                                
+                                if (!uri.path || uri.path === '/') {
+                                    url = null;
+                                    break;
+                                }
+                                
+                                uri = uri.combine('../')
+                            }
                         }
                         
                         if (url == null) {
