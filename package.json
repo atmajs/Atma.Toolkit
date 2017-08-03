@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.10.78",
+  "version": "0.10.79",
   "bin": {
     "atma": "atma"
   },
@@ -24,10 +24,10 @@
     "cheerio": "~0.13.1",
     "clean-css": "~0.9.0",
     "coffee-script": "latest",
-    "includejs": "^0.12.53",
+    "includejs": "^0.12.56",
     "jshint": "~0.9.1",
     "less": "~1.5.0",
-    "maskjs": "^0.64.3",
+    "maskjs": "^0.64.9",
     "openurl": "~1.1.0",
     "ruta": "^0.2.32",
     "uglify-js": "~2.2.2",
