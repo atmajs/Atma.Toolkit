@@ -36,7 +36,7 @@ var resource = include
 					path: base
 				});
 				
-				atma.server.app = Server
+				atma.server.app = new Server
 					.Application({
 						configs: configs,
 						config: {
@@ -45,8 +45,9 @@ var resource = include
 						args: {
 							debug: true
 						}
-					})
-					.done(function(app) {
+					});
+				
+				atma.server.app.done(function(app) {
 						
 						mask.cfg('allowCache', false);
 						
