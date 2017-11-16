@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.10.87",
+  "version": "0.10.88",
   "bin": {
     "atma": "atma"
   },
@@ -18,7 +18,7 @@
     "atma-libs": "^0.9.75",
     "atma-logger": "^1.0.2",
     "atma-server": "^0.2.39",
-    "atma-utest": "^0.20.66",
+    "atma-utest": "^0.20.68",
     "atma-utils": "^0.1.8",
     "body-parser": "~1.4.3",
     "cheerio": "~0.13.1",
