@@ -151,7 +151,6 @@ function initialize(app) {
 
 	include
 		.js({
-			settings: '/src/app.settings.js',
 			script: [
 				'helper/extensions',
 			],
