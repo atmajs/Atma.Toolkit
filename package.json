@@ -6,19 +6,19 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.10.85",
+  "version": "0.10.86",
   "bin": {
     "atma": "atma"
   },
   "main": "module.js",
   "dependencies": {
-    "appcfg": "^0.2.42",
+    "appcfg": "^0.2.47",
     "atma-class": "^1.1.72",
     "atma-io": "^0.2.35",
     "atma-libs": "^0.9.75",
     "atma-logger": "^1.0.2",
     "atma-server": "^0.2.39",
-    "atma-utest": "^0.20.64",
+    "atma-utest": "^0.20.66",
     "atma-utils": "^0.1.8",
     "body-parser": "~1.4.3",
     "cheerio": "~0.13.1",
