@@ -101,6 +101,11 @@ function resolveNativeNodeArgumentsIfAny () {
 
 function preload (onComplete) {
 
+	var isTest = process.argv.indexOf('test') !== -1;
+	if (isTest) {
+		process.env.TEST = true;
+	}
+
 	require('includejs');
 	require('atma-libs/globals-dev');
 
