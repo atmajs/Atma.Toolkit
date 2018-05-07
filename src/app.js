@@ -2,7 +2,17 @@ var AppCfg = require('appcfg'),
     Config = require('./config/Config'),
     ShellStrategy = require('./shell/Strategy.js'),
     ShellPrompt = require('./shell/Prompt.js'),
-    ShellProcess = require('./shell/Process.js');
+    ShellProcess = require('./shell/Process.js'),
+    io = require('atma-io');
+
+
+io.settings({
+    extensions: {
+        'yml': [
+            'atma-io-middleware-yml:read'
+        ]
+    }
+});
 
 
 var Application = Class({
