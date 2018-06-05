@@ -78,6 +78,25 @@ var resource = include
 							.createServer(app.process.bind(app))
 							.listen(port);
 						
+						if (config.sslPort) {
+							var sslPort = config.sslPort,
+								keyFile = config.key,
+								certFile = config.cert;
+							
+							if (!keyFile || !io.File.exists(keyFile)) {
+								throw new Error(`SSL public Key File not exists. --key "${keyFile}"`);
+							}
+							if (!certFile || !io.File.exists(certFile)) {
+								throw new Error(`CERT File not exists. --cert "${certFile}"`);
+							}
+							var options = {
+								key: io.File.read(keyFile, { encoding: 'buffer' }),
+								cert: io.File.read(certFile, { encoding: 'buffer' }),					  
+							};
+							require('https')
+								.createServer(options, app.process.bind(app))
+								.listen(sslPort);
+						}
 						
 						
 						var serverCfg = appConfig.server,
