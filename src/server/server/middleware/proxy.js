@@ -5,7 +5,8 @@ var http_ = require('http'),
 	url_ = require('url'),
 
 	proxyPath = null,
-	matcher = null;
+	matcher = null,
+	options = { followRedirect = true };
 
 var Proxy = Class({
 	Static: {
@@ -47,10 +48,16 @@ var Proxy = Class({
 	}
 });
 
-include.exports = function(proxyPath){
+include.exports = function(proxyPath, opts){
 	
-	if (proxyPath) 
+	if (proxyPath) {
 		Proxy.set(proxyPath);
+	}
+	if (opts) {
+		if (opts.followRedirect != null) {
+			options.followRedirect = opts.followRedirect;
+		}
+	}
 	
 	return function(req, res, next){
 		
@@ -91,11 +98,12 @@ function pipe(req, res, options_, remoteUrl, redirects) {
 	var request = client.request(options, function(response) {
 		
 		var code = response.statusCode;
-		if (code === 301 || code === 302) {
+		if ((code === 301 || code === 302) && options.followRedirect) {
 			
 			var location = response.headers.location;
-			if (location) 
+			if (location) {
 				pipe(req, res, options_, location, ++redirects);
+			}
 			return;
 		}
 		
@@ -109,9 +117,10 @@ function pipe(req, res, options_, remoteUrl, redirects) {
 
 
 function extend(target, source){
-	for (var key in source)
-		if (source[key] != null) 
+	for (var key in source) {
+		if (source[key] != null) {
 			target[key] = source[key];
-	
+		}
+	}
 	return target;
 }
