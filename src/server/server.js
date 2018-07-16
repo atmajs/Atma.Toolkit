@@ -17,8 +17,8 @@ var resource = include
 
 				
 				var port = config.port || process.env.PORT || 5777,
-					proxyPath = config.proxy;
-				
+					proxyPath = config.proxy,
+					proxyOnly = config.proxyOnly || config['proxy-only'];
 				
 				var configs = new net
 					.Uri(resource.location)
@@ -55,9 +55,9 @@ var resource = include
 							Url = require('url')
 							;
 						
-						
-						app.responders([
-							app.responder({
+						var responders = [];
+						if (proxyOnly !== true) {
+							responders.push(app.responder({
 								middleware: [
 									function(req, res, next){
 										var url = Url.parse(req.url, true);
@@ -66,14 +66,17 @@ var resource = include
 									},
 									bodyParser.json()
 								]
-							}),
-							Server.StaticContent.create({
-								headers: {
-									'Access-Control-Allow-Origin': '*'
-								}
-							}),
-							resp.proxy(proxyPath)
-						]);
+							}));
+						}
+						responders.push(Server.StaticContent.create({
+							headers: {
+								'Access-Control-Allow-Origin': '*'
+							}
+						}));
+						responders.push(resp.proxy(proxyPath));
+						
+						app.responders(responders);
+						
 						var server = require('http')
 							.createServer(app.process.bind(app))
 							.listen(port);
