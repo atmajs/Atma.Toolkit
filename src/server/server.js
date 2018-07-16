@@ -18,7 +18,8 @@ var resource = include
 				
 				var port = config.port || process.env.PORT || 5777,
 					proxyPath = config.proxy,
-					proxyOnly = config.proxyOnly || config['proxy-only'];
+					proxyOnly = config.proxyOnly || config['proxy-only'],
+					proxyFollowRedirects = (config.followRedirects || config['follow-redirects']);
 				
 				var configs = new net
 					.Uri(resource.location)
@@ -73,7 +74,7 @@ var resource = include
 								'Access-Control-Allow-Origin': '*'
 							}
 						}));
-						responders.push(resp.proxy(proxyPath));
+						responders.push(resp.proxy(proxyPath, { followRedirects: proxyFollowRedirects }));
 						
 						app.responders(responders);
 						

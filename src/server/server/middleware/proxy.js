@@ -6,7 +6,7 @@ var http_ = require('http'),
 
 	proxyPath = null,
 	matcher = null,
-	options = { followRedirect = true };
+	options = { followRedirects = true };
 
 var Proxy = Class({
 	Static: {
@@ -54,8 +54,8 @@ include.exports = function(proxyPath, opts){
 		Proxy.set(proxyPath);
 	}
 	if (opts) {
-		if (opts.followRedirect != null) {
-			options.followRedirect = opts.followRedirect;
+		if (opts.followRedirects != null) {
+			options.followRedirects = opts.followRedirects;
 		}
 	}
 	
@@ -98,7 +98,7 @@ function pipe(req, res, options_, remoteUrl, redirects) {
 	var request = client.request(options, function(response) {
 		
 		var code = response.statusCode;
-		if ((code === 301 || code === 302) && options.followRedirect) {
+		if ((code === 301 || code === 302) && options.followRedirects) {
 			
 			var location = response.headers.location;
 			if (location) {
