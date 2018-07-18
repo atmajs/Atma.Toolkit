@@ -3,10 +3,11 @@
 var http_ = require('http'),
 	https_ = require('https'),
 	url_ = require('url'),
+	path_ = require('path'),
 
 	proxyPath = null,
 	matcher = null,
-	options = { followRedirects = true };
+	proxyOptions = { followRedirects: false };
 
 var Proxy = Class({
 	Static: {
@@ -55,7 +56,7 @@ include.exports = function(proxyPath, opts){
 	}
 	if (opts) {
 		if (opts.followRedirects != null) {
-			options.followRedirects = opts.followRedirects;
+			proxyOptions.followRedirects = opts.followRedirects;
 		}
 	}
 	
@@ -98,14 +99,24 @@ function pipe(req, res, options_, remoteUrl, redirects) {
 	var request = client.request(options, function(response) {
 		
 		var code = response.statusCode;
-		if ((code === 301 || code === 302) && options.followRedirects) {
+		if (code === 301 || code === 302) {
 			
 			var location = response.headers.location;
 			if (location) {
-				pipe(req, res, options_, location, ++redirects);
+				location = locationNormalize(location, req);
+
+				if (proxyOptions.followRedirects) {
+					pipe(req, res, options_, location, ++redirects);
+					return;
+				}
+				if (location.indexOf(proxyPath) > -1) {
+					var path = location.replace(proxyPath, '');
+					var host = resolveHostForRedirect(req);
+					response.headers.location = host + path;
+				}
 			}
-			return;
 		}
+
 		
 		res.writeHead(code, response.headers);
 		response.pipe(res); 
@@ -123,4 +134,24 @@ function extend(target, source){
 		}
 	}
 	return target;
+}
+
+function resolveHostForRedirect (req) {
+	if (req.headers.origin != null) {
+		return req.headers.origin;
+	}
+	if (req.headers.host) {
+		return (req.connection.encrypted ? 'https' : 'http') + '://' + req.headers.host;
+	}
+    return '/';
+}
+function locationNormalize(location, req) {
+	if (location[0] === '/') {
+		location = path_.join(proxyPath, location);
+	}
+	location = location.replace(/\\/g, '/');
+	if (/^\w+:\/[^\/]/.test(location)) {
+		location = location.replace('/', '//');
+	}
+	return location;
 }

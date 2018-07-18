@@ -18,8 +18,9 @@ var resource = include
 				
 				var port = config.port || process.env.PORT || 5777,
 					proxyPath = config.proxy,
-					proxyOnly = config.proxyOnly || config['proxy-only'],
-					proxyFollowRedirects = (config.followRedirects || config['follow-redirects']);
+					proxyOnly = config.proxyOnly,
+					proxyFollowRedirects = config.followRedirects;
+				
 				
 				var configs = new net
 					.Uri(resource.location)

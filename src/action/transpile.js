@@ -44,7 +44,7 @@ function Watcher(arr) {
 			start();
 			return;
 		}
-		logger.log('Watching files...'.green.bold);
+		logger.log('green<Watching files...>'.color);
 		shouldRecompile = false;
 	}
 	function start(opts) {
@@ -118,7 +118,7 @@ function transpileFile(file, config, next) {
 		file
 			.readAsync()
 			.done(function(content){
-				logger.getTransport().put(' OK '.bold);
+				logger.getTransport().put(' bold<OK> '.color);
 				fn(content);
 			})
 			.fail(function(error) {
