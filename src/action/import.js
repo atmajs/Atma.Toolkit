@@ -53,12 +53,10 @@
                 output = output.split(';');
             }
 
-
             if (Array.isArray(files) === false){
                 done('Specify single/array of file(s) to process in {config}.files');
                 return;
             }
-
 
             io
                 .File
@@ -66,7 +64,7 @@
                 .register({
                     regexp: /./,
                     method:'read',
-                    handler: 'importer',
+                    handler: 'atma-io-middleware-importer',
                     zIndex: 100
                 });
                 
@@ -81,14 +79,11 @@
                     return;
                 }
 
-                var dist = output instanceof Array ? output[index] : output,
-                    code = file.read();
-
+                var dist = output instanceof Array ? output[index] : output;
                 if (!dist) {
                     logger.error('output not defined at %s for %s', index, file.uri.file);
                     return;
-                }
-                
+                }                
                 if (dist.indexOf('{') !== -1) {
                     dist = output_fromPattern(dist, file.uri);
                 }
@@ -100,17 +95,11 @@
                     dist = output_fromDirectory(dist, file.uri);
                 }
 
-                io
-                    .File
-                    .middleware
-                    .importer(file, config.defines);
-                    
 
+                var content = file.read(config)
                 new io
                     .File(dist)
-                    .write(file.content);
-
-                file.content = code;
+                    .write(content);
 
                 logger.log('Done - ', file.uri.file);
             });
@@ -119,7 +108,7 @@
             io
                 .File
                 .getHookHandler()
-                .unregister('read', 'importer');
+                .unregister('read', 'atma-io-middleware-importer');
                 
             done();
         }
