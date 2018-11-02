@@ -2,7 +2,7 @@
 
     var CopyHandler = Class({
         process: function(config, done){
-            config.sourceDir.readFiles().copyTo(config.targetDir.uri);
+            config.sourceDir.copyTo(config.targetDir.uri);
 
             done && done();
         }

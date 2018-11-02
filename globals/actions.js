@@ -50,6 +50,7 @@ function defaultActions() {
 	
 	
 	// aliases
-	paths['gen'] = paths['template'];
+    paths['gen'] = paths['template'];
+    paths['run'] = paths['custom'];
 	return paths;
 }

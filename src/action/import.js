@@ -38,7 +38,6 @@
                     files = new io
                         .Directory()
                         .readFiles(files)
-                        .files
                         .map(function(x){
                             return x.uri.toString();
                         });

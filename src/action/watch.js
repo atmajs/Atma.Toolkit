@@ -55,7 +55,7 @@ include
 	
 	
 				var onFileChanged = this.onFileChanged.bind(this),
-					collection = new io.Directory().readFiles(files).files;
+					collection = new io.Directory().readFiles(files);
 	
 				collection.forEach(function(file){
 					io.watcher.watch(file.uri.toLocalFile(), onFileChanged);

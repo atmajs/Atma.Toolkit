@@ -31,10 +31,9 @@ include.exports = {
             
             delete files[source];
             
-            var dir = new io
+            new io
                 .Directory()
                 .readFiles(source)
-                .files
                 .forEach(function(file){
                 
                     var _relative = file.uri.toRelativeString(io.env.currentDir),
