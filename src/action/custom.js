@@ -33,12 +33,18 @@ include.exports = {
             return;
         }
 
-        if (io.File.exists(script) === false) {
-            script += '.js';
+        var ext = /\.[\w]{1,5}$/;
+        if (ext.test(script) === false) {
+            let extension = ['.js', '.ts'].find(x => {
+                return io.File.exists(script + x)
+            });
+            if (extension) {
+                script += extension;
+            }
         }
 
         if (io.File.exists(script) === false) {
-            done('Custom script not exists: %1'.format(script));
+            done(`Custom script '${script}' not resolved in ${process.cwd()}.`);
             return;
         }
 
@@ -61,8 +67,6 @@ include.exports = {
                 return;
             }
             
-            console.log("Hint: To allow multiple custom scripts to be called one after another export 'process' function:".blue.bold);
-            console.log("include.exports = { process: function(config, done){ ... } }".blue.bold);
         });
     }
 }

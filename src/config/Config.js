@@ -19,53 +19,69 @@ module.exports = {
             var await = new Class.Await(),
                 base = io.env.applicationDir.toString() + '/'
                 ;
+
+            function findPath (plugin) {
+                var cwd = io.env.currentDir,
+                    uri = new net.Uri(cwd);
+
+                if (plugin[0] === '.' || plugin[0] === '/') {
+                    let rel = uri.combine(plugin);
+                    if (io.File.exists(rel)) {
+                        return rel.toString();
+                    }
+                    return null;
+                }
+
+                let self = uri.combine(`./node_modules/${plugin}/package.json`);
+                if (io.File.exists(self)) {
+                    return findPathInPackage (self.toString());
+                }
+                let atmaPlugin = `${base}plugins/${plugin}/package.json`;
+                if (io.File.exists(atmaPlugin)) {
+                    return findPathInPackage (atmaPlugin);
+                }
+                let atmaNodeModules = `${base}node_modules/${plugin}/package.json`;
+                if (io.File.exists(atmaNodeModules)) {
+                    return findPathInPackage (atmaNodeModules);
+                }
+                while (uri.path && uri.path !== '/') {
+                    uri.cdUp();
+                    let packageJson = uri.combine(`./node_modules/${plugin}/package.json`);
+                    if (io.File.exists(packageJson)) {
+                        return findPathInPackage (packageJson.toString());
+                    }   
+                }
+            }
+            function findPathInPackage (packagePath) {                
+                let base = packagePath.substring(0, packagePath.lastIndexOf('/') + 1);
+                let path = [
+                    `${base}index.js`,
+                    `${base}lib/index.js`
+                ].find(io.File.exists);
+                if (path) {
+                    return path;
+                }
+                let json = io.File.read(packagePath);
+                let script = typeof json.atmaPlugin === 'string' ? json.atmaPlugin : json.main;
+                
+                path = new net.Uri(base).combine(script);
+                if (io.File.exists(path)) {
+                    return path;
+                }
+                return null;
+            }
             
             plugins.forEach(function(plugin){
                 
-                var resolve = await.delegate(),
-                    url = String.format('%1plugins/%2/%2-plugin.js', base, plugin)
-                    ;
-                    
-                if (io.File.exists(url) === false) {
-                    url = String.format('%1node_modules/%2/index.js', base, plugin);
-                    
-                    if (io.File.exists(url) === false) {
-                        var cwd = io.env.currentDir,
-                            uri = new net.Uri(cwd);
-
-                        if (plugin[0] === '.' || plugin[0] === '/') {
-                            url = net.Uri.combine(cwd, plugin);
-                            if (io.File.exists(url) === false) {
-                                url = null;
-                            }
-                        }
-                        else {
-                            while (true){
-                                url = uri
-                                    .combine('node_modules/' + plugin + '/index.js')
-                                    .toString();
-                                
-                                if (io.File.exists(url))
-                                    break;
-                                
-                                if (!uri.path || uri.path === '/') {
-                                    url = null;
-                                    break;
-                                }
-                                
-                                uri = uri.combine('../')
-                            }
-                        }
-                        
-                        if (url == null) {
-                            logger
-                                .error('<plugin 404>', plugin)
-                                .warn('Did you forget to run `npm install %plugin-name%`?')
-                                ;
-                            resolve();
-                            return;
-                        }
-                    }
+                let resolve = await.delegate();
+                let url = findPath(plugin);
+                if (url == null) {
+                    logger
+                        .error('<plugin 404>', plugin)
+                        .warn('Did you forget to run `npm install %plugin-name%`?')
+                        ;
+                    resolve();
+                    return;
                 }
                 
                 include
@@ -73,14 +89,13 @@ module.exports = {
                     .js(url + '::Plugin')
                     .done(function(resp) {
                     
-                    var Plugin = resp.Plugin
-                    if (Plugin == null) {
+                    var plugin = resp.Plugin && resp.Plugin.default || resp.Plugin;
+                    if (plugin == null || plugin.register === null) {
                         logger.error('<plugin> 404 - ', url);
                         resolve();
                         return;
-                    }
-        
-                    Plugin.register(rootConfig);
+                    }   
+                    plugin.register(rootConfig);
                     resolve();
                 });   
             });
