@@ -17,7 +17,7 @@ module.exports = {
                 return this.resolve();
             
             var await = new Class.Await(),
-                base = io.env.applicationDir.toString() + '/'
+                base = io.env.applicationDir
                 ;
 
             function findPath (plugin) {
@@ -32,21 +32,21 @@ module.exports = {
                     return null;
                 }
 
-                let self = uri.combine(`./node_modules/${plugin}/package.json`);
+                let self = uri.combine(`node_modules/${plugin}/package.json`);
                 if (io.File.exists(self)) {
                     return findPathInPackage (self.toString());
                 }
-                let atmaPlugin = `${base}plugins/${plugin}/package.json`;
+                let atmaPlugin = base.combine(`plugins/${plugin}/package.json`);
                 if (io.File.exists(atmaPlugin)) {
-                    return findPathInPackage (atmaPlugin);
+                    return findPathInPackage (atmaPlugin.toString());
                 }
-                let atmaNodeModules = `${base}node_modules/${plugin}/package.json`;
+                let atmaNodeModules = base.combine(`node_modules/${plugin}/package.json`);
                 if (io.File.exists(atmaNodeModules)) {
-                    return findPathInPackage (atmaNodeModules);
+                    return findPathInPackage (atmaNodeModules.toString());
                 }
                 while (uri.path && uri.path !== '/') {
                     uri.cdUp();
-                    let packageJson = uri.combine(`./node_modules/${plugin}/package.json`);
+                    let packageJson = uri.combine(`node_modules/${plugin}/package.json`);
                     if (io.File.exists(packageJson)) {
                         return findPathInPackage (packageJson.toString());
                     }   
@@ -136,7 +136,7 @@ module.exports = {
             
             
             projects['atma_toolkit'] = {
-                path: io.env.applicationDir.toString() + '/'
+                path: io.env.applicationDir.toString()
             };
             
             this.resolve();

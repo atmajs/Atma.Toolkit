@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.11.16",
+  "version": "0.11.17",
   "bin": {
     "atma": "atma"
   },
@@ -14,18 +14,18 @@
   "dependencies": {
     "appcfg": "^0.2.53",
     "atma-class": "^1.1.72",
-    "atma-io": "^1.1.7",
+    "atma-io": "^1.2.16",
     "atma-io-middleware-yml": "latest",
     "atma-libs": "^0.9.75",
     "atma-logger": "^1.0.2",
     "atma-server": "^0.4.9",
-    "atma-utest": "^0.20.79",
+    "atma-utest": "^0.20.83",
     "atma-utils": "^0.1.8",
     "body-parser": "~1.4.3",
     "cheerio": "~0.13.1",
     "clean-css": "~0.9.0",
     "coffee-script": "latest",
-    "includejs": "^0.15.9",
+    "includejs": "^0.15.12",
     "jshint": "~0.9.1",
     "less": "~1.5.0",
     "maskjs": "^0.64.9",
@@ -34,7 +34,7 @@
     "uglify-js": "~2.2.2"
   },
   "scripts": {
-      "release": "atma bump && git add -A && git commit -am \"bump\" && git push && npm publish"
+    "release": "atma bump && git add -A && git commit -am \"bump\" && git push && npm publish"
   },
   "repository": {
     "type": "git",
