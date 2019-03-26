@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.12.00",
+  "version": "0.12.1",
   "bin": {
     "atma": "atma"
   },
@@ -20,7 +20,7 @@
     "atma-logger": "^1.0.2",
     "atma-server": "^0.4.18",
     "atma-utest": "^0.20.84",
-    "atma-utils": "^0.1.24",
+    "atma-utils": "^0.1.25",
     "body-parser": "~1.4.3",
     "includejs": "^0.15.14",
     "maskjs": "^0.64.9",
