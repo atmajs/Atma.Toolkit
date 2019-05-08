@@ -7,7 +7,9 @@ var http_ = require('http'),
 
 	proxyPath = null,
 	matcher = null,
-	proxyOptions = { followRedirects: false };
+    proxyOptions = { followRedirects: false, proxyCache: false },
+    CACHE = []
+    ;
 
 var Proxy = Class({
 	Static: {
@@ -57,7 +59,10 @@ include.exports = function(proxyPath, opts){
 	if (opts) {
 		if (opts.followRedirects != null) {
 			proxyOptions.followRedirects = opts.followRedirects;
-		}
+        }
+        if (opts.proxyCache != null) {
+			proxyOptions.proxyCache = opts.proxyCache;
+        }
 	}
 	
 	return function(req, res, next){
@@ -85,8 +90,13 @@ function pipe(req, res, options_, remoteUrl, redirects) {
 	}
 	
 	var remote = url_.parse(remoteUrl),
-		options = {};
-		
+        options = {},
+        isCachable = CacheHelper.isCachable(req);
+    
+    if (isCachable && CacheHelper.fromCache(req, res)) {
+        return;
+    }
+    
 	extend(options, options_);
 	extend(options, remote);
 	options.headers.host = remote.host;
@@ -118,8 +128,23 @@ function pipe(req, res, options_, remoteUrl, redirects) {
 		}
 
 		
-		res.writeHead(code, response.headers);
-		response.pipe(res); 
+        res.writeHead(code, response.headers);
+        
+        if (isCachable) {
+            let chunks = [];
+            response
+                .on('data', function(chunk) {
+                    chunks.push(chunk);
+                    res.write(chunk);
+                })
+                .on('end', function() {
+                    res.end();
+                    var buffer = Buffer.concat(chunks);                    
+                    CacheHelper.saveCache(req, code, response.headers, buffer);
+                });
+        } else {
+            response.pipe(res); 
+        }
 	});
 	
 	req.pipe(request);
@@ -155,3 +180,41 @@ function locationNormalize(location, req) {
 	}
 	return location;
 }
+
+
+var CacheHelper = {
+    isCachable (req) {
+        if (proxyOptions.proxyCache === false) {
+            return false;
+        }
+        let method = req.method.toLowerCase();
+        if (method !== 'get' && method !== 'options') {
+            return false;
+        }
+        return true;
+    },
+    fromCache (req, res) {
+        let cache = this.getCache(req);
+        if (cache == null) {
+            return false;
+        }
+            
+        res.writeHead(cache.code, cache.headers);
+        res.end(cache.body);
+        return true;
+    },
+    saveCache (req, code, headers, body) {
+        var cache = {
+            url: req.url,
+            method: req.method,
+            code: code,
+            headers: headers,
+            body: body
+        };
+        CACHE.push(cache);
+    },
+
+    getCache (req) {
+        return CACHE.find(x => x.url === req.url && x.method === req.method);
+    }
+};
