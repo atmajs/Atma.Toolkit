@@ -14,10 +14,16 @@
             args: {
                 port: '<?number> port number, @default: 5777',
                 open: '<?string> open path in browser after server start',
-                proxy: '<?string> url to a proxy. Pipe request to proxy server if request cannot be handled'
+                proxy: '<?string> url to a proxy. Pipe request to proxy server if request cannot be handled',
+                proxyOnly: '<?flag> no local files or routes are invoked',
+                proxyCache: '<?flag> cache requests from remote server',
+                config: '<?string> path to additional yml or json configuration file for appcfg and server module',
+                sslPort: '<?number> creates also https for the port',
+                key: '<?string> keyFile path',
+                cert: '<?string> certFile path',
             }
         },
-        process: function(config, done){
+        process (config, done){
 
 
             if (config.args)

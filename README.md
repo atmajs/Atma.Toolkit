@@ -249,19 +249,14 @@ include.exports = {
 ```
 
 ### HTTP Server
-```javascrit
-{
-    action: 'server',
-    port: 5777, // default 5777
-    open: 'index.dev.html' // auto open file in browser
-}
+```bash
+$ atma server --help
 ```
 
-Start integrated server in a current working directory.
-
-To start the server direct from command line, use cli action pattern
+Start http(s) server in current working directory.
 
 ```atma [action] -KEY VALUE```
+
 ```bash
 > atma server -port 5500
 ```

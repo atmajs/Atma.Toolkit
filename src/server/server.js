@@ -22,13 +22,13 @@ var resource = include
 					proxyFollowRedirects = config.followRedirects;
 				
 				
-				var configs = new net
+				let atmaConfigsPath = new net
 					.Uri(resource.location)
 					.combine('server/config/')
 					.toString()
 					;
 				
-				var base = io
+				let base = io
 						.env
 						.applicationDir
 						.combine('src/server/')
@@ -37,6 +37,11 @@ var resource = include
 				resource.cfg({
 					path: base
 				});
+
+                let configs = [ atmaConfigsPath ];
+                if (config.config) {
+                    configs.push(config.config);
+                }
 				
 				atma.server.app = new Server
 					.Application({
