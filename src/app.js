@@ -14,6 +14,10 @@ io.settings({
     }
 });
 
+/* Increase Await Timeout, so that configurations and plugins can be loaded.
+ * @TODO: appcfg: when Class.Await is used: make sure to disable or increase timeouts
+ */
+Class.Await.TIMEOUT = 20000;
 
 var Application = Class({
     Extends: [Class.EventEmitter, Class.Deferred, ShellPrompt],

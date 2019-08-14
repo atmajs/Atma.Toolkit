@@ -6,7 +6,7 @@
     "name": "Alexander Kit",
     "email": "alex.kit@atmajs.com"
   },
-  "version": "0.12.3",
+  "version": "0.12.5",
   "bin": {
     "atma": "atma"
   },
@@ -19,10 +19,10 @@
     "atma-libs": "^0.9.75",
     "atma-logger": "^1.0.2",
     "atma-server": "^0.4.18",
-    "atma-utest": "^0.20.84",
-    "atma-utils": "^0.1.26",
+    "atma-utest": "^0.20.87",
+    "atma-utils": "^0.1.30",
     "body-parser": "~1.4.3",
-    "includejs": "^0.15.14",
+    "includejs": "^0.15.17",
     "maskjs": "^0.64.9",
     "openurl": "~1.1.0",
     "ruta": "^0.2.32"
