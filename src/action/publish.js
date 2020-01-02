@@ -22,9 +22,9 @@ module.exports = {
             let branch = 'master';
 
             let publish = [
-                npm_run('build'),
+                'npm run build',
                 'git add -A',
-                `git commit -a -m "${message}"`,
+                `git commit -a -m "publish: ${message}"`,
                 'git push origin ' + branch,
                 'npm publish',
             ];
@@ -45,32 +45,32 @@ module.exports = {
 };
 
 
-var npm_run;
-(function () {
-    var pckg = null;
-    npm_run = function (action) {
-        if (pckg == null)
-            _load();
+// var npm_run;
+// (function () {
+//     var pckg = null;
+//     npm_run = function (action) {
+//         if (pckg == null)
+//             _load();
 
-        if (action in pckg) {
-            return 'npm run ' + action;
-        }
-        return null;
-    };
+//         if (action in pckg) {
+//             return 'npm run ' + action;
+//         }
+//         return null;
+//     };
 
-    function _load() {
-        if (io.File.exists('package.json') === false) {
-            pckg = {};
-            return;
-        }
+//     function _load() {
+//         if (io.File.exists('package.json') === false) {
+//             pckg = {};
+//             return;
+//         }
 
-        pckg = io.File.read('package.json');
-        if (typeof pckg === 'string') {
-            pckg = JSON.parse(pckg);
-        }
-    }
+//         pckg = io.File.read('package.json');
+//         if (typeof pckg === 'string') {
+//             pckg = JSON.parse(pckg);
+//         }
+//     }
 
-}());
+// }());
 
 
 var runCommands;
