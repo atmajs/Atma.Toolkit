@@ -1,38 +1,39 @@
 {
-  "name": "atma",
-  "description": "Atma.Toolkit",
-  "preferGlobal": true,
-  "author": {
-    "name": "Alexander Kit",
-    "email": "alex.kit@atmajs.com"
-  },
-  "version": "0.12.15",
-  "bin": {
-    "atma": "atma"
-  },
-  "main": "module.js",
-  "dependencies": {
-    "appcfg": "^0.2.56",
-    "atma-class": "^1.1.72",
-    "atma-io": "^1.2.17",
-    "atma-io-middleware-yml": "latest",
-    "atma-libs": "^0.9.75",
-    "atma-logger": "^1.0.2",
-    "atma-server": "^0.4.18",
-    "atma-utest": "^0.21.5",
-    "atma-utils": "^0.1.30",
-    "body-parser": "~1.4.3",
-    "includejs": "^0.15.33",
-    "maskjs": "^0.64.9",
-    "openurl": "~1.1.0",
-    "ruta": "^0.2.32"
-  },
-  "scripts": {
-    "release": "atma bump && git add -A && git commit -am \"bump\" && git push && npm publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/atmajs/Atma.Toolkit.git"
-  },
-  "license": "MIT"
+    "name": "atma",
+    "description": "Atma.Toolkit",
+    "preferGlobal": true,
+    "author": {
+        "name": "Alexander Kit",
+        "email": "alex.kit@atmajs.com"
+    },
+    "version": "0.12.16",
+    "bin": {
+        "atma": "atma"
+    },
+    "main": "module.js",
+    "dependencies": {
+        "appcfg": "^0.2.56",
+        "atma-class": "^1.1.72",
+        "atma-io": "^1.2.17",
+        "atma-io-middleware-yml": "latest",
+        "atma-libs": "^0.9.75",
+        "atma-logger": "^1.0.2",
+        "atma-server": "^0.4.30",
+        "atma-utest": "^0.21.5",
+        "atma-utils": "^0.1.30",
+        "body-parser": "~1.4.3",
+        "includejs": "^0.15.33",
+        "maskjs": "^0.64.9",
+        "openurl": "~1.1.0",
+        "ruta": "^0.2.32"
+    },
+    "scripts": {
+        "build": "echo \"nothing to build\"",
+        "release": "echo \"Run atma pub -m \"message\"\""
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/atmajs/Atma.Toolkit.git"
+    },
+    "license": "MIT"
 }
