@@ -6,7 +6,7 @@
         "name": "Alexander Kit",
         "email": "alex.kit@atmajs.com"
     },
-    "version": "0.12.17",
+    "version": "0.12.18",
     "bin": {
         "atma": "atma"
     },
@@ -14,11 +14,11 @@
     "dependencies": {
         "appcfg": "^0.2.56",
         "atma-class": "^1.1.72",
-        "atma-io": "^1.2.17",
+        "atma-io": "^1.2.29",
         "atma-io-middleware-yml": "latest",
         "atma-libs": "^0.9.75",
         "atma-logger": "^1.0.2",
-        "atma-server": "^0.4.32",
+        "atma-server": "^0.4.38",
         "atma-utest": "^0.21.5",
         "atma-utils": "^0.1.30",
         "body-parser": "~1.4.3",
