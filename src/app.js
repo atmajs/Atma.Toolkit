@@ -51,7 +51,8 @@ var Application = Class({
                 Config.Projects,
                 Config.Plugins,
                 Config.Tasks,
-                Config.Settings
+                Config.Settings,
+                Config.Configs,
             ]);
 
         this
