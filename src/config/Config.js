@@ -1,5 +1,5 @@
 var TaskSource = require('./TaskSource');
-
+var AppCfg = require('appcfg');
 
 module.exports = {
     Tasks: TaskSource,

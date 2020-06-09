@@ -1,9 +1,9 @@
-var AppCfg = require('appcfg'),
-    Config = require('./config/Config'),
-    ShellStrategy = require('./shell/Strategy.js'),
-    ShellPrompt = require('./shell/Prompt.js'),
-    ShellProcess = require('./shell/Process.js'),
-    io = require('atma-io');
+var AppCfg = require('appcfg');
+var Config = require('./config/Config');
+var ShellStrategy = require('./shell/Strategy.js');
+var ShellPrompt = require('./shell/Prompt.js');
+var ShellProcess = require('./shell/Process.js');
+var io = require('atma-io');
 
 
 io.settings({
