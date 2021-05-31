@@ -26,6 +26,7 @@ module.exports = {
                 this.config = config.toJSON();
                 this.resolve();
             })
+            return this;
         }
     }),
     Plugins: Class({
@@ -122,6 +123,7 @@ module.exports = {
 
 
             await.always(this.resolveDelegate());
+            return this;
         },
 
         data: {
@@ -160,6 +162,7 @@ module.exports = {
             };
 
             this.resolve();
+            return this;
         },
 
         data: {
@@ -180,6 +183,7 @@ module.exports = {
                 }
             }
             this.resolve();
+            return this;
         },
 
         data: {

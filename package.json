@@ -6,13 +6,13 @@
         "name": "Alexander Kit",
         "email": "alex.kit@atmajs.com"
     },
-    "version": "0.12.29",
+    "version": "0.12.30",
     "bin": {
         "atma": "atma"
     },
     "main": "module.js",
     "dependencies": {
-        "appcfg": "^0.4.5",
+        "appcfg": "^0.4.52",
         "atma-class": "^1.1.72",
         "atma-io": "^1.2.32",
         "atma-io-middleware-yml": "latest",
