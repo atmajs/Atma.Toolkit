@@ -28,7 +28,7 @@ var Application = Class({
 
         global.app = this;
 
-        this.config = AppCfg
+        AppCfg
             .fetch([
                 Config.Utils,
                 {
@@ -57,7 +57,8 @@ var Application = Class({
 
         this
             .config
-            .done(function() {
+            .done(function(config) {
+                app.config = config;
 
                 if (app.config.$cli.params.help) {
                     app.run({ action: 'help' });
