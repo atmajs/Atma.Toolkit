@@ -28,8 +28,7 @@ var Application = Class({
 
         global.app = this;
 
-        AppCfg
-            .fetch([
+        let promise = AppCfg.fetch([
                 Config.Utils,
                 {
                     path: '%APP%/globals/actions.js'
@@ -55,8 +54,7 @@ var Application = Class({
                 Config.Configs,
             ]);
 
-        this
-            .config
+        promise
             .done(function(config) {
                 app.config = config;
 
