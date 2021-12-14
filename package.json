@@ -6,34 +6,118 @@
         "name": "Alexander Kit",
         "email": "alex.kit@atmajs.com"
     },
-    "version": "0.12.33",
+    "version": "0.14.1",
     "bin": {
         "atma": "atma"
     },
     "main": "module.js",
     "dependencies": {
-        "appcfg": "^0.4.53",
+        "alot": "^0.2.93",
+        "appcfg": "^0.4.54",
         "atma-class": "^1.1.72",
-        "atma-io": "^1.2.32",
+        "atma-io": "^1.2.44",
         "atma-io-middleware-yml": "latest",
         "atma-libs": "^0.9.75",
         "atma-logger": "^1.0.2",
         "atma-server": "^0.4.82",
         "atma-utest": "^0.21.5",
-        "atma-utils": "^0.1.30",
+        "atma-utils": "^0.1.41",
         "body-parser": "~1.4.3",
         "includejs": "^0.15.41",
         "maskjs": "^0.64.9",
         "openurl": "~1.1.0",
-        "ruta": "^0.2.32"
+        "ruta": "^0.2.32",
+        "shellbee": "^0.5.16"
     },
     "scripts": {
-        "build": "echo \"nothing to build\"",
+        "build": "app-bundler",
+        "watch": "app-bundler -watch",
         "release": "echo \"Run atma pub -m \"message\"\""
     },
     "repository": {
         "type": "git",
         "url": "git://github.com/atmajs/Atma.Toolkit.git"
     },
-    "license": "MIT"
+    "license": "MIT",
+    "devDependencies": {
+        "app-bundler": "^0.0.99",
+        "atma-loader-ts": "^1.1.16"
+    },
+    "app-bundler": {
+        "apps": {
+            "cli": {
+                "file": "src/cli.ts",
+                "outputMain": "lib/cli.js"
+            }
+        },
+        "common": {
+            "package": {
+                "module": "commonjs",
+                "commonjs": {
+                    "output": "simplified"
+                }
+            },
+            "extensions": {
+                "io": {
+                    "type": "js"
+                }
+            },
+            "defaultExtensions": {
+                "js": "ts"
+            },
+            "dynamicDependencies": [
+                "shellbee",
+                "everlog",
+                "memd",
+                "maskjs",
+                "appcfg",
+                "alot",
+                "atma-io",
+                "atma-utils",
+                "atma-libs",
+                "includejs",
+                "atma-class",
+                "ruta",
+                "^path$",
+                "child_process",
+                "atma-logger"
+            ],
+            "middlewares": {
+                "ts": [
+                    "atma-loader-ts:read"
+                ]
+            }
+        }
+    },
+    "atma": {
+        "plugins": [
+            "atma-loader-ts"
+        ],
+        "settings": {
+            "atma-utest": {
+                "include": {
+                    "amd": true
+                }
+            },
+            "include": {
+                "amd": true,
+                "extentionDefault": {
+                    "js": "ts"
+                }
+            },
+            "atma-loader-ts": {
+                "typescript": {
+                    "compilerOptions": {
+                        "#if (TEST)": {
+                            "module": "AMD"
+                        },
+                        "#if (!TEST)": {
+                            "module": "commonjs"
+                        },
+                        "sourceMap": false
+                    }
+                }
+            }
+        }
+    }
 }
