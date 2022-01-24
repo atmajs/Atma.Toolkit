@@ -1,16 +1,10 @@
 import { class_Dfr } from 'atma-utils';
 
-declare let atma;
-
-if (atma.shell == null) {
-    atma.shell = {};
-}
-
-export const Prompt = atma.shell.Prompt = {
-    prompt: function(str, callback){
+export class Prompt {
+    prompt (str, callback){
         Factory.create(new PromptAction(str, callback));
-    },
-    confirm: function(str, callback){
+    }
+    confirm (str, callback){
         Factory.create(new ConfirmAction(str + ' (y): ', callback));
     }
 };

@@ -4,7 +4,7 @@ import { class_Uri } from 'atma-utils';
 declare let include;
 
 
-export default {
+export const CustomAction = {
     help: {
         description: 'Run custom script',
         args: {

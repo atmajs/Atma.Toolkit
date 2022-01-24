@@ -5,24 +5,24 @@ import { arr_each } from '../utils/arr';
 
 declare let global, logger;
 
-export class TaskSource extends class_Dfr {
+export class TaskSource {
 
     config = null
     data = {
         sync: true
     }
 
-    async read (rootConfig) {
-        let file = getFile(rootConfig.$cli),
-            action = getAction(rootConfig),
-            that = this;
+    async read (rootConfig: AppCfg & { [key: string]: any }) {
+
+        let file = getFile(rootConfig.$cli);
+        let action = getAction(rootConfig);
 
         if (action != null) {
             delete rootConfig.tasks;
             this.config = {
                 tasks: [action]
             };
-            return this.resolve();
+            return this;
         }
 
         if (file == null) {
@@ -37,7 +37,7 @@ export class TaskSource extends class_Dfr {
                     $prepairTasks: prepairTasks
                 };
             }
-            return this.resolve();
+            return this;
         }
         let config = await AppCfg.fetch([{
             path: file.uri.toLocalFile()
@@ -49,8 +49,7 @@ export class TaskSource extends class_Dfr {
             $prepairTasks: prepairTasks
         };
 
-        this.resolve();
-
+        return this;
     }
 
 };

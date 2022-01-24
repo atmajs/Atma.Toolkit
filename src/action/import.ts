@@ -12,7 +12,7 @@ import { class_Uri } from 'atma-utils';
 
 declare let logger;
 
-export default {
+export const ImportAction = {
     help: {
         description: 'Perfom import operations on specified files',
         args: {

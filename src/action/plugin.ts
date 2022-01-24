@@ -3,7 +3,7 @@ import { Shell } from 'shellbee';
 
 declare let include, app;
 
-export default {
+export const PluginAction = {
 
 	help : {
 		description: 'Install Atma Plugins to the CWD or to the global Atma path',

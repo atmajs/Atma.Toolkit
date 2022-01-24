@@ -2,7 +2,7 @@ import alot from 'alot';
 import { Directory, File, env } from 'atma-io';
 import { class_Uri } from 'atma-utils';
 
-export default {
+export const CopyAction = {
     help: {
         description: 'Copy files with glob pattern support',
         args: {

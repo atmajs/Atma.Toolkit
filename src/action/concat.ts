@@ -10,7 +10,7 @@ import { File } from 'atma-io'
     }
     */
 
-export default {
+export const ConcatAction = {
     help: {
         description: 'Does simple file concatenation from a list of files',
 

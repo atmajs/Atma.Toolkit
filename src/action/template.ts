@@ -12,7 +12,7 @@ class CopyHandler {
 
 
 
-export default {
+export const TemplateAction = {
     help: {
         description: 'Project, Component Scaffolding',
         examples: [

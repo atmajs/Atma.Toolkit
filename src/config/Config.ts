@@ -13,7 +13,7 @@ export const Config = {
             $resolvePathFromProject: cfg_resolvePathFromProject
         }
     },
-    Configs: class extends class_Dfr {
+    Configs: class {
         data = {
             sync: false,
         }
@@ -21,23 +21,22 @@ export const Config = {
         async read (rootConfig) {
             let configs = rootConfig.configs;
             if (typeof configs !== 'string') {
-                this.resolve();
                 return this;
             }
             let config = await AppCfg.fetch([{
                 path: configs
             }]);
             this.config = config.toJSON();
-            this.resolve();
             return this;
         }
     },
-    Plugins: class extends class_Dfr {
+    Plugins: class {
         async read (rootConfig){
 
             let plugins = rootConfig.plugins;
-            if (plugins == null || plugins.length === 0)
-                return this.resolve();
+            if (plugins == null || plugins.length === 0) {
+                return;
+            }
 
             let base = env.applicationDir
                 ;
@@ -102,17 +101,15 @@ export const Config = {
                     return;
                 }
 
-                let { Plugin } = await include
-                    .instance(url)
-                    .js(url + '::Plugin');
 
+                let Plugin = await load(url);
                 if (Plugin?.register == null) {
                     logger.error('<plugin> 404 - ', url);
                     return;
                 }
                 Plugin.register(rootConfig);
+
             }).toArrayAsync();
-            return this;
         }
 
         data = {
@@ -120,7 +117,7 @@ export const Config = {
         }
     },
 
-    Projects: class extends class_Dfr {
+    Projects: class {
 
         async read (rootConfig){
 
@@ -144,8 +141,6 @@ export const Config = {
             projects['atma_toolkit'] = {
                 path: env.applicationDir.toString()
             };
-
-            this.resolve();
             return this;
         }
 
@@ -154,7 +149,7 @@ export const Config = {
         }
     },
 
-    Settings: class extends class_Dfr {
+    Settings: class {
         async read (rootConfig){
             if (rootConfig.settings) {
                 if (rootConfig.settings.io) {
@@ -164,7 +159,6 @@ export const Config = {
                     include.cfg(rootConfig.settings.include);
                 }
             }
-            this.resolve();
             return this;
         }
 
@@ -196,4 +190,15 @@ function cfg_resolvePathFromProject(path) {
     path = path.substring(match[0].length);
 
     return class_Uri.combine(projectPath, path);
+}
+
+async function load (path: string): Promise<any> {
+    return new Promise(resolve => {
+        include
+            .instance(path)
+            .js(path + '::Plugin')
+            .done(resp => {
+                resolve(resp.Plugin);
+            });
+    });
 }

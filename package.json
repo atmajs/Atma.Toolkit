@@ -6,24 +6,24 @@
         "name": "Alexander Kit",
         "email": "alex.kit@atmajs.com"
     },
-    "version": "0.14.1",
+    "version": "0.15.2",
     "bin": {
-        "atma": "atma"
+        "atma": "index.js"
     },
     "main": "module.js",
     "dependencies": {
         "alot": "^0.2.93",
-        "appcfg": "^0.4.54",
+        "appcfg": "^0.4.58",
         "atma-class": "^1.1.72",
-        "atma-io": "^1.2.44",
+        "atma-io": "^1.2.52",
         "atma-io-middleware-yml": "latest",
         "atma-libs": "^0.9.75",
         "atma-logger": "^1.0.2",
-        "atma-server": "^0.4.82",
-        "atma-utest": "^0.21.5",
-        "atma-utils": "^0.1.41",
+        "atma-server": "^0.5.8",
+        "atma-utest": "^0.21.22",
+        "atma-utils": "^0.2.53",
         "body-parser": "~1.4.3",
-        "includejs": "^0.15.41",
+        "includejs": "^0.15.52",
         "maskjs": "^0.64.9",
         "openurl": "~1.1.0",
         "ruta": "^0.2.32",
@@ -32,7 +32,8 @@
     "scripts": {
         "build": "app-bundler",
         "watch": "app-bundler -watch",
-        "release": "echo \"Run atma pub -m \"message\"\""
+        "release": "echo \"Run atma pub -m \"message\"\"",
+        "test": "atma test"
     },
     "repository": {
         "type": "git",
@@ -40,7 +41,7 @@
     },
     "license": "MIT",
     "devDependencies": {
-        "app-bundler": "^0.0.99",
+        "app-bundler": "^0.1.1",
         "atma-loader-ts": "^1.1.16"
     },
     "app-bundler": {
@@ -77,10 +78,16 @@
                 "atma-libs",
                 "includejs",
                 "atma-class",
+                "atma-server",
                 "ruta",
                 "^path$",
+                "^http$",
+                "^https$",
+                "^url$",
                 "child_process",
-                "atma-logger"
+                "atma-logger",
+                "readline",
+                "body-parser"
             ],
             "middlewares": {
                 "ts": [

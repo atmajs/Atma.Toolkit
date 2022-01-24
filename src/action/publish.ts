@@ -2,7 +2,7 @@ import { Shell } from 'shellbee';
 
 declare let app;
 
-export default {
+export const PublishAction = {
     help: {
         description: [
             'Commit all changes with message and push to git and npm'

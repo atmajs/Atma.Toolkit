@@ -3,7 +3,7 @@ import { Shell } from 'shellbee'
 
 declare let app, logger;
 
-export default {
+export const ReleaseAction = {
     help: {
         description: [
             'Increase the version in `package.json | bower.json | component.json`',

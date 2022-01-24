@@ -8,12 +8,10 @@ declare let app, include, logger, atma, mask;
 const location = include.location;
 
 
-let appConfig = app.config;
-
 export const Server = {
 
-    start: function (config) {
-
+    start (config) {
+        let appConfig = app.config;
 
         let port = config.port || process.env.PORT || 5777,
             proxyPath = config.proxy,
@@ -23,7 +21,7 @@ export const Server = {
 
 
         let atmaConfigsPath = new class_Uri(location)
-            .combine('server/config/')
+            .combine('src/server/server/config/')
             .toString()
             ;
 
@@ -41,7 +39,7 @@ export const Server = {
             configs.push(config.config);
         }
 
-        atma.server.app = Application.create({
+        let serverApp = Application.create({
             configs: configs,
             config: {
                 debug: true,
@@ -56,7 +54,7 @@ export const Server = {
             }
         });
 
-        atma.server.app.done(function (app) {
+        serverApp.then(function (app) {
 
             mask.cfg('allowCache', false);
 
@@ -102,8 +100,8 @@ export const Server = {
                     throw new Error(`CERT File not exists. --cert "${certFile}"`);
                 }
                 let options = {
-                    key: File.read(keyFile, { encoding: 'buffer' }),
-                    cert: File.read(certFile, { encoding: 'buffer' }),
+                    key: File.read(keyFile, { encoding: 'binary' }),
+                    cert: File.read(certFile, { encoding: 'binary' }),
                 };
                 require('https')
                     .createServer(options, app.process.bind(app))
@@ -148,5 +146,8 @@ export const Server = {
             include.cfg('path', null);
             logger.log('Listen %s'.green.bold, port);
         });
+
+
+        (atma.server || (atma.server = {})).app = serverApp;
     }
 };

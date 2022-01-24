@@ -1,4 +1,4 @@
 module.exports = {
     exec: 'node',
-    tests: "test/**.test"
+    tests: "test/**.spec.ts"
 }

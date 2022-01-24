@@ -3,7 +3,7 @@ import { referenceHelper } from '../helper/referenceHelper';
 
 declare let app;
 
-export default {
+export const ReferenceAction = {
     help: {
         description: 'Reference a library: Create symlink to its folder',
         args: {

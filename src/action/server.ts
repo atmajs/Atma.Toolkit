@@ -9,7 +9,7 @@
 
 import { Server } from '../server/server';
 
-export default {
+export const ServerAction = {
     help: {
         description: 'Start local dev server in current working directory',
         args: {

@@ -18,8 +18,10 @@ function newLine() {
     write('');
 }
 
-export default {
-    process: function(){
+export const HelpAction = {
+    process () {
+
+        console.log('HELP');
 
         logger.cfg('logCaller', false);
 
@@ -75,7 +77,7 @@ function help_generic() {
 
     newLine();
 
-    write('In case of any issue, please contact green<bold<team@atmajs.com>>');
+    write('In case of any issue, please contact green<bold<team@atma.dev>>');
     write('You can also attach a log output:');
     write('$ atma [arguments] --level 99 --no-color > output.log'.cyan, 1);
 

@@ -4,11 +4,13 @@ import { File, env, settings } from 'atma-io';
 import { class_Dfr, class_Uri } from 'atma-utils';
 import { Config } from './config/Config';
 import { ShellStrategy } from './shell/ShellStrategy';
+import { Prompt } from './shell/Prompt';
+import { Actions } from './action/Actions';
 
-// var Config = require('./config/Config');
-// var ShellStrategy = require('./shell/Strategy.js');
-// var ShellPrompt = require('./shell/Prompt.js');
-// var ShellProcess = require('./shell/Process.js');
+// let Config = require('./config/Config');
+// let ShellStrategy = require('./shell/Strategy.js');
+// let ShellPrompt = require('./shell/Prompt.js');
+// let ShellProcess = require('./shell/Process.js');
 
 declare let global, Class, logger, include;
 
@@ -20,12 +22,8 @@ settings({
     }
 });
 
-/* Increase Await Timeout, so that configurations and plugins can be loaded.
- * @TODO: appcfg: when Class.Await is used: make sure to disable or increase timeouts
- */
-Class.Await.TIMEOUT = 20000;
 
-export class Application extends ShellPrompt {
+export class Application extends Prompt {
     //Extends: [Class.EventEmitter, ShellPrompt],
 
     config = null
@@ -35,44 +33,50 @@ export class Application extends ShellPrompt {
 
     async initialize(): Promise<this> {
 
-        global.app = this;
+        try {
+            global.app = this;
 
-        let config = await AppCfg.fetch([
-            Config.Utils,
-            {
-                path: '%APP%/globals/actions.js'
-            },
-            {
-                path: '%APP%/globals/config.yml'
-            },
-            {
-                path: '%APPDATA%/.atma/config.yml',
-                writable: true,
-                optional: true
-            },
-            {
-                path: 'package.json',
-                getterProperty: 'atma',
-                optional: true,
-                lookupAncestors: true
-            },
-            Config.Projects,
-            Config.Plugins,
-            Config.Tasks,
-            Config.Settings,
-            Config.Configs,
-        ]);
+            let config = this.config = await AppCfg.fetch([
+                Config.Utils,
+                {
+                    path: '%APP%/globals/actions.js'
+                },
+                {
+                    path: '%APP%/globals/config.yml'
+                },
+                {
+                    path: '%APPDATA%/.atma/config.yml',
+                    writable: true,
+                    optional: true
+                },
+                {
+                    path: 'package.json',
+                    getterProperty: 'atma',
+                    optional: true,
+                    lookupAncestors: true
+                },
+                Config.Projects,
+                Config.Plugins,
+                Config.Tasks,
+                Config.Settings,
+                Config.Configs,
+            ]);
 
-        if (config.$cli.params.help) {
-            this.run({ action: 'help' });
-            return this;
+            if (config.$cli.params.help) {
+                //this.run({ action: 'help' });
+                //return this;
+            }
+        } catch (err) {
+            console.log('err', err);
         }
-
-        this.config = config;
         return this;
     }
 
-    run(taskConfigs) {
+    help () {
+        return this.run({ action: 'help' });
+    }
+
+    run(taskConfigs?) {
 
         this.worker = new class_Dfr();
         this.errors = [];
@@ -101,54 +105,48 @@ export class Application extends ShellPrompt {
 
 
 
-    process(taskConfig) {
+    async process(taskConfig) {
 
-        var app = this;
+        let app = this;
 
         this.current = taskConfig;
-        this
-            .findAction(taskConfig.action)
-            .fail(function (error) {
-                logger.error('<app.action>', error);
-                next();
-            })
-            .done(function (handler) {
+        let handler = await this.findAction(taskConfig.action);
 
                 // defer `run` to wait before for all `done`-stack is called when resolving action
-                setTimeout(run, 0);
+        setTimeout(run, 0);
 
-                function run() {
-                    if (handler.strategy) {
+        function run() {
+            if (handler.strategy) {
 
-                        var strategy = new ShellStrategy(handler.strategy),
-                            path = process.argv.slice(3).join(' '),
-                            cmd = ruta.$utils.pathFromCLI(path);
+                let strategy = new ShellStrategy(handler.strategy),
+                    path = process.argv.slice(3).join(' '),
+                    cmd = ruta.$utils.pathFromCLI(path);
 
-                        strategy.process(cmd, taskConfig, callback);
-                        return;
-                    }
-                    if (handler.process) {
-                        handler.process(taskConfig, callback);
-                        return;
-                    }
-                    app.errors.push('<fail> ' +
-                        taskConfig.action +
-                        ':' +
-                        ' No `strategy` object, no `process` function'
-                    );
-                }
+                strategy.process(cmd, taskConfig, callback);
+                return;
+            }
+            if (handler.process) {
+                handler.process(taskConfig, callback);
+                return;
+            }
+            app.errors.push('<fail> ' +
+                taskConfig.action +
+                ':' +
+                ' No `strategy` object, no `process` function'
+            );
+        }
 
 
-                function callback(error) {
+        function callback(error) {
 
-                    if (error)
-                        app.errors.push('<fail> ' + taskConfig.action + ':' + error);
-                    next();
-                }
-            });
+            if (error)
+                app.errors.push('<fail> ' + taskConfig.action + ':' + error);
+            next();
+        }
+
 
         function next() {
-            var taskConfig = app.config.tasks.shift();
+            let taskConfig = app.config.tasks.shift();
 
             if (taskConfig == null) {
                 app
@@ -164,20 +162,27 @@ export class Application extends ShellPrompt {
     }
 
     findAction(action) {
-        var dfr = new Class.Deferred(),
+        let dfr = new Class.Deferred(),
             mix = this.config.actions[action];
 
         if (mix != null && typeof mix === 'object') {
             return dfr.resolve(mix);
         }
 
-        var path = mix;
-        if (path == null)
-            path = '/src/action/' + action + '.js';
+        let act = Actions.get(action);
+        if (act) {
+            return act;
+        }
 
-        var base = env.applicationDir.toString();
-        if (path[0] === '/')
+        let path = mix;
+        if (path == null) {
+            path = '/src/action/' + action + '.js';
+        }
+
+        let base = env.applicationDir.toString();
+        if (path[0] === '/') {
             path = class_Uri.combine(base, path);
+        }
 
         include
             .instance(base)
@@ -199,7 +204,7 @@ export class Application extends ShellPrompt {
     }
 
     findActions() {
-        var actions = Array.prototype.slice.call(arguments),
+        let actions = Array.prototype.slice.call(arguments),
             fns = [],
             dfr = new Class.Deferred(),
             app = this;
@@ -224,14 +229,8 @@ export class Application extends ShellPrompt {
         return dfr;
     }
 
-    runAction(action, config, done) {
-        this
-            .findAction(action)
-            .done(function (action) {
-                action.process(config, done);
-            })
-            .fail(function () {
-                done('<Atma.Toolkit::Action - 404> ' + action);
-            })
+    async runAction(action, config, done) {
+        let handler = await this.findAction(action);
+        handler.process(config, done);
     }
 }

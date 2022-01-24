@@ -1,6 +1,6 @@
 import { File, env } from 'atma-io';
 
-export default {
+export const ConfigAction = {
     help: {
         description: 'Opens Atma.Toolkit global configuration file'
     },

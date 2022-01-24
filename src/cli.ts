@@ -127,7 +127,7 @@ namespace ApplicationStart {
 
         include
             .cfg({
-        //        path: base,
+                //        path: base,
                 extentionDefault: {
                     "js": "ts"
                 }
@@ -148,11 +148,16 @@ namespace ApplicationStart {
     }
 
 
-    export function initialize(app) {
+    export function initialize(app: Application) {
 
         logger(99)
             .log('> process:'.cyan, process)
             .log('> config:'.cyan, app.config);
+
+        if (app.config.$cli.params.help) {
+            app.help();
+            return 1;
+        }
 
         if (app.config.tasks == null) {
             logger.error('<config:invalid> Tasks are not defined', app.config.toJSON());
@@ -175,8 +180,6 @@ namespace ApplicationStart {
         return 1;
     }
 }
-
-
 
 (async function () {
     let args = NodeJSNativeStart.resolveNativeNodeArgumentsIfAny();
