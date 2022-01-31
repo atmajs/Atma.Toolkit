@@ -1,7 +1,7 @@
-import http_ from 'http'
-import https_ from 'https'
-import url_ from 'url'
-import path_ from 'path'
+import * as http_ from 'http'
+import * as https_ from 'https'
+import * as url_ from 'url'
+import * as path_ from 'path'
 
 declare let logger;
 

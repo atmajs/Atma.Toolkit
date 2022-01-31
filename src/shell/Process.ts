@@ -1,4 +1,4 @@
-import { class_Uri } from 'atma-utils';
+import { class_Dfr,  class_EventEmitter, class_Uri } from 'atma-utils';
 
 declare let atma, logger;
 
@@ -20,7 +20,7 @@ if (atma.shell == null) {
  *        - done (Process self)
  */
 export const Process = atma.shell.Process = Class({
-    Extends: [ Class.Deferred, Class.EventEmitter ],
+    Extends: [ class_Dfr, class_EventEmitter ],
 
     children: null,
     errors: null,

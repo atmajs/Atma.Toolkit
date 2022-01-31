@@ -162,7 +162,7 @@ export class Application extends Prompt {
     }
 
     findAction(action) {
-        let dfr = new Class.Deferred(),
+        let dfr = new class_Dfr(),
             mix = this.config.actions[action];
 
         if (mix != null && typeof mix === 'object') {
@@ -171,7 +171,7 @@ export class Application extends Prompt {
 
         let act = Actions.get(action);
         if (act) {
-            return act;
+            return dfr.resolve(act);
         }
 
         let path = mix;
@@ -206,7 +206,7 @@ export class Application extends Prompt {
     findActions() {
         let actions = Array.prototype.slice.call(arguments),
             fns = [],
-            dfr = new Class.Deferred(),
+            dfr = new class_Dfr(),
             app = this;
 
         function next() {
