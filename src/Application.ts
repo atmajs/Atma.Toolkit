@@ -1,5 +1,5 @@
 import AppCfg from 'appcfg';
-import ruta from 'ruta';
+import { $utils } from 'ruta';
 import { File, env, settings } from 'atma-io';
 import { class_Dfr, class_Uri } from 'atma-utils';
 import { Config } from './config/Config';
@@ -7,10 +7,6 @@ import { ShellStrategy } from './shell/ShellStrategy';
 import { Prompt } from './shell/Prompt';
 import { Actions } from './action/Actions';
 
-// let Config = require('./config/Config');
-// let ShellStrategy = require('./shell/Strategy.js');
-// let ShellPrompt = require('./shell/Prompt.js');
-// let ShellProcess = require('./shell/Process.js');
 
 declare let global, Class, logger, include;
 
@@ -120,7 +116,7 @@ export class Application extends Prompt {
 
                 let strategy = new ShellStrategy(handler.strategy),
                     path = process.argv.slice(3).join(' '),
-                    cmd = ruta.$utils.pathFromCLI(path);
+                    cmd = $utils.pathFromCLI(path);
 
                 strategy.process(cmd, taskConfig, callback);
                 return;

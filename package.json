@@ -6,7 +6,7 @@
         "name": "Alexander Kit",
         "email": "alex.kit@atmajs.com"
     },
-    "version": "0.15.7",
+    "version": "0.15.8",
     "bin": {
         "atma": "index.js"
     },
@@ -15,7 +15,7 @@
         "alot": "^0.2.93",
         "appcfg": "^0.4.58",
         "atma-class": "^1.1.72",
-        "atma-io": "^1.2.52",
+        "atma-io": "^1.2.53",
         "atma-io-middleware-yml": "latest",
         "atma-libs": "^0.9.75",
         "atma-logger": "^1.0.2",
@@ -23,7 +23,7 @@
         "atma-utest": "^0.21.22",
         "atma-utils": "^0.2.53",
         "body-parser": "~1.4.3",
-        "includejs": "^0.15.52",
+        "includejs": "^0.16.1",
         "maskjs": "^0.64.9",
         "openurl": "~1.1.0",
         "ruta": "^0.2.32",

@@ -1,4 +1,4 @@
-import ruta from 'ruta'
+import { Collection } from 'ruta'
 
 declare let atma, global, logger;
 
@@ -9,7 +9,7 @@ export const ShellStrategy = class {
 
     constructor (strategy){
 
-        this.routes = new ruta.Collection();
+        this.routes = new Collection();
         this.strategy = strategy;
 
         for (var key in strategy){
