@@ -6,7 +6,7 @@
         "name": "Alexander Kit",
         "email": "alex.kit@atmajs.com"
     },
-    "version": "0.15.6",
+    "version": "0.15.7",
     "bin": {
         "atma": "index.js"
     },
