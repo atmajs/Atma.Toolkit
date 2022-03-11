@@ -27,7 +27,8 @@ namespace NodeJSNativeStart {
 
     export function resolveNativeNodeArgumentsIfAny() {
         let path = require('path');
-        let args = [path.join(__dirname, 'atma')];
+
+        let args = [path.join(__dirname.replace(/lib[\/\\]?$/, ''), 'index.js')];
         let isDebug = false;
         let count = 0;
 

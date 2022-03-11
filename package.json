@@ -10,7 +10,6 @@
     "bin": {
         "atma": "index.js"
     },
-    "main": "module.js",
     "dependencies": {
         "alot": "^0.2.93",
         "appcfg": "^0.4.58",

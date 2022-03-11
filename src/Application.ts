@@ -8,15 +8,7 @@ import { Prompt } from './shell/Prompt';
 import { Actions } from './action/Actions';
 
 
-declare let global, Class, logger, include;
-
-settings({
-    extensions: {
-        'yml': [
-            'atma-io-middleware-yml:read'
-        ]
-    }
-});
+declare let global, include;
 
 
 export class Application extends Prompt {
@@ -28,6 +20,14 @@ export class Application extends Prompt {
     current = null
 
     async initialize(): Promise<this> {
+
+        settings({
+            extensions: {
+                'yml': [
+                    'atma-io-middleware-yml:read'
+                ]
+            }
+        });
 
         try {
             global.app = this;
