@@ -3,15 +3,15 @@ import { env, File } from 'atma-io'
 import { class_Uri } from 'atma-utils';
 import { proxify } from './server/middleware/proxy'
 
-declare let app, include, logger, atma, mask;
+declare let global, include, logger, atma, mask;
 
 const location = include.location;
 
 
 export const Server = {
 
-    start (config) {
-        let appConfig = app.config;
+    async start(config) {
+        let appConfig = global.app.config;
 
         let port = config.port || process.env.PORT || 5777,
             proxyPath = config.proxy,
@@ -39,7 +39,7 @@ export const Server = {
             configs.push(config.config);
         }
 
-        let serverApp = Application.create({
+        let app = await Application.create({
             configs: configs,
             config: {
                 debug: true,
@@ -54,100 +54,98 @@ export const Server = {
             }
         });
 
-        serverApp.then(function (app) {
+        mask.cfg('allowCache', false);
 
-            mask.cfg('allowCache', false);
+        let bodyParser = require('body-parser'),
+            Url = require('url')
+            ;
 
-            let bodyParser = require('body-parser'),
-                Url = require('url')
-                ;
-
-            let responders = [];
-            if (proxyOnly !== true) {
-                responders.push(app.responder({
-                    middleware: [
-                        function (req, res, next) {
-                            let url = Url.parse(req.url, true);
-                            req.query = url.query;
-                            next();
-                        },
-                        bodyParser.json()
-                    ]
-                }));
-            }
-            responders.push(StaticContent.create({
-                headers: {
-                    'Access-Control-Allow-Origin': '*'
-                }
+        let responders = [];
+        if (proxyOnly !== true) {
+            responders.push(app.responder({
+                middleware: [
+                    function (req, res, next) {
+                        let url = Url.parse(req.url, true);
+                        req.query = url.query;
+                        next();
+                    },
+                    bodyParser.json()
+                ]
             }));
-            responders.push(proxify(proxyPath, { followRedirects: proxyFollowRedirects }));
-
-            app.responders(responders);
-
-            let server = require('http')
-                .createServer(app.process.bind(app))
-                .listen(port);
-
-            if (config.sslPort) {
-                let sslPort = config.sslPort,
-                    keyFile = config.key,
-                    certFile = config.cert;
-
-                if (!keyFile || !File.exists(keyFile)) {
-                    throw new Error(`SSL public Key File not exists. --key "${keyFile}"`);
-                }
-                if (!certFile || !File.exists(certFile)) {
-                    throw new Error(`CERT File not exists. --cert "${certFile}"`);
-                }
-                let options = {
-                    key: File.read(keyFile, { encoding: 'binary' }),
-                    cert: File.read(certFile, { encoding: 'binary' }),
-                };
-                require('https')
-                    .createServer(options, app.process.bind(app))
-                    .listen(sslPort);
+        }
+        responders.push(StaticContent.create({
+            headers: {
+                'Access-Control-Allow-Origin': '*'
             }
+        }));
+        responders.push(proxify(proxyPath, { followRedirects: proxyFollowRedirects }));
 
+        app.responders(responders);
 
-            let serverCfg = appConfig.server,
+        let server = require('http')
+            .createServer(app.process.bind(app))
+            .listen(port);
 
-                handlers, pages, websockets, subapps;
+        if (config.sslPort) {
+            let sslPort = config.sslPort,
+                keyFile = config.key,
+                certFile = config.cert;
 
-            if (serverCfg) {
-                handlers = serverCfg.handlers,
-                    websockets = serverCfg.websockets,
-                    subapps = serverCfg.subapps;
-                pages = serverCfg.pages;
+            if (!keyFile || !File.exists(keyFile)) {
+                throw new Error(`SSL public Key File not exists. --key "${keyFile}"`);
             }
+            if (!certFile || !File.exists(certFile)) {
+                throw new Error(`CERT File not exists. --cert "${certFile}"`);
+            }
+            let options = {
+                key: File.read(keyFile, { encoding: 'binary' }),
+                cert: File.read(certFile, { encoding: 'binary' }),
+            };
+            require('https')
+                .createServer(options, app.process.bind(app))
+                .listen(sslPort);
+        }
 
 
-            handlers && app
-                .handlers
-                .registerHandlers(handlers, app.config.handler)
-                ;
+        let serverCfg = appConfig.server,
 
-            websockets && app
-                .handlers
-                .registerWebsockets(websockets, app.config)
-                ;
+            handlers, pages, websockets, subapps;
 
-            subapps && app
-                .handlers
-                .registerSubApps(subapps)
-                ;
-
-            pages && app
-                .handlers
-                .registerPages(pages, app.config.page)
-
-            app
-                .autoreload(server);
-
-            include.cfg('path', null);
-            logger.log('Listen %s'.green.bold, port);
-        });
+        if (serverCfg) {
+            handlers = serverCfg.handlers,
+                websockets = serverCfg.websockets,
+                subapps = serverCfg.subapps;
+            pages = serverCfg.pages;
+        }
 
 
-        (atma.server || (atma.server = {})).app = serverApp;
+        handlers && app
+            .handlers
+            .registerHandlers(handlers, app.config.handler)
+            ;
+
+        websockets && app
+            .handlers
+            .registerWebsockets(websockets, app.config)
+            ;
+
+        subapps && app
+            .handlers
+            .registerSubApps(subapps)
+            ;
+
+        pages && app
+            .handlers
+            .registerPages(pages, app.config.page)
+
+        app
+            .autoreload(server);
+
+        include.cfg('path', null);
+        logger.log('Listen %s'.green.bold, port);
+
+
+
+        (atma.server || (atma.server = {})).app = app;
     }
 };

@@ -24,14 +24,14 @@ export const ServerAction = {
             cert: '<?string> certFile path',
         }
     },
-    process(config, done) {
+    async process(config, done) {
 
 
         if (config.args) {
             config.open = config.args[0];
         }
 
-        Server.start(config);
+        await Server.start(config);
 
         if (config.open) {
             require('openurl').open(`http://localhost:${config.port || 5777}/${config.open ?? ''}`);
