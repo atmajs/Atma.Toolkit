@@ -158,16 +158,15 @@ export class Application extends Prompt {
     }
 
     findAction(action) {
-        let dfr = new class_Dfr(),
-            mix = this.config.actions[action];
-
-        if (mix != null && typeof mix === 'object') {
-            return dfr.resolve(mix);
-        }
-
+        let dfr = new class_Dfr();
         let act = Actions.get(action);
         if (act) {
             return dfr.resolve(act);
+        }
+
+        let mix = this.config.actions[action];
+        if (mix != null && typeof mix === 'object') {
+            return dfr.resolve(mix);
         }
 
         let path = mix;

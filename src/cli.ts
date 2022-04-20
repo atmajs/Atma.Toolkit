@@ -99,6 +99,9 @@ namespace ApplicationStart {
     declare let global, io, include, logger;
 
     export async function preload() {
+        if (global.atma == null) {
+            global.atma = {};
+        }
 
         let isTest = process.argv.includes('test');
         if (isTest) {
@@ -107,9 +110,8 @@ namespace ApplicationStart {
 
         require('includejs');
         require('atma-libs/globals-dev');
+        require('atma-utils');
 
-        let _ = require('atma-utils');
-        global.atma = {};
         global.ruta = require('ruta');
         global.Class = require('atma-class');
         global.mask = require('maskjs');

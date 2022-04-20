@@ -5,6 +5,7 @@ import { CopyAction } from './copy';
 import { CustomAction } from './custom';
 import { HelpAction } from './help';
 import { ImportAction } from './import';
+import { InitAction } from './init';
 import { PluginAction } from './plugin';
 import { PublishAction } from './publish';
 import { ReferenceAction } from './reference';
@@ -40,6 +41,7 @@ export namespace Actions {
         'gen': TemplateAction,
 
         'transpile': TranspileAction,
+        'init': InitAction,
     };
 
     export function get (name: string) {

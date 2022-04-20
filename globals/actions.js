@@ -29,6 +29,8 @@ function defaultActions() {
 
         'transpile',
 
+        'init',
+
         // build includejs project
         'build',
         'project-import',

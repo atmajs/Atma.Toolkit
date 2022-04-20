@@ -6,27 +6,27 @@
         "name": "Alexander Kit",
         "email": "alex.kit@atmajs.com"
     },
-    "version": "0.15.12",
+    "version": "0.15.13",
     "bin": {
         "atma": "index.js"
     },
     "dependencies": {
-        "alot": "^0.2.93",
-        "appcfg": "^0.4.62",
+        "alot": "^0.2.99",
+        "appcfg": "^0.4.64",
         "atma-class": "^1.1.72",
         "atma-io": "^1.2.56",
         "atma-io-middleware-yml": "latest",
         "atma-libs": "^0.9.75",
         "atma-logger": "^1.0.2",
-        "atma-server": "^0.5.8",
-        "atma-utest": "^0.21.22",
+        "atma-server": "^0.5.13",
+        "atma-utest": "^0.21.27",
         "atma-utils": "^0.2.53",
         "body-parser": "~1.4.3",
         "includejs": "^0.16.1",
-        "maskjs": "^0.64.9",
+        "maskjs": "^0.72.36",
         "openurl": "~1.1.0",
         "ruta": "^0.2.32",
-        "shellbee": "^0.5.16"
+        "shellbee": "^0.5.22"
     },
     "scripts": {
         "build": "app-bundler",
