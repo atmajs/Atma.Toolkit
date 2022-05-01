@@ -65,6 +65,7 @@ namespace NodeJSNativeStart {
                 case '--allow-natives-syntax':
                 case '--perf-basic-prof':
                 case '--napi-modules':
+                case '--openssl-legacy-provider':
                     args.unshift(arg);
                     break;
                 default:
