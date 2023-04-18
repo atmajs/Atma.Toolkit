@@ -34,7 +34,7 @@ export const Server = {
             path: base
         });
 
-        let configs = [atmaConfigsPath];
+        let configs = []; //[atmaConfigsPath];
         if (config.config) {
             configs.push(config.config);
         }
