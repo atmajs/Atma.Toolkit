@@ -6,7 +6,7 @@
         "name": "Alexander Kit",
         "email": "alex.kit@atmajs.com"
     },
-    "version": "0.15.21",
+    "version": "0.15.22",
     "bin": {
         "atma": "index.js"
     },
@@ -18,7 +18,7 @@
         "atma-io-middleware-yml": "latest",
         "atma-libs": "^0.9.75",
         "atma-logger": "^1.0.2",
-        "atma-server": "^0.5.20",
+        "atma-server": "^0.5.21",
         "atma-utest": "^0.21.28",
         "atma-utils": "^0.2.53",
         "body-parser": "~1.4.3",
